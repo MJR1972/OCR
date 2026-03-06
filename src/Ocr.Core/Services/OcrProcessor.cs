@@ -17,6 +17,7 @@ namespace Ocr.Core.Services;
 public sealed class OcrProcessor : IOcrProcessor
 {
     private readonly ITableDetector _tableDetector;
+    private readonly IRegionDetector _regionDetector;
     private readonly IKeyValueExtractor _keyValueExtractor;
     private readonly IFieldRecognizer _fieldRecognizer;
     private static readonly HashSet<string> SupportedExtensions = new(StringComparer.OrdinalIgnoreCase)
@@ -41,18 +42,24 @@ public sealed class OcrProcessor : IOcrProcessor
     private static readonly Regex SymbolLikeRegex = new(@"^[\p{P}\p{S}]+$", RegexOptions.Compiled);
 
     public OcrProcessor()
-        : this(new HybridTableDetector(), new HeuristicKeyValueExtractor(), new HeuristicFieldRecognizer())
+        : this(new HybridTableDetector(), new OpenCvRegionDetector(), new HeuristicKeyValueExtractor(), new HeuristicFieldRecognizer())
     {
     }
 
     public OcrProcessor(ITableDetector tableDetector)
-        : this(tableDetector, new HeuristicKeyValueExtractor(), new HeuristicFieldRecognizer())
+        : this(tableDetector, new OpenCvRegionDetector(), new HeuristicKeyValueExtractor(), new HeuristicFieldRecognizer())
     {
     }
 
     public OcrProcessor(ITableDetector tableDetector, IKeyValueExtractor keyValueExtractor, IFieldRecognizer fieldRecognizer)
+        : this(tableDetector, new OpenCvRegionDetector(), keyValueExtractor, fieldRecognizer)
+    {
+    }
+
+    public OcrProcessor(ITableDetector tableDetector, IRegionDetector regionDetector, IKeyValueExtractor keyValueExtractor, IFieldRecognizer fieldRecognizer)
     {
         _tableDetector = tableDetector;
+        _regionDetector = regionDetector;
         _keyValueExtractor = keyValueExtractor;
         _fieldRecognizer = fieldRecognizer;
     }
@@ -122,6 +129,7 @@ public sealed class OcrProcessor : IOcrProcessor
             var pageNoiseDiagnostics = new List<PageNoiseDiagnosticsInfo>(pageImages.Count);
             var fieldExtractionDiagnostics = new List<FieldExtractionDiagnosticsInfo>(pageImages.Count);
             var filteredTokenIds = new List<string>();
+            var documentWordMap = new Dictionary<string, string>(StringComparer.Ordinal);
 
             var preprocessTotal = 0;
             var ocrTotal = 0;
@@ -214,6 +222,20 @@ public sealed class OcrProcessor : IOcrProcessor
                 tableSw.Stop();
                 pageTiming.TableDetectMs = (int)tableSw.ElapsedMilliseconds;
 
+                var regionDetection = _regionDetector.Detect(new PageInfo
+                {
+                    PageIndex = pageImage.PageIndex,
+                    Tokens = layout.Tokens,
+                    Lines = layout.Lines,
+                    Blocks = layout.Blocks,
+                    Size = new PageSizeInfo
+                    {
+                        WidthPx = processedWidth,
+                        HeightPx = processedHeight,
+                        Dpi = effectiveOptions.TargetDpi
+                    }
+                }, preprocessResult.ProcessedMat);
+
                 var pageInfo = new PageInfo
                 {
                     PageIndex = pageImage.PageIndex,
@@ -241,12 +263,15 @@ public sealed class OcrProcessor : IOcrProcessor
                     Lines = layout.Lines,
                     Blocks = layout.Blocks,
                     Tables = tableDetection.Tables,
+                    Regions = regionDetection.Regions,
+                    PageWords = BuildUniqueWordList(layout.Tokens),
                     Artifacts = new ArtifactsInfo
                     {
                         PageImageRef = preprocessResult.FinalImagePath ?? pageImage.OriginalImagePath,
                         DebugOverlayRef = null
                     }
                 };
+                MergeWordsIntoDocumentMap(pageInfo.PageWords, documentWordMap);
 
                 var keyValueSw = Stopwatch.StartNew();
                 var keyValueExtraction = _keyValueExtractor.Extract(pageInfo);
@@ -282,13 +307,20 @@ public sealed class OcrProcessor : IOcrProcessor
                     artifactEntry.TableOverlayPath = tableOverlayPath;
                 }
 
+                if (effectiveOptions.SaveDebugArtifacts && !string.IsNullOrWhiteSpace(runOutputFolder) && regionDetection.Overlays.Count > 0)
+                {
+                    var regionOverlayPath = SaveRegionOverlay(preprocessResult.ProcessedMat, regionDetection.Overlays, pageImage.PageIndex, runOutputFolder);
+                    artifactEntry.RegionOverlayPath = regionOverlayPath;
+                }
+
                 if (!string.IsNullOrWhiteSpace(artifactEntry.OriginalOrRenderPath) ||
                     !string.IsNullOrWhiteSpace(artifactEntry.GrayPath) ||
                     !string.IsNullOrWhiteSpace(artifactEntry.PreprocessedPath) ||
                     !string.IsNullOrWhiteSpace(artifactEntry.TokenOverlayPath) ||
                     !string.IsNullOrWhiteSpace(artifactEntry.LineOverlayPath) ||
                     !string.IsNullOrWhiteSpace(artifactEntry.BlockOverlayPath) ||
-                    !string.IsNullOrWhiteSpace(artifactEntry.TableOverlayPath))
+                    !string.IsNullOrWhiteSpace(artifactEntry.TableOverlayPath) ||
+                    !string.IsNullOrWhiteSpace(artifactEntry.RegionOverlayPath))
                 {
                     debugArtifactPaths.Add(artifactEntry);
                 }
@@ -343,6 +375,9 @@ public sealed class OcrProcessor : IOcrProcessor
             root.Extensions.PageNoiseDiagnostics = pageNoiseDiagnostics;
             root.Extensions.FilteredTokenIds = filteredTokenIds;
             root.Extensions.FieldExtractionDiagnostics = fieldExtractionDiagnostics;
+            root.DocumentWords = documentWordMap.Values
+                .OrderBy(w => w, StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
             var anyDeskewApplied = preprocessProfiles.Any(p => p.DeskewApplied);
             var deskewDegrees = anyDeskewApplied ? preprocessProfiles.Where(p => p.DeskewApplied).Average(p => p.AppliedDegrees) : 0;
@@ -1643,6 +1678,67 @@ public sealed class OcrProcessor : IOcrProcessor
         return trimmed.Length > 0 && SymbolLikeRegex.IsMatch(trimmed);
     }
 
+    private static List<string> BuildUniqueWordList(IEnumerable<TokenInfo> tokens)
+    {
+        var words = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var token in tokens)
+        {
+            if (string.IsNullOrWhiteSpace(token.Text))
+            {
+                continue;
+            }
+
+            var normalizedKey = NormalizeWordKey(token.Text);
+            if (string.IsNullOrWhiteSpace(normalizedKey))
+            {
+                continue;
+            }
+
+            if (!words.ContainsKey(normalizedKey))
+            {
+                words[normalizedKey] = token.Text.Trim();
+            }
+        }
+
+        return words.Values
+            .OrderBy(w => w, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    private static void MergeWordsIntoDocumentMap(IEnumerable<string> pageWords, Dictionary<string, string> documentWordMap)
+    {
+        foreach (var word in pageWords)
+        {
+            if (string.IsNullOrWhiteSpace(word))
+            {
+                continue;
+            }
+
+            var normalizedKey = NormalizeWordKey(word);
+            if (string.IsNullOrWhiteSpace(normalizedKey))
+            {
+                continue;
+            }
+
+            if (!documentWordMap.ContainsKey(normalizedKey))
+            {
+                documentWordMap[normalizedKey] = word.Trim();
+            }
+        }
+    }
+
+    private static string NormalizeWordKey(string value)
+    {
+        var trimmed = value.Trim();
+        if (trimmed.Length == 0)
+        {
+            return string.Empty;
+        }
+
+        var collapsed = string.Join(' ', trimmed.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+        return collapsed.ToLowerInvariant();
+    }
+
     private static OverlayArtifactPaths SaveOverlayArtifacts(Mat source, LayoutResult layout, int pageIndex, string outputFolder)
     {
         using var tokenOverlay = new Mat();
@@ -1762,6 +1858,37 @@ public sealed class OcrProcessor : IOcrProcessor
         }
 
         var path = Path.Combine(outputFolder, $"page_{pageIndex}_table_overlay.png");
+        Cv2.ImWrite(path, overlay);
+        return path;
+    }
+
+    private static string SaveRegionOverlay(Mat source, IReadOnlyCollection<RegionOverlayInfo> regions, int pageIndex, string outputFolder)
+    {
+        using var overlay = new Mat();
+        if (source.Channels() == 1)
+        {
+            Cv2.CvtColor(source, overlay, ColorConversionCodes.GRAY2BGR);
+        }
+        else
+        {
+            source.CopyTo(overlay);
+        }
+
+        foreach (var region in regions)
+        {
+            var rect = new OpenCvSharp.Rect(region.Bbox.X, region.Bbox.Y, region.Bbox.W, region.Bbox.H);
+            var isChecked = region.Value == true;
+            var color = string.Equals(region.Type, "radio", StringComparison.OrdinalIgnoreCase)
+                ? new Scalar(170, 60, 180)
+                : new Scalar(0, 165, 255);
+            var thickness = isChecked ? 3 : 1;
+            Cv2.Rectangle(overlay, rect, color, thickness);
+            var label = $"{region.Type}:{(isChecked ? "checked" : "unchecked")}";
+            var labelY = Math.Max(12, region.Bbox.Y - 3);
+            Cv2.PutText(overlay, label, new OpenCvSharp.Point(region.Bbox.X, labelY), HersheyFonts.HersheySimplex, 0.4, color, 1);
+        }
+
+        var path = Path.Combine(outputFolder, $"page_{pageIndex}_regions_overlay.png");
         Cv2.ImWrite(path, overlay);
         return path;
     }

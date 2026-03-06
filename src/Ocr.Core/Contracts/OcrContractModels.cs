@@ -11,6 +11,7 @@ public sealed class OcrContractRoot
     public ReviewInfo Review { get; set; } = new();
     public List<IssueInfo> Warnings { get; set; } = [];
     public List<IssueInfo> Errors { get; set; } = [];
+    public List<string> DocumentWords { get; set; } = [];
     public ExtensionsInfo Extensions { get; set; } = new();
 }
 
@@ -204,7 +205,8 @@ public sealed class PageInfo
     public List<BlockInfo> Blocks { get; set; } = [];
     public List<TableInfo> Tables { get; set; } = [];
     public List<KeyValueCandidateInfo> KeyValueCandidates { get; set; } = [];
-    public List<object> Regions { get; set; } = [];
+    public List<RegionInfo> Regions { get; set; } = [];
+    public List<string> PageWords { get; set; } = [];
     public List<string> UnassignedTokenIds { get; set; } = [];
     public ArtifactsInfo Artifacts { get; set; } = new();
 }
@@ -299,6 +301,17 @@ public sealed class ArtifactsInfo
 {
     public string? PageImageRef { get; set; }
     public string? DebugOverlayRef { get; set; }
+}
+
+public sealed class RegionInfo
+{
+    public string RegionId { get; set; } = string.Empty;
+    public string Type { get; set; } = "checkbox";
+    public BboxInfo Bbox { get; set; } = new();
+    public double Confidence { get; set; }
+    public bool? Value { get; set; }
+    public List<string> LabelTokenIds { get; set; } = [];
+    public List<string> Notes { get; set; } = [];
 }
 
 public sealed class RecognitionInfo
@@ -544,6 +557,7 @@ public sealed class PageDebugArtifactInfo
     public string? LineOverlayPath { get; set; }
     public string? BlockOverlayPath { get; set; }
     public string? TableOverlayPath { get; set; }
+    public string? RegionOverlayPath { get; set; }
 }
 
 public sealed class PageNoiseDiagnosticsInfo

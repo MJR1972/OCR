@@ -45,6 +45,10 @@ public sealed class MainViewModel : ViewModelBase
     private double _summaryMeanTableConfidence;
     private string _summaryTableMethods = string.Empty;
     private string _summaryHighestConfidenceTable = string.Empty;
+    private int _summaryCheckboxCount;
+    private int _summaryRadioCount;
+    private int _summaryCheckedRegionCount;
+    private int _summaryUniqueWordCount;
     private int _summaryKeyValueCandidateCount;
     private int _summaryPromotedFieldCount;
     private TableSummaryItem? _selectedTableSummary;
@@ -57,6 +61,8 @@ public sealed class MainViewModel : ViewModelBase
     private double _selectedTableTokenCoverageRatio;
     private string _selectedTableOverlayPath = string.Empty;
     private string _tablesStatusMessage = "Run OCR to populate table review.";
+    private string _selectedWordScope = "All";
+    private int _displayWordCount;
 
     private int _targetDpi = 300;
     private string _language = "eng";
@@ -83,6 +89,8 @@ public sealed class MainViewModel : ViewModelBase
     private readonly Dictionary<int, PageArtifactSet> _previewArtifactsByPage = [];
     private readonly Dictionary<string, JObject> _tableJsonByKey = [];
     private readonly Dictionary<int, string> _tableOverlayPathByPage = [];
+    private readonly Dictionary<int, List<string>> _pageWordsByPageIndex = [];
+    private readonly List<string> _documentWords = [];
 
     public MainViewModel()
         : this(new OcrProcessor())
@@ -107,6 +115,8 @@ public sealed class MainViewModel : ViewModelBase
         PreviewViewOptions.Add("Lines Overlay");
         PreviewViewOptions.Add("Blocks Overlay");
         PreviewViewOptions.Add("Table Overlay");
+        PreviewViewOptions.Add("Region Overlay");
+        WordScopeOptions.Add("All");
 
         LogLines.Add("Ready.");
     }
@@ -122,6 +132,8 @@ public sealed class MainViewModel : ViewModelBase
     public ObservableCollection<string> PreviewViewOptions { get; } = [];
     public ObservableCollection<PageSummaryItem> PageSummaries { get; } = [];
     public ObservableCollection<FieldSummaryItem> FieldSummaries { get; } = [];
+    public ObservableCollection<string> DisplayWords { get; } = [];
+    public ObservableCollection<string> WordScopeOptions { get; } = [];
     public ObservableCollection<TableSummaryItem> TableSummaries { get; } = [];
     public ObservableCollection<TableHeaderColumnItem> SelectedTableHeaderColumns { get; } = [];
     public ObservableCollection<TableCellDisplayItem> SelectedTableHeaderCells { get; } = [];
@@ -455,6 +467,30 @@ public sealed class MainViewModel : ViewModelBase
         set => SetProperty(ref _summaryHighestConfidenceTable, value);
     }
 
+    public int SummaryCheckboxCount
+    {
+        get => _summaryCheckboxCount;
+        set => SetProperty(ref _summaryCheckboxCount, value);
+    }
+
+    public int SummaryRadioCount
+    {
+        get => _summaryRadioCount;
+        set => SetProperty(ref _summaryRadioCount, value);
+    }
+
+    public int SummaryCheckedRegionCount
+    {
+        get => _summaryCheckedRegionCount;
+        set => SetProperty(ref _summaryCheckedRegionCount, value);
+    }
+
+    public int SummaryUniqueWordCount
+    {
+        get => _summaryUniqueWordCount;
+        set => SetProperty(ref _summaryUniqueWordCount, value);
+    }
+
     public int SummaryKeyValueCandidateCount
     {
         get => _summaryKeyValueCandidateCount;
@@ -531,6 +567,25 @@ public sealed class MainViewModel : ViewModelBase
     {
         get => _tablesStatusMessage;
         set => SetProperty(ref _tablesStatusMessage, value);
+    }
+
+    public string SelectedWordScope
+    {
+        get => _selectedWordScope;
+        set
+        {
+            var safeValue = string.IsNullOrWhiteSpace(value) ? "All" : value;
+            if (SetProperty(ref _selectedWordScope, safeValue))
+            {
+                UpdateDisplayWordsForScope();
+            }
+        }
+    }
+
+    public int DisplayWordCount
+    {
+        get => _displayWordCount;
+        set => SetProperty(ref _displayWordCount, value);
     }
 
     private bool CanRunOcr()
@@ -624,6 +679,7 @@ public sealed class MainViewModel : ViewModelBase
             LogDebugArtifacts(result.Json);
             PopulatePreviewArtifacts(result.Json);
             PopulateTables(result.Json);
+            PopulateWords(result.Json);
             AddLog($"Warnings: {warningCount}, Errors: {errorCount}");
         }
         catch (Exception ex)
@@ -685,6 +741,10 @@ public sealed class MainViewModel : ViewModelBase
             SummaryErrorCount = 0;
             SummaryTableMethods = string.Empty;
             SummaryHighestConfidenceTable = string.Empty;
+            SummaryCheckboxCount = 0;
+            SummaryRadioCount = 0;
+            SummaryCheckedRegionCount = 0;
+            SummaryUniqueWordCount = 0;
             SummaryKeyValueCandidateCount = 0;
             SummaryPromotedFieldCount = 0;
             return;
@@ -704,6 +764,7 @@ public sealed class MainViewModel : ViewModelBase
             SummaryOcrMs = root["metrics"]?["breakdownMs"]?["ocrMs"]?.Value<int>() ?? 0;
             SummaryWarningCount = (root["warnings"] as JArray)?.Count ?? 0;
             SummaryErrorCount = (root["errors"] as JArray)?.Count ?? 0;
+            SummaryUniqueWordCount = (root["documentWords"] as JArray)?.Count ?? 0;
             var fields = root["recognition"]?["fields"] as JArray;
             SummaryPromotedFieldCount = fields?.Count ?? 0;
             if (fields is not null)
@@ -726,6 +787,9 @@ public sealed class MainViewModel : ViewModelBase
                 SummaryTokenCount = 0;
                 SummaryMeanConfidence = 0;
                 SummaryLowConfidenceTokenCount = 0;
+                SummaryCheckboxCount = 0;
+                SummaryRadioCount = 0;
+                SummaryCheckedRegionCount = 0;
                 return;
             }
 
@@ -733,6 +797,9 @@ public sealed class MainViewModel : ViewModelBase
             var totalLowConfidenceCount = 0;
             var totalConfidence = 0.0;
             var totalKeyValueCandidates = 0;
+            var totalCheckboxes = 0;
+            var totalRadios = 0;
+            var totalCheckedRegions = 0;
 
             foreach (var page in pages.OfType<JObject>())
             {
@@ -752,6 +819,10 @@ public sealed class MainViewModel : ViewModelBase
                     : (tables?.OfType<JObject>().Average(t => t["confidence"]?.Value<double>() ?? 0) ?? 0);
                 var keyValueCandidates = page["keyValueCandidates"] as JArray;
                 totalKeyValueCandidates += keyValueCandidates?.Count ?? 0;
+                var regions = page["regions"] as JArray;
+                var checkboxCount = regions?.OfType<JObject>().Count(r => string.Equals(r["type"]?.Value<string>(), "checkbox", StringComparison.OrdinalIgnoreCase)) ?? 0;
+                var radioCount = regions?.OfType<JObject>().Count(r => string.Equals(r["type"]?.Value<string>(), "radio", StringComparison.OrdinalIgnoreCase)) ?? 0;
+                var checkedCount = regions?.OfType<JObject>().Count(r => r["value"]?.Value<bool>() == true) ?? 0;
 
                 PageSummaries.Add(new PageSummaryItem
                 {
@@ -763,12 +834,18 @@ public sealed class MainViewModel : ViewModelBase
                     OcrMs = ocrMs,
                     LayoutMs = layoutMs,
                     TableCount = tableCount,
-                    MeanTableConfidence = tableConfidence
+                    MeanTableConfidence = tableConfidence,
+                    CheckboxCount = checkboxCount,
+                    RadioCount = radioCount,
+                    CheckedRegionCount = checkedCount
                 });
 
                 totalTokenCount += tokenCount;
                 totalLowConfidenceCount += lowConfidenceCount;
                 totalConfidence += meanConfidence;
+                totalCheckboxes += checkboxCount;
+                totalRadios += radioCount;
+                totalCheckedRegions += checkedCount;
             }
 
             SummaryTokenCount = totalTokenCount;
@@ -795,6 +872,9 @@ public sealed class MainViewModel : ViewModelBase
             SummaryHighestConfidenceTable = bestTable is null
                 ? string.Empty
                 : $"{bestTable["tableId"]?.Value<string>()} ({(bestTable["confidence"]?.Value<double>() ?? 0):F3})";
+            SummaryCheckboxCount = totalCheckboxes;
+            SummaryRadioCount = totalRadios;
+            SummaryCheckedRegionCount = totalCheckedRegions;
         }
         catch
         {
@@ -805,6 +885,10 @@ public sealed class MainViewModel : ViewModelBase
             SummaryMeanTableConfidence = 0;
             SummaryTableMethods = string.Empty;
             SummaryHighestConfidenceTable = string.Empty;
+            SummaryCheckboxCount = 0;
+            SummaryRadioCount = 0;
+            SummaryCheckedRegionCount = 0;
+            SummaryUniqueWordCount = 0;
             SummaryKeyValueCandidateCount = 0;
             SummaryPromotedFieldCount = 0;
         }
@@ -847,6 +931,10 @@ public sealed class MainViewModel : ViewModelBase
                 return;
             }
 
+            var totalCheckboxes = 0;
+            var totalRadios = 0;
+            var totalChecked = 0;
+
             foreach (var page in pages.OfType<JObject>())
             {
                 var pageIndex = page["pageIndex"]?.Value<int>() ?? 0;
@@ -863,9 +951,17 @@ public sealed class MainViewModel : ViewModelBase
                 var postprocessMs = timing["postprocessMs"]?.Value<int>() ?? 0;
                 var tableCount = (page["tables"] as JArray)?.Count ?? 0;
                 var keyValueCount = (page["keyValueCandidates"] as JArray)?.Count ?? 0;
+                var regions = page["regions"] as JArray;
+                var checkboxCount = regions?.OfType<JObject>().Count(r => string.Equals(r["type"]?.Value<string>(), "checkbox", StringComparison.OrdinalIgnoreCase)) ?? 0;
+                var radioCount = regions?.OfType<JObject>().Count(r => string.Equals(r["type"]?.Value<string>(), "radio", StringComparison.OrdinalIgnoreCase)) ?? 0;
+                var checkedCount = regions?.OfType<JObject>().Count(r => r["value"]?.Value<bool>() == true) ?? 0;
                 AddLog($"Page {pageIndex} timing ms: render={renderMs}, preprocess={preprocessMs}, ocr={ocrMs}, layout={layoutMs}, postprocess={postprocessMs}");
                 AddLog($"Page {pageIndex} tables: {tableCount}");
                 AddLog($"Page {pageIndex} key-value candidates: {keyValueCount}");
+                AddLog($"Page {pageIndex} regions: checkboxes={checkboxCount}, radios={radioCount}, checked={checkedCount}");
+                totalCheckboxes += checkboxCount;
+                totalRadios += radioCount;
+                totalChecked += checkedCount;
                 var tableEntries = (page["tables"] as JArray)?.OfType<JObject>() ?? [];
                 foreach (var table in tableEntries)
                 {
@@ -889,6 +985,11 @@ public sealed class MainViewModel : ViewModelBase
 
             var promotedCount = (root["recognition"]?["fields"] as JArray)?.Count ?? 0;
             AddLog($"Promoted recognition fields: {promotedCount}");
+            var uniqueWordCount = (root["documentWords"] as JArray)?.Count ?? 0;
+            AddLog($"Unique words (document): {uniqueWordCount}");
+            AddLog($"Detected checkboxes: {totalCheckboxes}");
+            AddLog($"Detected radios: {totalRadios}");
+            AddLog($"Checked regions: {totalChecked}");
         }
         catch
         {
@@ -922,7 +1023,8 @@ public sealed class MainViewModel : ViewModelBase
                     artifact["tokenOverlayPath"]?.Value<string>(),
                     artifact["lineOverlayPath"]?.Value<string>(),
                     artifact["blockOverlayPath"]?.Value<string>(),
-                    artifact["tableOverlayPath"]?.Value<string>()
+                    artifact["tableOverlayPath"]?.Value<string>(),
+                    artifact["regionOverlayPath"]?.Value<string>()
                 };
 
                 var pageIndex = artifact["pageIndex"]?.Value<int>() ?? 0;
@@ -1056,6 +1158,98 @@ public sealed class MainViewModel : ViewModelBase
         {
             TablesStatusMessage = "Unable to parse table structures from OCR JSON.";
         }
+    }
+
+    private void PopulateWords(string json)
+    {
+        DisplayWords.Clear();
+        WordScopeOptions.Clear();
+        WordScopeOptions.Add("All");
+        _pageWordsByPageIndex.Clear();
+        _documentWords.Clear();
+        DisplayWordCount = 0;
+        SelectedWordScope = "All";
+
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            return;
+        }
+
+        try
+        {
+            var root = JObject.Parse(json);
+            var documentWords = (root["documentWords"] as JArray)?
+                .OfType<JValue>()
+                .Select(v => v.Value<string>())
+                .Where(v => !string.IsNullOrWhiteSpace(v))
+                .Select(v => v!)
+                .OrderBy(v => v, StringComparer.OrdinalIgnoreCase)
+                .ToList() ?? [];
+            _documentWords.AddRange(documentWords);
+
+            var pages = root["pages"] as JArray;
+            if (pages is not null)
+            {
+                foreach (var page in pages.OfType<JObject>().OrderBy(p => p["pageIndex"]?.Value<int>() ?? int.MaxValue))
+                {
+                    var pageIndex = page["pageIndex"]?.Value<int>() ?? 0;
+                    if (pageIndex <= 0)
+                    {
+                        continue;
+                    }
+
+                    var pageWords = (page["pageWords"] as JArray)?
+                        .OfType<JValue>()
+                        .Select(v => v.Value<string>())
+                        .Where(v => !string.IsNullOrWhiteSpace(v))
+                        .Select(v => v!)
+                        .OrderBy(v => v, StringComparer.OrdinalIgnoreCase)
+                        .ToList() ?? [];
+
+                    _pageWordsByPageIndex[pageIndex] = pageWords;
+                    WordScopeOptions.Add($"Page {pageIndex}");
+                }
+            }
+
+            foreach (var word in _documentWords)
+            {
+                DisplayWords.Add(word);
+            }
+
+            DisplayWordCount = DisplayWords.Count;
+            AddLog($"Unique words (document): {_documentWords.Count}");
+        }
+        catch
+        {
+            DisplayWords.Clear();
+            DisplayWordCount = 0;
+            AddLog("Unable to parse word lists from JSON.");
+        }
+    }
+
+    private void UpdateDisplayWordsForScope()
+    {
+        DisplayWords.Clear();
+        IEnumerable<string> words = [];
+        var scope = SelectedWordScope ?? "All";
+
+        if (string.Equals(scope, "All", StringComparison.OrdinalIgnoreCase))
+        {
+            words = _documentWords;
+        }
+        else if (scope.StartsWith("Page ", StringComparison.OrdinalIgnoreCase) &&
+                 int.TryParse(scope["Page ".Length..], out var pageIndex) &&
+                 _pageWordsByPageIndex.TryGetValue(pageIndex, out var pageWords))
+        {
+            words = pageWords;
+        }
+
+        foreach (var word in words.OrderBy(v => v, StringComparer.OrdinalIgnoreCase))
+        {
+            DisplayWords.Add(word);
+        }
+
+        DisplayWordCount = DisplayWords.Count;
     }
 
     private void LoadSelectedTableDetails()
@@ -1264,7 +1458,8 @@ public sealed class MainViewModel : ViewModelBase
                     TokenOverlayPath = artifact["tokenOverlayPath"]?.Value<string>(),
                     LineOverlayPath = artifact["lineOverlayPath"]?.Value<string>(),
                     BlockOverlayPath = artifact["blockOverlayPath"]?.Value<string>(),
-                    TableOverlayPath = artifact["tableOverlayPath"]?.Value<string>()
+                    TableOverlayPath = artifact["tableOverlayPath"]?.Value<string>(),
+                    RegionOverlayPath = artifact["regionOverlayPath"]?.Value<string>()
                 };
             }
 
@@ -1304,6 +1499,7 @@ public sealed class MainViewModel : ViewModelBase
             "Lines Overlay" => artifacts.LineOverlayPath,
             "Blocks Overlay" => artifacts.BlockOverlayPath,
             "Table Overlay" => artifacts.TableOverlayPath,
+            "Region Overlay" => artifacts.RegionOverlayPath,
             _ => artifacts.PreprocessedPath
         };
 
@@ -1374,5 +1570,6 @@ public sealed class MainViewModel : ViewModelBase
         public string? LineOverlayPath { get; init; }
         public string? BlockOverlayPath { get; init; }
         public string? TableOverlayPath { get; init; }
+        public string? RegionOverlayPath { get; init; }
     }
 }

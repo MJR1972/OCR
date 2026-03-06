@@ -11,4 +11,7 @@ public sealed class PageSummaryItem
     public int LayoutMs { get; init; }
     public int TableCount { get; init; }
     public double MeanTableConfidence { get; init; }
+    public int CheckboxCount { get; init; }
+    public int RadioCount { get; init; }
+    public int CheckedRegionCount { get; init; }
 }
