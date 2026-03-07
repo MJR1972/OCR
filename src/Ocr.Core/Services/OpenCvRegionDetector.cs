@@ -6,9 +6,11 @@ namespace Ocr.Core.Services;
 
 public sealed class OpenCvRegionDetector : IRegionDetector
 {
-    private const int MinBoxSize = 10;
-    private const int MaxBoxSize = 36;
-    private const int LabelSearchDistancePx = 120;
+    private const int MinControlSizePx = 10;
+    private const int MaxControlSizePx = 28;
+    private const double MinAspectRatio = 0.75;
+    private const double MaxAspectRatio = 1.33;
+    private const int RightSideLabelDistancePx = 110;
     private const double CheckedFillThreshold = 0.15;
 
     public RegionDetectionResult Detect(PageInfo page, Mat pageImage)
@@ -30,12 +32,14 @@ public sealed class OpenCvRegionDetector : IRegionDetector
 
         using var binary = new Mat();
         Cv2.AdaptiveThreshold(gray, binary, 255, AdaptiveThresholdTypes.GaussianC, ThresholdTypes.BinaryInv, 31, 8);
+        using var cleaned = new Mat();
+        using var kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new Size(3, 3));
+        Cv2.MorphologyEx(binary, cleaned, MorphTypes.Close, kernel);
 
-        var detected = new List<DetectedRegion>();
-        detected.AddRange(DetectCheckboxes(page, gray, binary));
-        detected.AddRange(DetectRadios(page, gray, detected));
-
-        var deduped = Deduplicate(detected)
+        var rawCandidates = BuildRawCandidates(page, gray, cleaned);
+        var geometryFiltered = FilterByGeometry(page, rawCandidates);
+        var labelFiltered = FilterByLabelAssociation(page, geometryFiltered);
+        var deduped = Deduplicate(labelFiltered)
             .OrderBy(r => r.Bbox.Y)
             .ThenBy(r => r.Bbox.X)
             .ThenBy(r => r.Type, StringComparer.Ordinal)
@@ -46,210 +50,292 @@ public sealed class OpenCvRegionDetector : IRegionDetector
         var checkboxIndex = 1;
         var radioIndex = 1;
 
-        foreach (var region in deduped)
+        foreach (var candidate in deduped)
         {
-            var prefix = region.Type == "radio" ? "rad" : "chk";
-            var index = region.Type == "radio" ? radioIndex++ : checkboxIndex++;
+            var prefix = candidate.Type == "radio" ? "rad" : "chk";
+            var index = candidate.Type == "radio" ? radioIndex++ : checkboxIndex++;
             regions.Add(new RegionInfo
             {
                 RegionId = $"{prefix}-{page.PageIndex:000}-{index:0000}",
-                Type = region.Type,
-                Bbox = region.Bbox,
-                Confidence = Math.Clamp(region.Confidence, 0, 1),
-                Value = region.Value,
-                LabelTokenIds = region.LabelTokenIds
+                Type = candidate.Type,
+                Bbox = candidate.Bbox,
+                Confidence = Math.Clamp(candidate.Confidence, 0, 1),
+                Value = candidate.Value,
+                LabelTokenIds = candidate.LabelTokenIds,
+                Notes = candidate.Notes
             });
 
             overlays.Add(new RegionOverlayInfo
             {
-                Type = region.Type,
-                Value = region.Value,
-                Bbox = region.Bbox
+                Type = candidate.Type,
+                Value = candidate.Value,
+                Bbox = candidate.Bbox
             });
         }
 
         return new RegionDetectionResult
         {
             Regions = regions,
-            Overlays = overlays
+            Overlays = overlays,
+            Diagnostics = new RegionDetectionDiagnostics
+            {
+                RawCandidateCount = rawCandidates.Count,
+                GeometryFilteredCount = geometryFiltered.Count,
+                LabelFilteredCount = labelFiltered.Count,
+                FinalCheckboxCount = regions.Count(r => string.Equals(r.Type, "checkbox", StringComparison.OrdinalIgnoreCase)),
+                FinalRadioCount = regions.Count(r => string.Equals(r.Type, "radio", StringComparison.OrdinalIgnoreCase))
+            }
         };
     }
 
-    private static List<DetectedRegion> DetectCheckboxes(PageInfo page, Mat gray, Mat binary)
+    private static List<RegionCandidate> BuildRawCandidates(PageInfo page, Mat gray, Mat binary)
     {
-        Cv2.FindContours(binary, out var contours, out _, RetrievalModes.List, ContourApproximationModes.ApproxSimple);
-        var result = new List<DetectedRegion>();
+        var raw = new List<RegionCandidate>();
 
+        // Raw checkbox and circular contour candidates.
+        Cv2.FindContours(binary, out var contours, out _, RetrievalModes.List, ContourApproximationModes.ApproxSimple);
         foreach (var contour in contours)
         {
             var rect = Cv2.BoundingRect(contour);
-            if (!IsSmallSquare(rect))
-            {
-                continue;
-            }
-
-            var perimeter = Cv2.ArcLength(contour, true);
-            if (perimeter <= 0)
-            {
-                continue;
-            }
-
-            var approx = Cv2.ApproxPolyDP(contour, perimeter * 0.04, true);
-            if (approx.Length is < 4 or > 8 || !Cv2.IsContourConvex(approx))
+            if (!IsSizeInRange(rect))
             {
                 continue;
             }
 
             var bbox = ToBbox(rect);
-            if (IsInsideTextToken(page.Tokens, bbox) || OverlapsTextToken(page.Tokens, bbox, 0.25))
-            {
-                continue;
-            }
-
-            var contourArea = Cv2.ContourArea(contour);
-            var contourFillRatio = contourArea / Math.Max(1.0, rect.Width * rect.Height);
-            if (contourFillRatio is < 0.2 or > 0.9)
-            {
-                continue;
-            }
-
-            var borderRatio = CalculateBorderRatio(binary, rect);
-            var fillRatio = CalculateInteriorDarkRatio(gray, rect);
-            var checkedValue = fillRatio > CheckedFillThreshold;
-
-            if (borderRatio < 0.14 || fillRatio >= 0.8)
+            var area = Cv2.ContourArea(contour);
+            var perimeter = Cv2.ArcLength(contour, true);
+            if (area <= 0 || perimeter <= 0)
             {
                 continue;
             }
 
             var aspect = rect.Height == 0 ? 0 : rect.Width / (double)rect.Height;
-            var shapeScore = Math.Clamp(1.0 - Math.Abs(aspect - 1.0), 0, 1);
-            var sizeScore = Math.Clamp(1.0 - (Math.Abs(((rect.Width + rect.Height) / 2.0) - 18.0) / 18.0), 0, 1);
-            var borderScore = Math.Clamp(borderRatio / 0.25, 0, 1);
-            var confidence = Math.Clamp((shapeScore * 0.35) + (sizeScore * 0.25) + (borderScore * 0.4), 0, 1);
-            if (confidence < 0.58)
-            {
-                continue;
-            }
+            var approx = Cv2.ApproxPolyDP(contour, perimeter * 0.05, true);
+            var corners = approx.Length;
+            var contourFillRatio = area / Math.Max(1.0, rect.Width * rect.Height);
+            var borderRatio = CalculateBorderRatio(binary, rect);
+            var interiorDark = CalculateInteriorDarkRatio(gray, rect);
+            var interiorInk = CalculateInteriorInkRatio(binary, rect);
+            var centerDark = CalculateCenterDarkRatio(gray, rect);
+            var circularity = Math.Clamp((4.0 * Math.PI * area) / (perimeter * perimeter), 0, 1);
 
-            result.Add(new DetectedRegion
+            // Checkbox raw candidate.
+            raw.Add(new RegionCandidate
             {
                 Type = "checkbox",
                 Bbox = bbox,
-                Value = checkedValue,
-                Confidence = confidence,
-                LabelTokenIds = FindLabelTokenIds(page, bbox)
+                Aspect = aspect,
+                Corners = corners,
+                Rectangularity = contourFillRatio,
+                Circularity = circularity,
+                BorderRatio = borderRatio,
+                InteriorDarkRatio = interiorDark,
+                InteriorInkRatio = interiorInk,
+                CenterDarkRatio = centerDark,
+                Value = Math.Max(interiorDark, interiorInk) > CheckedFillThreshold
+            });
+
+            // Radio contour candidate (separate scoring path).
+            raw.Add(new RegionCandidate
+            {
+                Type = "radio",
+                Bbox = bbox,
+                Aspect = aspect,
+                Corners = corners,
+                Rectangularity = contourFillRatio,
+                Circularity = circularity,
+                BorderRatio = borderRatio,
+                InteriorDarkRatio = interiorDark,
+                InteriorInkRatio = interiorInk,
+                CenterDarkRatio = centerDark,
+                Value = Math.Max(interiorDark, centerDark) > CheckedFillThreshold
             });
         }
 
-        return result;
-    }
-
-    private static List<DetectedRegion> DetectRadios(PageInfo page, Mat gray, List<DetectedRegion> existing)
-    {
+        // Hough radio candidates.
         using var blurred = new Mat();
         Cv2.GaussianBlur(gray, blurred, new Size(5, 5), 1.2);
-        var circles = Cv2.HoughCircles(
-            blurred,
-            HoughModes.Gradient,
-            dp: 1.2,
-            minDist: 12,
-            param1: 100,
-            param2: 16,
-            minRadius: 6,
-            maxRadius: 14);
-
-        var result = new List<DetectedRegion>();
+        var circles = Cv2.HoughCircles(blurred, HoughModes.Gradient, 1.2, 10, 100, 14, 5, 20);
         foreach (var circle in circles)
         {
             var x = (int)Math.Round(circle.Center.X - circle.Radius);
             var y = (int)Math.Round(circle.Center.Y - circle.Radius);
             var d = (int)Math.Round(circle.Radius * 2);
             var rect = new Rect(x, y, d, d);
-            if (!IsSmallSquare(rect))
+            if (!IsSizeInRange(rect))
             {
                 continue;
             }
 
             var bbox = ToBbox(rect);
-            if (existing.Any(r => IntersectionOverUnion(r.Bbox, bbox) > 0.35))
-            {
-                continue;
-            }
-
-            if (IsInsideTextToken(page.Tokens, bbox) || OverlapsTextToken(page.Tokens, bbox, 0.25))
-            {
-                continue;
-            }
-
+            var aspect = rect.Height == 0 ? 0 : rect.Width / (double)rect.Height;
+            var borderRatio = CalculateBorderRatio(binary, rect);
+            var interiorDark = CalculateInteriorDarkRatio(gray, rect);
+            var centerDark = CalculateCenterDarkRatio(gray, rect);
             var circularity = EstimateCircularity(gray, rect);
-            if (circularity < 0.65)
+
+            raw.Add(new RegionCandidate
+            {
+                Type = "radio",
+                Bbox = bbox,
+                Aspect = aspect,
+                Corners = 0,
+                Rectangularity = 0,
+                Circularity = circularity,
+                BorderRatio = borderRatio,
+                InteriorDarkRatio = interiorDark,
+                InteriorInkRatio = 0,
+                CenterDarkRatio = centerDark,
+                Value = Math.Max(interiorDark, centerDark) > CheckedFillThreshold,
+                Notes = ["hough_candidate"]
+            });
+        }
+
+        return raw;
+    }
+
+    private static List<RegionCandidate> FilterByGeometry(PageInfo page, List<RegionCandidate> raw)
+    {
+        var filtered = new List<RegionCandidate>();
+        foreach (var candidate in raw)
+        {
+            if (!IsAspectInRange(candidate.Aspect))
             {
                 continue;
             }
 
-            var fillRatio = CalculateInteriorDarkRatio(gray, rect);
-            var checkedValue = fillRatio > CheckedFillThreshold;
-            if (fillRatio > 0.75)
-            {
-                continue;
-            }
-            var sizeScore = Math.Clamp(1.0 - (Math.Abs(circle.Radius - 9.0) / 9.0), 0, 1);
-            var confidence = Math.Clamp((circularity * 0.7) + (sizeScore * 0.3), 0, 1);
-            if (confidence < 0.68)
+            if (IsInsideTextToken(page.Tokens, candidate.Bbox) || OverlapsTextToken(page.Tokens, candidate.Bbox, 0.35))
             {
                 continue;
             }
 
-            var labelTokenIds = FindLabelTokenIds(page, bbox);
+            var size = (candidate.Bbox.W + candidate.Bbox.H) / 2.0;
+            var sizeScore = Math.Clamp(1.0 - (Math.Abs(size - 16.0) / 16.0), 0, 1);
+            var borderScore = Math.Clamp(candidate.BorderRatio / 0.22, 0, 1);
+            var interiorScore = candidate.Type == "radio"
+                ? Math.Clamp(1.0 - Math.Abs(candidate.CenterDarkRatio - (candidate.Value == true ? 0.3 : 0.05)), 0, 1)
+                : Math.Clamp(1.0 - Math.Abs(candidate.InteriorDarkRatio - (candidate.Value == true ? 0.24 : 0.05)), 0, 1);
+
+            if (candidate.Type == "checkbox")
+            {
+                if (candidate.Corners is < 4 or > 8)
+                {
+                    continue;
+                }
+
+                // Require a reasonably rectangular ring-like shape.
+                if (candidate.Rectangularity is < 0.12 or > 0.85)
+                {
+                    continue;
+                }
+
+                if (candidate.BorderRatio is < 0.06 or > 0.55)
+                {
+                    continue;
+                }
+
+                if (candidate.InteriorDarkRatio > 0.78 && candidate.Rectangularity < 0.4)
+                {
+                    continue;
+                }
+
+                var shapeScore = Math.Clamp(1.0 - Math.Abs(candidate.Aspect - 1.0), 0, 1);
+                candidate.Confidence = Math.Clamp((shapeScore * 0.34) + (sizeScore * 0.2) + (borderScore * 0.24) + (interiorScore * 0.22), 0, 1);
+                if (candidate.Confidence < 0.58)
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                // Higher circularity for radios.
+                if (candidate.Circularity < 0.78)
+                {
+                    continue;
+                }
+
+                if (candidate.BorderRatio is < 0.05 or > 0.5)
+                {
+                    continue;
+                }
+
+                if (candidate.InteriorDarkRatio > 0.88 && candidate.Circularity < 0.9)
+                {
+                    continue;
+                }
+
+                candidate.Confidence = Math.Clamp((candidate.Circularity * 0.44) + (sizeScore * 0.2) + (borderScore * 0.2) + (interiorScore * 0.16), 0, 1);
+                if (candidate.Confidence < 0.62)
+                {
+                    continue;
+                }
+
+                candidate.Notes.Add("circularity_pass");
+            }
+
+            if (candidate.Value == true && candidate.Type == "radio")
+            {
+                candidate.Notes.Add("checked_by_fill_ratio");
+            }
+
+            filtered.Add(candidate);
+        }
+
+        return filtered;
+    }
+
+    private static List<RegionCandidate> FilterByLabelAssociation(PageInfo page, List<RegionCandidate> candidates)
+    {
+        var filtered = new List<RegionCandidate>();
+        foreach (var candidate in candidates)
+        {
+            var labelTokenIds = FindLabelTokenIds(page, candidate.Bbox);
             if (labelTokenIds.Count == 0)
             {
                 continue;
             }
 
-            result.Add(new DetectedRegion
+            candidate.LabelTokenIds = labelTokenIds;
+            candidate.Confidence = Math.Clamp(candidate.Confidence + 0.08, 0, 1);
+            candidate.Notes.Add("strong_label_match");
+            filtered.Add(candidate);
+        }
+
+        return filtered;
+    }
+
+    private static List<RegionCandidate> Deduplicate(List<RegionCandidate> candidates)
+    {
+        var result = new List<RegionCandidate>();
+        foreach (var candidate in candidates
+                     .OrderByDescending(c => c.Confidence)
+                     .ThenBy(c => c.Bbox.Y)
+                     .ThenBy(c => c.Bbox.X))
+        {
+            var duplicate = result.Any(existing =>
+                (string.Equals(existing.Type, candidate.Type, StringComparison.OrdinalIgnoreCase) && IntersectionOverUnion(existing.Bbox, candidate.Bbox) > 0.45) ||
+                (!string.Equals(existing.Type, candidate.Type, StringComparison.OrdinalIgnoreCase) && IntersectionOverUnion(existing.Bbox, candidate.Bbox) > 0.6));
+            if (!duplicate)
             {
-                Type = "radio",
-                Bbox = bbox,
-                Value = checkedValue,
-                Confidence = confidence,
-                LabelTokenIds = labelTokenIds
-            });
+                result.Add(candidate);
+            }
         }
 
         return result;
     }
 
-    private static List<DetectedRegion> Deduplicate(List<DetectedRegion> regions)
+    private static bool IsSizeInRange(Rect rect)
     {
-        var deduped = new List<DetectedRegion>();
-        foreach (var candidate in regions
-                     .OrderByDescending(r => r.Confidence)
-                     .ThenBy(r => r.Bbox.Y)
-                     .ThenBy(r => r.Bbox.X))
-        {
-            var duplicate = deduped.Any(existing =>
-                string.Equals(existing.Type, candidate.Type, StringComparison.Ordinal) &&
-                IntersectionOverUnion(existing.Bbox, candidate.Bbox) > 0.5);
-
-            if (!duplicate)
-            {
-                deduped.Add(candidate);
-            }
-        }
-
-        return deduped;
+        return rect.Width >= MinControlSizePx &&
+               rect.Height >= MinControlSizePx &&
+               rect.Width <= MaxControlSizePx &&
+               rect.Height <= MaxControlSizePx;
     }
 
-    private static bool IsSmallSquare(Rect rect)
+    private static bool IsAspectInRange(double aspect)
     {
-        if (rect.Width < MinBoxSize || rect.Height < MinBoxSize || rect.Width > MaxBoxSize || rect.Height > MaxBoxSize)
-        {
-            return false;
-        }
-
-        var aspect = rect.Height == 0 ? 0 : rect.Width / (double)rect.Height;
-        return aspect is >= 0.75 and <= 1.25;
+        return aspect >= MinAspectRatio && aspect <= MaxAspectRatio;
     }
 
     private static double CalculateBorderRatio(Mat binary, Rect rect)
@@ -265,7 +351,6 @@ public sealed class OpenCvRegionDetector : IRegionDetector
 
         using var roi = new Mat(binary, new Rect(x, y, w, h));
         var outerDark = Cv2.CountNonZero(roi);
-
         using var inner = new Mat(roi, new Rect(2, 2, Math.Max(1, w - 4), Math.Max(1, h - 4)));
         var innerDark = Cv2.CountNonZero(inner);
         var borderDark = Math.Max(0, outerDark - innerDark);
@@ -286,8 +371,43 @@ public sealed class OpenCvRegionDetector : IRegionDetector
         using var interior = new Mat(gray, new Rect(x, y, w, h));
         using var darkMask = new Mat();
         Cv2.Threshold(interior, darkMask, 150, 255, ThresholdTypes.BinaryInv);
-        var darkPixels = Cv2.CountNonZero(darkMask);
-        return darkPixels / (double)(w * h);
+        return Cv2.CountNonZero(darkMask) / (double)(w * h);
+    }
+
+    private static double CalculateInteriorInkRatio(Mat binary, Rect rect)
+    {
+        var x = Math.Max(0, rect.X + 2);
+        var y = Math.Max(0, rect.Y + 2);
+        var w = Math.Min(binary.Width - x, Math.Max(1, rect.Width - 4));
+        var h = Math.Min(binary.Height - y, Math.Max(1, rect.Height - 4));
+        if (w <= 0 || h <= 0)
+        {
+            return 0;
+        }
+
+        using var interior = new Mat(binary, new Rect(x, y, w, h));
+        return Cv2.CountNonZero(interior) / (double)(w * h);
+    }
+
+    private static double CalculateCenterDarkRatio(Mat gray, Rect rect)
+    {
+        var centerW = Math.Max(1, (int)Math.Round(rect.Width * 0.45));
+        var centerH = Math.Max(1, (int)Math.Round(rect.Height * 0.45));
+        var centerX = rect.X + ((rect.Width - centerW) / 2);
+        var centerY = rect.Y + ((rect.Height - centerH) / 2);
+        centerX = Math.Max(0, centerX);
+        centerY = Math.Max(0, centerY);
+        centerW = Math.Min(gray.Width - centerX, centerW);
+        centerH = Math.Min(gray.Height - centerY, centerH);
+        if (centerW <= 0 || centerH <= 0)
+        {
+            return 0;
+        }
+
+        using var center = new Mat(gray, new Rect(centerX, centerY, centerW, centerH));
+        using var darkMask = new Mat();
+        Cv2.Threshold(center, darkMask, 150, 255, ThresholdTypes.BinaryInv);
+        return Cv2.CountNonZero(darkMask) / (double)(centerW * centerH);
     }
 
     private static double EstimateCircularity(Mat gray, Rect rect)
@@ -344,41 +464,48 @@ public sealed class OpenCvRegionDetector : IRegionDetector
     {
         var rightX = regionBbox.X + regionBbox.W;
         var centerY = regionBbox.Y + (regionBbox.H / 2.0);
-        var yTolerance = Math.Max(12, regionBbox.H);
+        var tightYTolerance = Math.Max(10, regionBbox.H / 2.0 + 4);
+        var expandedYTolerance = Math.Max(14, regionBbox.H + 4);
 
-        var candidates = page.Tokens
+        var sameLineRight = page.Tokens
             .Where(t =>
                 t.Bbox.X >= rightX - 2 &&
-                t.Bbox.X <= rightX + LabelSearchDistancePx &&
-                (VerticalOverlap(t.Bbox, regionBbox) >= 0.2 ||
-                 Math.Abs((t.Bbox.Y + (t.Bbox.H / 2.0)) - centerY) <= yTolerance))
-            .OrderBy(t => Math.Abs((t.Bbox.Y + (t.Bbox.H / 2.0)) - centerY))
-            .ThenBy(t => t.Bbox.X)
+                t.Bbox.X <= rightX + RightSideLabelDistancePx &&
+                Math.Abs((t.Bbox.Y + (t.Bbox.H / 2.0)) - centerY) <= tightYTolerance)
+            .OrderBy(t => t.Bbox.X)
+            .ThenBy(t => Math.Abs((t.Bbox.Y + (t.Bbox.H / 2.0)) - centerY))
             .ToList();
 
-        if (candidates.Count == 0)
+        if (sameLineRight.Count > 0)
         {
-            return [];
+            var anchor = sameLineRight[0];
+            var lineTokens = page.Tokens
+                .Where(t =>
+                    t.LineId == anchor.LineId &&
+                    t.Bbox.X >= rightX - 2 &&
+                    t.Bbox.X <= rightX + (RightSideLabelDistancePx + 20))
+                .OrderBy(t => t.Bbox.X)
+                .ThenBy(t => t.Bbox.Y)
+                .Select(t => t.Id)
+                .Distinct(StringComparer.Ordinal)
+                .ToList();
+
+            if (lineTokens.Count > 0)
+            {
+                return lineTokens;
+            }
         }
 
-        var anchor = candidates[0];
-        var lineTokens = page.Tokens
-            .Where(t => t.LineId == anchor.LineId && t.Bbox.X >= rightX - 2 && t.Bbox.X <= rightX + 200)
-            .OrderBy(t => t.Bbox.X)
-            .ThenBy(t => t.Bbox.Y)
-            .Select(t => t.Id)
+        var fallback = page.Tokens
+            .Where(t =>
+                t.Bbox.X >= rightX - 2 &&
+                t.Bbox.X <= rightX + RightSideLabelDistancePx &&
+                Math.Abs((t.Bbox.Y + (t.Bbox.H / 2.0)) - centerY) <= expandedYTolerance)
+            .OrderBy(t => t.Bbox.X - rightX)
+            .ThenBy(t => Math.Abs((t.Bbox.Y + (t.Bbox.H / 2.0)) - centerY))
             .ToList();
 
-        return lineTokens.Count == 0 ? [anchor.Id] : lineTokens;
-    }
-
-    private static double VerticalOverlap(BboxInfo a, BboxInfo b)
-    {
-        var top = Math.Max(a.Y, b.Y);
-        var bottom = Math.Min(a.Y + a.H, b.Y + b.H);
-        var overlap = Math.Max(0, bottom - top);
-        var minHeight = Math.Max(1, Math.Min(a.H, b.H));
-        return overlap / (double)minHeight;
+        return fallback.Count == 0 ? [] : [fallback[0].Id];
     }
 
     private static double IntersectionOverUnion(BboxInfo a, BboxInfo b)
@@ -423,12 +550,21 @@ public sealed class OpenCvRegionDetector : IRegionDetector
         };
     }
 
-    private sealed class DetectedRegion
+    private sealed class RegionCandidate
     {
         public required string Type { get; init; }
         public required BboxInfo Bbox { get; init; }
+        public double Aspect { get; init; }
+        public int Corners { get; init; }
+        public double Rectangularity { get; init; }
+        public double Circularity { get; init; }
+        public double BorderRatio { get; init; }
+        public double InteriorDarkRatio { get; init; }
+        public double InteriorInkRatio { get; init; }
+        public double CenterDarkRatio { get; init; }
         public bool? Value { get; init; }
-        public double Confidence { get; init; }
-        public List<string> LabelTokenIds { get; init; } = [];
+        public double Confidence { get; set; }
+        public List<string> LabelTokenIds { get; set; } = [];
+        public List<string> Notes { get; set; } = [];
     }
 }

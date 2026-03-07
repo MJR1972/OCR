@@ -359,8 +359,12 @@ public sealed class ExtensionsInfo
     public List<PagePreprocessingInfo> PagePreprocessing { get; set; } = [];
     public List<PageDebugArtifactInfo> DebugArtifactPaths { get; set; } = [];
     public List<PageNoiseDiagnosticsInfo> PageNoiseDiagnostics { get; set; } = [];
+    public List<LineReconstructionDiagnosticsInfo> LineReconstructionDiagnostics { get; set; } = [];
+    public List<TokenCleanupStatsInfo> TokenCleanupStats { get; set; } = [];
     public List<string> FilteredTokenIds { get; set; } = [];
     public List<FieldExtractionDiagnosticsInfo> FieldExtractionDiagnostics { get; set; } = [];
+    public StructuredFieldExtractionStatsInfo StructuredFieldExtractionStats { get; set; } = new();
+    public List<PipelineStageTimingInfo> PipelineStageTimings { get; set; } = [];
 }
 
 public sealed class KeyValueCandidateInfo
@@ -577,6 +581,44 @@ public sealed class FieldExtractionDiagnosticsInfo
     public int CandidateCount { get; set; }
     public int PromotedFieldCount { get; set; }
     public int AmbiguousCandidateCount { get; set; }
+}
+
+public sealed class LineReconstructionDiagnosticsInfo
+{
+    public int PageIndex { get; set; }
+    public int OriginalLineCount { get; set; }
+    public int ReconstructedLineCount { get; set; }
+    public int TokensAssigned { get; set; }
+    public bool Successful { get; set; }
+}
+
+public sealed class TokenCleanupStatsInfo
+{
+    public int PageIndex { get; set; }
+    public int TokensOriginal { get; set; }
+    public int TokensModified { get; set; }
+    public int TokensRemoved { get; set; }
+    public int TokensSplit { get; set; }
+    public int CheckboxArtifactsRemoved { get; set; }
+    public int UnderlineArtifactsRemoved { get; set; }
+    public int DictionaryCorrections { get; set; }
+    public int TokensCleaned { get; set; }
+}
+
+public sealed class StructuredFieldExtractionStatsInfo
+{
+    public int PagesProcessed { get; set; }
+    public int KeyValueCandidateCount { get; set; }
+    public int PromotedFieldCount { get; set; }
+    public int CheckboxDerivedFieldCount { get; set; }
+}
+
+public sealed class PipelineStageTimingInfo
+{
+    public string StageName { get; set; } = string.Empty;
+    public int DurationMs { get; set; }
+    public string Status { get; set; } = "completed";
+    public string? Note { get; set; }
 }
 
 public sealed class OptionSnapshotInfo

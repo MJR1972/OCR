@@ -9,6 +9,7 @@ using Newtonsoft.Json.Serialization;
 using Ocr.Core.Abstractions;
 using Ocr.Core.Contracts;
 using Ocr.Core.Models;
+using Ocr.Core.Pipeline;
 using OpenCvSharp;
 using Tesseract;
 
@@ -17,9 +18,12 @@ namespace Ocr.Core.Services;
 public sealed class OcrProcessor : IOcrProcessor
 {
     private readonly ITableDetector _tableDetector;
+    private readonly ILineReconstructor _lineReconstructor;
     private readonly IRegionDetector _regionDetector;
+    private readonly ITokenCleanupService _tokenCleanupService;
     private readonly IKeyValueExtractor _keyValueExtractor;
     private readonly IFieldRecognizer _fieldRecognizer;
+    private readonly IStructuredFieldExtractor _structuredFieldExtractor;
     private static readonly HashSet<string> SupportedExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
         ".pdf", ".jpg", ".jpeg", ".png", ".tif", ".tiff", ".gif", ".bmp"
@@ -42,26 +46,46 @@ public sealed class OcrProcessor : IOcrProcessor
     private static readonly Regex SymbolLikeRegex = new(@"^[\p{P}\p{S}]+$", RegexOptions.Compiled);
 
     public OcrProcessor()
-        : this(new HybridTableDetector(), new OpenCvRegionDetector(), new HeuristicKeyValueExtractor(), new HeuristicFieldRecognizer())
+        : this(new HybridTableDetector(), new GeometryLineReconstructor(), new OpenCvRegionDetector(), new TokenCleanupService(), new HeuristicKeyValueExtractor(), new HeuristicFieldRecognizer(), new StructuredFieldExtractor())
     {
     }
 
     public OcrProcessor(ITableDetector tableDetector)
-        : this(tableDetector, new OpenCvRegionDetector(), new HeuristicKeyValueExtractor(), new HeuristicFieldRecognizer())
+        : this(tableDetector, new GeometryLineReconstructor(), new OpenCvRegionDetector(), new TokenCleanupService(), new HeuristicKeyValueExtractor(), new HeuristicFieldRecognizer(), new StructuredFieldExtractor())
     {
     }
 
     public OcrProcessor(ITableDetector tableDetector, IKeyValueExtractor keyValueExtractor, IFieldRecognizer fieldRecognizer)
-        : this(tableDetector, new OpenCvRegionDetector(), keyValueExtractor, fieldRecognizer)
+        : this(tableDetector, new GeometryLineReconstructor(), new OpenCvRegionDetector(), new TokenCleanupService(), keyValueExtractor, fieldRecognizer, new StructuredFieldExtractor())
     {
     }
 
     public OcrProcessor(ITableDetector tableDetector, IRegionDetector regionDetector, IKeyValueExtractor keyValueExtractor, IFieldRecognizer fieldRecognizer)
+        : this(tableDetector, new GeometryLineReconstructor(), regionDetector, new TokenCleanupService(), keyValueExtractor, fieldRecognizer, new StructuredFieldExtractor())
+    {
+    }
+
+    public OcrProcessor(ITableDetector tableDetector, ILineReconstructor lineReconstructor, IRegionDetector regionDetector, ITokenCleanupService tokenCleanupService, IKeyValueExtractor keyValueExtractor, IFieldRecognizer fieldRecognizer)
+        : this(tableDetector, lineReconstructor, regionDetector, tokenCleanupService, keyValueExtractor, fieldRecognizer, new StructuredFieldExtractor())
+    {
+    }
+
+    public OcrProcessor(
+        ITableDetector tableDetector,
+        ILineReconstructor lineReconstructor,
+        IRegionDetector regionDetector,
+        ITokenCleanupService tokenCleanupService,
+        IKeyValueExtractor keyValueExtractor,
+        IFieldRecognizer fieldRecognizer,
+        IStructuredFieldExtractor structuredFieldExtractor)
     {
         _tableDetector = tableDetector;
+        _lineReconstructor = lineReconstructor;
         _regionDetector = regionDetector;
+        _tokenCleanupService = tokenCleanupService;
         _keyValueExtractor = keyValueExtractor;
         _fieldRecognizer = fieldRecognizer;
+        _structuredFieldExtractor = structuredFieldExtractor;
     }
 
     public OcrResult ProcessFile(string filePath, OcrOptions? options = null, CancellationToken ct = default)
@@ -74,47 +98,59 @@ public sealed class OcrProcessor : IOcrProcessor
         var fileType = DetermineFileType(extension);
         var mimeType = DetermineMimeType(extension);
         var root = BuildContract(filePath ?? string.Empty, effectiveOptions, fileType, mimeType);
+        var pipelineContext = new OcrPipelineContext(filePath ?? string.Empty, effectiveOptions, fileType, mimeType, root);
+        IOcrPipelineRunner pipelineRunner = new OcrPipelineRunner();
 
         try
         {
-            if (ct.IsCancellationRequested)
+            pipelineRunner.ExecuteStage(pipelineContext, OcrPipelineStageNames.InputLoad, () =>
             {
-                AddError(root, "operation_cancelled", "OCR request was cancelled.");
-                return FinalizeResult(root, filePath, effectiveOptions, runStopwatch.ElapsedMilliseconds, null);
-            }
+                if (ct.IsCancellationRequested)
+                {
+                    AddError(root, "operation_cancelled", "OCR request was cancelled.");
+                    return;
+                }
 
-            foreach (var error in Validate(filePath ?? string.Empty))
-            {
-                root.Errors.Add(error);
-            }
+                foreach (var error in Validate(filePath ?? string.Empty))
+                {
+                    root.Errors.Add(error);
+                }
 
-            var tessdataPath = Path.Combine(AppContext.BaseDirectory, "tessdata");
-            foreach (var error in ValidateTessdata(tessdataPath, effectiveOptions.Language))
-            {
-                root.Errors.Add(error);
-            }
+                pipelineContext.TessdataPath = Path.Combine(AppContext.BaseDirectory, "tessdata");
+                foreach (var error in ValidateTessdata(pipelineContext.TessdataPath, effectiveOptions.Language))
+                {
+                    root.Errors.Add(error);
+                }
 
-            var runOutputFolder = PrepareRunOutputFolder(filePath, effectiveOptions);
+                pipelineContext.RunOutputFolder = PrepareRunOutputFolder(filePath, effectiveOptions);
+            });
 
             if (root.Errors.Count > 0)
             {
                 root.Document.Source.PageCount = 0;
-                return FinalizeResult(root, filePath, effectiveOptions, runStopwatch.ElapsedMilliseconds, runOutputFolder);
+                return FinalizeResult(root, filePath, effectiveOptions, runStopwatch.ElapsedMilliseconds, pipelineContext.RunOutputFolder);
             }
 
-            var pageImages = LoadPages(filePath ?? string.Empty, fileType, effectiveOptions, runOutputFolder, ct, root, out var totalRenderMs);
+            var totalRenderMs = 0;
+            var pageImages = new List<LoadedPage>();
+            pipelineRunner.ExecuteStage(pipelineContext, OcrPipelineStageNames.Render, () =>
+            {
+                pageImages = LoadPages(filePath ?? string.Empty, fileType, effectiveOptions, pipelineContext.RunOutputFolder, ct, root, out totalRenderMs);
+                pipelineContext.LoadedPageCount = pageImages.Count;
+                pipelineContext.Items["pageImages"] = pageImages;
+            });
             root.Document.Source.PageCount = pageImages.Count;
 
             if (pageImages.Count == 0)
             {
                 AddError(root, "no_pages_rendered", "No pages were loaded from the input file.");
-                return FinalizeResult(root, filePath, effectiveOptions, runStopwatch.ElapsedMilliseconds, runOutputFolder);
+                return FinalizeResult(root, filePath, effectiveOptions, runStopwatch.ElapsedMilliseconds, pipelineContext.RunOutputFolder);
             }
 
             var languages = SplitLanguages(effectiveOptions.Language);
             var engineMode = ResolveEngineMode(effectiveOptions.EngineMode, root);
             var pageSegMode = ResolvePageSegMode(effectiveOptions.PageSegMode, root);
-            using var engine = new TesseractEngine(tessdataPath, string.Join('+', languages), engineMode);
+            using var engine = new TesseractEngine(pipelineContext.TessdataPath, string.Join('+', languages), engineMode);
             engine.DefaultPageSegMode = pageSegMode;
             engine.SetVariable("preserve_interword_spaces", effectiveOptions.PreserveInterwordSpaces ? "1" : "0");
             if (effectiveOptions.PreserveInterwordSpaces)
@@ -127,6 +163,8 @@ public sealed class OcrProcessor : IOcrProcessor
             var preprocessProfiles = new List<PagePreprocessingInfo>(pageImages.Count);
             var debugArtifactPaths = new List<PageDebugArtifactInfo>();
             var pageNoiseDiagnostics = new List<PageNoiseDiagnosticsInfo>(pageImages.Count);
+            var lineReconstructionDiagnostics = new List<LineReconstructionDiagnosticsInfo>(pageImages.Count);
+            var tokenCleanupStats = new List<TokenCleanupStatsInfo>(pageImages.Count);
             var fieldExtractionDiagnostics = new List<FieldExtractionDiagnosticsInfo>(pageImages.Count);
             var filteredTokenIds = new List<string>();
             var documentWordMap = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -148,8 +186,12 @@ public sealed class OcrProcessor : IOcrProcessor
 
                 using var sourceMat = pageImage.Image;
 
+                PreprocessResult preprocessResult = default!;
                 var preprocessSw = Stopwatch.StartNew();
-                var preprocessResult = PreprocessPage(sourceMat, pageImage.PageIndex, effectiveOptions, runOutputFolder);
+                pipelineRunner.ExecuteStage(
+                    pipelineContext,
+                    $"{OcrPipelineStageNames.Preprocess} [Page {pageImage.PageIndex}]",
+                    () => preprocessResult = PreprocessPage(sourceMat, pageImage.PageIndex, effectiveOptions, pipelineContext.RunOutputFolder));
                 preprocessSw.Stop();
 
                 preprocessProfiles.Add(new PagePreprocessingInfo
@@ -162,17 +204,50 @@ public sealed class OcrProcessor : IOcrProcessor
                     AppliedDegrees = preprocessResult.AppliedDegrees
                 });
 
+                List<WordCandidate> words = [];
                 var ocrSw = Stopwatch.StartNew();
-                var words = RunOcr(engine, preprocessResult.ProcessedMat);
+                pipelineRunner.ExecuteStage(
+                    pipelineContext,
+                    $"{OcrPipelineStageNames.OcrExtraction} [Page {pageImage.PageIndex}]",
+                    () => words = RunOcr(engine, preprocessResult.ProcessedMat));
                 ocrSw.Stop();
 
+                LayoutResult layout = default!;
                 var layoutSw = Stopwatch.StartNew();
-                var layout = BuildLayout(
-                    words,
-                    pageImage.PageIndex,
-                    root.Definitions.Confidence,
-                    preprocessResult.ProcessedMat.Width,
-                    preprocessResult.ProcessedMat.Height);
+                pipelineRunner.ExecuteStage(
+                    pipelineContext,
+                    $"{OcrPipelineStageNames.LayoutAnalysis} [Page {pageImage.PageIndex}]",
+                    () => layout = BuildLayout(
+                        words,
+                        pageImage.PageIndex,
+                        root.Definitions.Confidence,
+                        preprocessResult.ProcessedMat.Width,
+                        preprocessResult.ProcessedMat.Height,
+                        _lineReconstructor,
+                        _tokenCleanupService,
+                        lineReconstructionDiagnostics));
+                pipelineRunner.ExecuteStage(
+                    pipelineContext,
+                    $"{OcrPipelineStageNames.TokenCleanup} [Page {pageImage.PageIndex}]",
+                    () => { },
+                    note: "Token cleanup is executed inside the layout analysis stage.");
+                pipelineRunner.ExecuteStage(
+                    pipelineContext,
+                    $"{OcrPipelineStageNames.LineReconstruction} [Page {pageImage.PageIndex}]",
+                    () => { },
+                    note: "Line reconstruction is executed inside the layout analysis stage.");
+                tokenCleanupStats.Add(new TokenCleanupStatsInfo
+                {
+                    PageIndex = pageImage.PageIndex,
+                    TokensOriginal = layout.TokenCleanupStats.TokensOriginal,
+                    TokensModified = layout.TokenCleanupStats.TokensModified,
+                    TokensRemoved = layout.TokenCleanupStats.TokensRemoved,
+                    TokensSplit = layout.TokenCleanupStats.TokensSplit,
+                    CheckboxArtifactsRemoved = layout.TokenCleanupStats.CheckboxArtifactsRemoved,
+                    UnderlineArtifactsRemoved = layout.TokenCleanupStats.UnderlineArtifactsRemoved,
+                    DictionaryCorrections = layout.TokenCleanupStats.DictionaryCorrections,
+                    TokensCleaned = Math.Max(0, layout.TokenCleanupStats.TokensOriginal - layout.TokenCleanupStats.TokensRemoved)
+                });
                 var noiseAnalysis = AnalyzePageNoise(layout);
                 var filteredThisPage = 0;
                 if (effectiveOptions.EnableNoiseFiltering)
@@ -199,42 +274,50 @@ public sealed class OcrProcessor : IOcrProcessor
                     PostprocessMs = 0
                 };
 
+                TableDetectionResult tableDetection = new();
                 var tableSw = Stopwatch.StartNew();
-                var tableDetection = _tableDetector.Detect(new PageInfo
-                {
-                    PageIndex = pageImage.PageIndex,
-                    Size = new PageSizeInfo
+                pipelineRunner.ExecuteStage(
+                    pipelineContext,
+                    $"{OcrPipelineStageNames.TableDetection} [Page {pageImage.PageIndex}]",
+                    () => tableDetection = _tableDetector.Detect(new PageInfo
                     {
-                        WidthPx = processedWidth,
-                        HeightPx = processedHeight,
-                        Dpi = effectiveOptions.TargetDpi
-                    },
-                    Tokens = layout.Tokens,
-                    Lines = layout.Lines,
-                    Blocks = layout.Blocks,
-                    Quality = new PageQualityInfo
-                    {
-                        MeanTokenConfidence = layout.Tokens.Count == 0 ? 0 : layout.Tokens.Average(t => t.Confidence),
-                        LowConfidenceTokenCount = layout.Tokens.Count(t => t.IsLowConfidence),
-                        BlankPage = string.IsNullOrWhiteSpace(layout.FullText)
-                    }
-                }, preprocessResult.ProcessedMat);
+                        PageIndex = pageImage.PageIndex,
+                        Size = new PageSizeInfo
+                        {
+                            WidthPx = processedWidth,
+                            HeightPx = processedHeight,
+                            Dpi = effectiveOptions.TargetDpi
+                        },
+                        Tokens = layout.Tokens,
+                        Lines = layout.Lines,
+                        Blocks = layout.Blocks,
+                        Quality = new PageQualityInfo
+                        {
+                            MeanTokenConfidence = layout.Tokens.Count == 0 ? 0 : layout.Tokens.Average(t => t.Confidence),
+                            LowConfidenceTokenCount = layout.Tokens.Count(t => t.IsLowConfidence),
+                            BlankPage = string.IsNullOrWhiteSpace(layout.FullText)
+                        }
+                    }, preprocessResult.ProcessedMat));
                 tableSw.Stop();
                 pageTiming.TableDetectMs = (int)tableSw.ElapsedMilliseconds;
 
-                var regionDetection = _regionDetector.Detect(new PageInfo
-                {
-                    PageIndex = pageImage.PageIndex,
-                    Tokens = layout.Tokens,
-                    Lines = layout.Lines,
-                    Blocks = layout.Blocks,
-                    Size = new PageSizeInfo
+                RegionDetectionResult regionDetection = new();
+                pipelineRunner.ExecuteStage(
+                    pipelineContext,
+                    $"{OcrPipelineStageNames.RegionDetection} [Page {pageImage.PageIndex}]",
+                    () => regionDetection = _regionDetector.Detect(new PageInfo
                     {
-                        WidthPx = processedWidth,
-                        HeightPx = processedHeight,
-                        Dpi = effectiveOptions.TargetDpi
-                    }
-                }, preprocessResult.ProcessedMat);
+                        PageIndex = pageImage.PageIndex,
+                        Tokens = layout.Tokens,
+                        Lines = layout.Lines,
+                        Blocks = layout.Blocks,
+                        Size = new PageSizeInfo
+                        {
+                            WidthPx = processedWidth,
+                            HeightPx = processedHeight,
+                            Dpi = effectiveOptions.TargetDpi
+                        }
+                    }, preprocessResult.ProcessedMat));
 
                 var pageInfo = new PageInfo
                 {
@@ -273,8 +356,12 @@ public sealed class OcrProcessor : IOcrProcessor
                 };
                 MergeWordsIntoDocumentMap(pageInfo.PageWords, documentWordMap);
 
+                KeyValueExtractionResult keyValueExtraction = new();
                 var keyValueSw = Stopwatch.StartNew();
-                var keyValueExtraction = _keyValueExtractor.Extract(pageInfo);
+                pipelineRunner.ExecuteStage(
+                    pipelineContext,
+                    $"{OcrPipelineStageNames.StructuredFieldExtraction} [Page {pageImage.PageIndex}]",
+                    () => keyValueExtraction = _keyValueExtractor.Extract(pageInfo));
                 keyValueSw.Stop();
                 pageTiming.PostprocessMs += (int)keyValueSw.ElapsedMilliseconds;
                 pageInfo.KeyValueCandidates = keyValueExtraction.Candidates;
@@ -292,24 +379,24 @@ public sealed class OcrProcessor : IOcrProcessor
                     PreprocessedPath = preprocessResult.FinalImagePath
                 };
 
-                if (effectiveOptions.SaveTokenOverlay && !string.IsNullOrWhiteSpace(runOutputFolder))
+                if (effectiveOptions.SaveTokenOverlay && !string.IsNullOrWhiteSpace(pipelineContext.RunOutputFolder))
                 {
-                    var overlays = SaveOverlayArtifacts(preprocessResult.ProcessedMat, layout, pageImage.PageIndex, runOutputFolder);
+                    var overlays = SaveOverlayArtifacts(preprocessResult.ProcessedMat, layout, pageImage.PageIndex, pipelineContext.RunOutputFolder);
                     pageInfo.Artifacts.DebugOverlayRef = overlays.TokenOverlayPath;
                     artifactEntry.TokenOverlayPath = overlays.TokenOverlayPath;
                     artifactEntry.LineOverlayPath = overlays.LineOverlayPath;
                     artifactEntry.BlockOverlayPath = overlays.BlockOverlayPath;
                 }
 
-                if (effectiveOptions.SaveDebugArtifacts && !string.IsNullOrWhiteSpace(runOutputFolder) && tableDetection.Overlays.Count > 0)
+                if (effectiveOptions.SaveDebugArtifacts && !string.IsNullOrWhiteSpace(pipelineContext.RunOutputFolder) && tableDetection.Overlays.Count > 0)
                 {
-                    var tableOverlayPath = SaveTableOverlay(preprocessResult.ProcessedMat, tableDetection.Overlays, pageImage.PageIndex, runOutputFolder);
+                    var tableOverlayPath = SaveTableOverlay(preprocessResult.ProcessedMat, tableDetection.Overlays, pageImage.PageIndex, pipelineContext.RunOutputFolder);
                     artifactEntry.TableOverlayPath = tableOverlayPath;
                 }
 
-                if (effectiveOptions.SaveDebugArtifacts && !string.IsNullOrWhiteSpace(runOutputFolder) && regionDetection.Overlays.Count > 0)
+                if (effectiveOptions.SaveDebugArtifacts && !string.IsNullOrWhiteSpace(pipelineContext.RunOutputFolder) && regionDetection.Overlays.Count > 0)
                 {
-                    var regionOverlayPath = SaveRegionOverlay(preprocessResult.ProcessedMat, regionDetection.Overlays, pageImage.PageIndex, runOutputFolder);
+                    var regionOverlayPath = SaveRegionOverlay(preprocessResult.ProcessedMat, regionDetection.Overlays, pageImage.PageIndex, pipelineContext.RunOutputFolder);
                     artifactEntry.RegionOverlayPath = regionOverlayPath;
                 }
 
@@ -327,6 +414,8 @@ public sealed class OcrProcessor : IOcrProcessor
 
                 AddQualityWarnings(root, pageInfo, preprocessResult);
                 AddNoiseWarnings(root, pageInfo, noiseAnalysis, effectiveOptions.EnableNoiseFiltering, filteredThisPage);
+                AddRegionWarnings(root, pageInfo, regionDetection.Diagnostics);
+                AddTokenCleanupInfo(root, pageInfo.PageIndex, layout.TokenCleanupStats);
                 preprocessResult.ProcessedMat.Dispose();
 
                 pageNoiseDiagnostics.Add(new PageNoiseDiagnosticsInfo
@@ -353,28 +442,92 @@ public sealed class OcrProcessor : IOcrProcessor
             }
 
             var recognitionSw = Stopwatch.StartNew();
-            var fieldRecognition = _fieldRecognizer.Recognize(pageResults, root.Definitions.Confidence.LowFieldThreshold);
+            FieldRecognitionResult fieldRecognition = new();
+            pipelineRunner.ExecuteStage(
+                pipelineContext,
+                OcrPipelineStageNames.StructuredFieldExtraction,
+                () => fieldRecognition = _fieldRecognizer.Recognize(pageResults, root.Definitions.Confidence.LowFieldThreshold));
+
+            StructuredFieldExtractionResult structuredExtraction = new();
+            pipelineRunner.ExecuteStage(
+                pipelineContext,
+                $"{OcrPipelineStageNames.StructuredFieldExtraction} (Additive)",
+                () => structuredExtraction = _structuredFieldExtractor.Extract(
+                    pageResults,
+                    fieldRecognition.Fields,
+                    root.Definitions.Confidence.LowFieldThreshold),
+                preserveOnFailure: true,
+                onFailure: ex => AddWarning(
+                    root,
+                    "structured_extraction_stage_failed",
+                    $"Structured extraction stage failed; preserving raw OCR evidence. {ex.Message}"));
+            foreach (var page in pageResults)
+            {
+                if (!structuredExtraction.AdditionalKeyValueCandidatesByPage.TryGetValue(page.PageIndex, out var additions) ||
+                    additions.Count == 0)
+                {
+                    continue;
+                }
+
+                page.KeyValueCandidates.AddRange(additions);
+                RenumberKeyValueCandidates(page);
+            }
+
+            var mergedFields = MergeRecognitionFields(
+                fieldRecognition.Fields,
+                structuredExtraction.AdditionalFields,
+                root.Definitions.Confidence.LowFieldThreshold);
             recognitionSw.Stop();
             recognitionTotal = (int)recognitionSw.ElapsedMilliseconds;
-            root.Recognition.Fields = fieldRecognition.Fields;
+            root.Recognition.Fields = mergedFields;
             foreach (var warning in fieldRecognition.Warnings)
+            {
+                root.Warnings.Add(warning);
+            }
+            foreach (var warning in structuredExtraction.Warnings)
             {
                 root.Warnings.Add(warning);
             }
 
             foreach (var diag in fieldExtractionDiagnostics)
             {
-                diag.PromotedFieldCount = fieldRecognition.PromotedByPage.GetValueOrDefault(diag.PageIndex);
+                var basePromoted = fieldRecognition.PromotedByPage.GetValueOrDefault(diag.PageIndex);
+                var structuredPromoted = structuredExtraction.AdditionalFields.Count(f => f.Source.PageIndex == diag.PageIndex);
+                var structuredCandidates = structuredExtraction.AdditionalKeyValueCandidatesByPage.GetValueOrDefault(diag.PageIndex)?.Count ?? 0;
+                diag.CandidateCount += structuredCandidates;
+                diag.PromotedFieldCount = basePromoted + structuredPromoted;
             }
 
             root.Pages.Clear();
             root.Pages.AddRange(pageResults);
+            pipelineContext.Items["pages"] = pageResults;
+            pipelineContext.Items["pageCount"] = pageResults.Count;
+            pipelineContext.Items["warningsCount"] = root.Warnings.Count;
+            pipelineContext.Items["errorsCount"] = root.Errors.Count;
 
             root.Extensions.PagePreprocessing = preprocessProfiles;
             root.Extensions.DebugArtifactPaths = debugArtifactPaths;
             root.Extensions.PageNoiseDiagnostics = pageNoiseDiagnostics;
+            root.Extensions.LineReconstructionDiagnostics = lineReconstructionDiagnostics;
+            root.Extensions.TokenCleanupStats = tokenCleanupStats;
             root.Extensions.FilteredTokenIds = filteredTokenIds;
             root.Extensions.FieldExtractionDiagnostics = fieldExtractionDiagnostics;
+            root.Extensions.StructuredFieldExtractionStats = new StructuredFieldExtractionStatsInfo
+            {
+                PagesProcessed = pageResults.Count,
+                KeyValueCandidateCount = structuredExtraction.KeyValueCandidateCount,
+                PromotedFieldCount = structuredExtraction.PromotedFieldCount,
+                CheckboxDerivedFieldCount = structuredExtraction.CheckboxDerivedFieldCount
+            };
+            root.Extensions.PipelineStageTimings = pipelineContext.StageTimings
+                .Select(t => new PipelineStageTimingInfo
+                {
+                    StageName = t.StageName,
+                    DurationMs = t.DurationMs,
+                    Status = t.Status,
+                    Note = t.Note
+                })
+                .ToList();
             root.DocumentWords = documentWordMap.Values
                 .OrderBy(w => w, StringComparer.OrdinalIgnoreCase)
                 .ToList();
@@ -410,7 +563,12 @@ public sealed class OcrProcessor : IOcrProcessor
                 }
             };
 
-            return FinalizeResult(root, filePath, effectiveOptions, runStopwatch.ElapsedMilliseconds, runOutputFolder);
+            pipelineRunner.ExecuteStage(
+                pipelineContext,
+                OcrPipelineStageNames.FinalAssembly,
+                () => { },
+                note: "Final result serialization and output path handling.");
+            return FinalizeResult(root, filePath, effectiveOptions, runStopwatch.ElapsedMilliseconds, pipelineContext.RunOutputFolder);
         }
         catch (Exception ex)
         {
@@ -986,11 +1144,22 @@ public sealed class OcrProcessor : IOcrProcessor
         int pageIndex,
         ConfidenceDefinitionInfo confidenceDefinition,
         int pageWidth,
-        int pageHeight)
+        int pageHeight,
+        ILineReconstructor lineReconstructor,
+        ITokenCleanupService tokenCleanupService,
+        List<LineReconstructionDiagnosticsInfo> lineDiagnostics)
     {
         if (words.Count == 0)
         {
-            return new LayoutResult([], [], [], string.Empty);
+            lineDiagnostics.Add(new LineReconstructionDiagnosticsInfo
+            {
+                PageIndex = pageIndex,
+                OriginalLineCount = 0,
+                ReconstructedLineCount = 0,
+                TokensAssigned = 0,
+                Successful = true
+            });
+            return new LayoutResult([], [], [], string.Empty, new TokenCleanupResult());
         }
 
         var orderedWords = words
@@ -1001,6 +1170,7 @@ public sealed class OcrProcessor : IOcrProcessor
 
         var lineGroups = CreateLineGroups(orderedWords);
         var lineEntries = new List<LineBuildEntry>(lineGroups.Count);
+        var tokenBlockKeys = new Dictionary<string, string>(StringComparer.Ordinal);
 
         var tokenIndex = 1;
         var lineIndex = 1;
@@ -1048,6 +1218,7 @@ public sealed class OcrProcessor : IOcrProcessor
                         Level = "word"
                     }
                 });
+                tokenBlockKeys[tokenId] = group.BlockKey;
             }
 
             var lineBBox = ClampBbox(UnionBboxes(tokenEntries.Select(t => t.Bbox)), pageWidth, pageHeight);
@@ -1065,14 +1236,65 @@ public sealed class OcrProcessor : IOcrProcessor
             lineEntries.Add(new LineBuildEntry(line, tokenEntries, group.BlockKey));
         }
 
-        var blockGroups = lineEntries
-            .GroupBy(l => l.BlockKey)
-            .OrderBy(g => g.Key)
+        var tokens = lineEntries.SelectMany(l => l.Tokens).ToList();
+        var originalLines = lineEntries.Select(l => l.Line).ToList();
+
+        var cleanup = tokenCleanupService.Cleanup(tokens, []);
+        foreach (var token in tokens)
+        {
+            if (cleanup.ReconstructedTextOverrides.TryGetValue(token.Id, out var updatedText) &&
+                !string.IsNullOrWhiteSpace(updatedText))
+            {
+                token.Text = updatedText;
+            }
+        }
+        var reconstruction = lineReconstructor.Reconstruct(
+            tokens,
+            pageIndex,
+            pageWidth,
+            pageHeight,
+            confidenceDefinition.LowLineThreshold,
+            cleanup.SkipTokenIds,
+            cleanup.ReconstructedTextOverrides);
+
+        var lines = reconstruction.Successful && reconstruction.Lines.Count > 0
+            ? reconstruction.Lines
+            : originalLines;
+
+        var fullText = reconstruction.Successful && !string.IsNullOrWhiteSpace(reconstruction.FullText)
+            ? reconstruction.FullText
+            : string.Join(
+                Environment.NewLine,
+                lines.Select(line => string.Join(' ', line.TokenIds.Select(id => tokens.First(t => t.Id == id).Text).Where(t => !string.IsNullOrWhiteSpace(t)))));
+
+        lineDiagnostics.Add(new LineReconstructionDiagnosticsInfo
+        {
+            PageIndex = pageIndex,
+            OriginalLineCount = originalLines.Count,
+            ReconstructedLineCount = lines.Count,
+            TokensAssigned = reconstruction.TokensAssigned,
+            Successful = reconstruction.Successful
+        });
+
+        var blockKeyByLineId = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var line in lines)
+        {
+            var dominantBlockKey = line.TokenIds
+                .Select(id => tokenBlockKeys.GetValueOrDefault(id, "blk-fallback"))
+                .GroupBy(k => k)
+                .OrderByDescending(g => g.Count())
+                .ThenBy(g => g.Key, StringComparer.Ordinal)
+                .Select(g => g.Key)
+                .FirstOrDefault() ?? "blk-fallback";
+            blockKeyByLineId[line.LineId] = dominantBlockKey;
+        }
+
+        var blockGroups = lines
+            .GroupBy(l => blockKeyByLineId.GetValueOrDefault(l.LineId, "blk-fallback"))
+            .OrderBy(g => g.Key, StringComparer.Ordinal)
             .ToList();
 
         var blocks = new List<BlockInfo>(blockGroups.Count);
-        var lines = lineEntries.Select(l => l.Line).ToList();
-        var tokens = lineEntries.SelectMany(l => l.Tokens).ToList();
 
         var blockIndex = 1;
         var tokenById = tokens.ToDictionary(t => t.Id, t => t);
@@ -1082,9 +1304,9 @@ public sealed class OcrProcessor : IOcrProcessor
             var blockId = $"blk-{pageIndex:000}-{blockIndex:00000}";
             blockIndex++;
 
-            var groupLines = group.Select(x => x.Line).OrderBy(l => l.Bbox.Y).ThenBy(l => l.Bbox.X).ToList();
+            var groupLines = group.OrderBy(l => l.Bbox.Y).ThenBy(l => l.Bbox.X).ToList();
             var lineIds = groupLines.Select(l => l.LineId).ToList();
-            var tokenIds = group.SelectMany(x => x.Tokens).Select(t => t.Id).ToList();
+            var tokenIds = groupLines.SelectMany(x => x.TokenIds).Distinct(StringComparer.Ordinal).ToList();
             var bbox = ClampBbox(UnionBboxes(groupLines.Select(l => l.Bbox)), pageWidth, pageHeight);
             var confidence = groupLines.Count == 0 ? 0 : groupLines.Average(l => l.Confidence);
 
@@ -1110,10 +1332,7 @@ public sealed class OcrProcessor : IOcrProcessor
             .Select(id => tokenById[id])
             .ToList();
 
-        var lineTexts = lines.Select(line => string.Join(' ', line.TokenIds.Select(id => tokenById[id].Text).Where(t => !string.IsNullOrWhiteSpace(t))));
-        var fullText = string.Join(Environment.NewLine, lineTexts.Where(t => !string.IsNullOrWhiteSpace(t)));
-
-        return new LayoutResult(finalTokens, lines, blocks, fullText);
+        return new LayoutResult(finalTokens, lines, blocks, fullText, cleanup);
     }
 
     private static List<LineGroup> CreateLineGroups(List<WordCandidate> orderedWords)
@@ -1427,6 +1646,18 @@ public sealed class OcrProcessor : IOcrProcessor
         });
     }
 
+    private static void AddInfo(OcrContractRoot root, string code, string message, int? pageIndex = null, Dictionary<string, object?>? details = null)
+    {
+        root.Warnings.Add(new IssueInfo
+        {
+            Code = code,
+            Severity = "info",
+            Message = message,
+            PageIndex = pageIndex,
+            Details = details ?? new Dictionary<string, object?>()
+        });
+    }
+
     private static Dictionary<string, object?> CreateExceptionDetails(Exception ex)
     {
         var details = new Dictionary<string, object?>
@@ -1672,6 +1903,155 @@ public sealed class OcrProcessor : IOcrProcessor
         }
     }
 
+    private static void AddRegionWarnings(OcrContractRoot root, PageInfo page, RegionDetectionDiagnostics diagnostics)
+    {
+        AddInfo(
+            root,
+            "region_detection_stats",
+            $"Page {page.PageIndex} region detection: raw={diagnostics.RawCandidateCount}, geometry={diagnostics.GeometryFilteredCount}, label={diagnostics.LabelFilteredCount}, finalCheckbox={diagnostics.FinalCheckboxCount}, finalRadio={diagnostics.FinalRadioCount}.",
+            page.PageIndex,
+            new Dictionary<string, object?>
+            {
+                ["rawCandidateCount"] = diagnostics.RawCandidateCount,
+                ["geometryFilteredCount"] = diagnostics.GeometryFilteredCount,
+                ["labelFilteredCount"] = diagnostics.LabelFilteredCount,
+                ["finalCheckboxCount"] = diagnostics.FinalCheckboxCount,
+                ["finalRadioCount"] = diagnostics.FinalRadioCount
+            });
+
+        if (page.Regions.Count == 0)
+        {
+            return;
+        }
+
+        var suspiciousThreshold = Math.Max(25, page.Tokens.Count / 3);
+        if (page.Regions.Count > suspiciousThreshold)
+        {
+            AddWarning(
+                root,
+                "high_region_false_positive_risk",
+                $"Page {page.PageIndex} produced unusually high region count ({page.Regions.Count}).",
+                page.PageIndex,
+                new Dictionary<string, object?>
+                {
+                    ["regionCount"] = page.Regions.Count,
+                    ["threshold"] = suspiciousThreshold
+                });
+        }
+
+        var unlabeledCount = page.Regions.Count(r => r.LabelTokenIds.Count == 0);
+        if (unlabeledCount >= 5)
+        {
+            AddWarning(
+                root,
+                "ambiguous_label_association",
+                $"Page {page.PageIndex} has {unlabeledCount} regions without nearby label tokens.",
+                page.PageIndex,
+                new Dictionary<string, object?>
+                {
+                    ["unlabeledRegionCount"] = unlabeledCount,
+                    ["totalRegions"] = page.Regions.Count
+                });
+        }
+
+        var conflictingCount = page.Regions
+            .Where(r => r.LabelTokenIds.Count > 0)
+            .GroupBy(r => string.Join("|", r.LabelTokenIds))
+            .Count(g => g.Select(r => r.Value).Distinct().Count() > 1);
+
+        if (conflictingCount > 0)
+        {
+            AddWarning(
+                root,
+                "conflicting_checked_state_detection",
+                $"Page {page.PageIndex} has {conflictingCount} conflicting region checked-state groups for the same label tokens.",
+                page.PageIndex,
+                new Dictionary<string, object?>
+                {
+                    ["conflictingGroups"] = conflictingCount
+                });
+        }
+    }
+
+    private static void AddTokenCleanupInfo(OcrContractRoot root, int pageIndex, TokenCleanupResult cleanup)
+    {
+        AddInfo(
+            root,
+            "token_cleanup_stats",
+            $"Page {pageIndex} token cleanup: original={cleanup.TokensOriginal}, modified={cleanup.TokensModified}, removed={cleanup.TokensRemoved}, split={cleanup.TokensSplit}, checkboxArtifactsRemoved={cleanup.CheckboxArtifactsRemoved}, underlineArtifactsRemoved={cleanup.UnderlineArtifactsRemoved}, dictionaryCorrections={cleanup.DictionaryCorrections}.",
+            pageIndex,
+            new Dictionary<string, object?>
+            {
+                ["tokensOriginal"] = cleanup.TokensOriginal,
+                ["tokensModified"] = cleanup.TokensModified,
+                ["tokensRemoved"] = cleanup.TokensRemoved,
+                ["tokensSplit"] = cleanup.TokensSplit,
+                ["checkboxArtifactsRemoved"] = cleanup.CheckboxArtifactsRemoved,
+                ["underlineArtifactsRemoved"] = cleanup.UnderlineArtifactsRemoved,
+                ["dictionaryCorrections"] = cleanup.DictionaryCorrections
+            });
+    }
+
+    private static void RenumberKeyValueCandidates(PageInfo page)
+    {
+        var ordered = page.KeyValueCandidates
+            .OrderBy(c => c.Label.Bbox.Y)
+            .ThenBy(c => c.Label.Bbox.X)
+            .ThenBy(c => c.Value.Bbox.Y)
+            .ThenBy(c => c.Value.Bbox.X)
+            .ThenByDescending(c => c.Confidence)
+            .ToList();
+
+        page.KeyValueCandidates.Clear();
+        for (var i = 0; i < ordered.Count; i++)
+        {
+            ordered[i].PairId = $"kv-{page.PageIndex:000}-{i + 1:00000}";
+            page.KeyValueCandidates.Add(ordered[i]);
+        }
+    }
+
+    private static List<RecognitionFieldInfo> MergeRecognitionFields(
+        IReadOnlyList<RecognitionFieldInfo> baseFields,
+        IReadOnlyList<RecognitionFieldInfo> additionalFields,
+        double lowFieldThreshold)
+    {
+        var merged = new Dictionary<string, RecognitionFieldInfo>(StringComparer.OrdinalIgnoreCase);
+        foreach (var field in baseFields)
+        {
+            if (!string.IsNullOrWhiteSpace(field.FieldId))
+            {
+                merged[field.FieldId] = field;
+            }
+        }
+
+        foreach (var field in additionalFields)
+        {
+            if (string.IsNullOrWhiteSpace(field.FieldId))
+            {
+                continue;
+            }
+
+            if (merged.TryGetValue(field.FieldId, out var existing))
+            {
+                if (field.Confidence > existing.Confidence)
+                {
+                    field.IsLowConfidence = field.Confidence < lowFieldThreshold;
+                    merged[field.FieldId] = field;
+                }
+            }
+            else
+            {
+                field.IsLowConfidence = field.Confidence < lowFieldThreshold;
+                merged[field.FieldId] = field;
+            }
+        }
+
+        return merged.Values
+            .OrderBy(f => f.Source.PageIndex)
+            .ThenBy(f => f.FieldId, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
     private static bool IsSymbolLike(string text)
     {
         var trimmed = text?.Trim() ?? string.Empty;
@@ -1883,6 +2263,22 @@ public sealed class OcrProcessor : IOcrProcessor
                 : new Scalar(0, 165, 255);
             var thickness = isChecked ? 3 : 1;
             Cv2.Rectangle(overlay, rect, color, thickness);
+            if (isChecked)
+            {
+                var center = new OpenCvSharp.Point(region.Bbox.X + (region.Bbox.W / 2), region.Bbox.Y + (region.Bbox.H / 2));
+                if (string.Equals(region.Type, "radio", StringComparison.OrdinalIgnoreCase))
+                {
+                    Cv2.Circle(overlay, center, Math.Max(2, Math.Min(region.Bbox.W, region.Bbox.H) / 5), color, -1);
+                }
+                else
+                {
+                    var p1 = new OpenCvSharp.Point(region.Bbox.X + Math.Max(1, region.Bbox.W / 5), region.Bbox.Y + (region.Bbox.H / 2));
+                    var p2 = new OpenCvSharp.Point(region.Bbox.X + (region.Bbox.W / 2), region.Bbox.Y + region.Bbox.H - Math.Max(2, region.Bbox.H / 5));
+                    var p3 = new OpenCvSharp.Point(region.Bbox.X + region.Bbox.W - Math.Max(1, region.Bbox.W / 6), region.Bbox.Y + Math.Max(1, region.Bbox.H / 5));
+                    Cv2.Line(overlay, p1, p2, color, 2);
+                    Cv2.Line(overlay, p2, p3, color, 2);
+                }
+            }
             var label = $"{region.Type}:{(isChecked ? "checked" : "unchecked")}";
             var labelY = Math.Max(12, region.Bbox.Y - 3);
             Cv2.PutText(overlay, label, new OpenCvSharp.Point(region.Bbox.X, labelY), HersheyFonts.HersheySimplex, 0.4, color, 1);
@@ -1925,18 +2321,20 @@ public sealed class OcrProcessor : IOcrProcessor
 
     private sealed class LayoutResult
     {
-        public LayoutResult(List<TokenInfo> tokens, List<LineInfo> lines, List<BlockInfo> blocks, string fullText)
+        public LayoutResult(List<TokenInfo> tokens, List<LineInfo> lines, List<BlockInfo> blocks, string fullText, TokenCleanupResult tokenCleanupStats)
         {
             Tokens = tokens;
             Lines = lines;
             Blocks = blocks;
             FullText = fullText;
+            TokenCleanupStats = tokenCleanupStats;
         }
 
         public List<TokenInfo> Tokens { get; }
         public List<LineInfo> Lines { get; }
         public List<BlockInfo> Blocks { get; }
         public string FullText { get; set; }
+        public TokenCleanupResult TokenCleanupStats { get; }
     }
 
     private sealed class LineGroup

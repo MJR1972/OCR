@@ -24,6 +24,12 @@ Workflow:
 
 The harness calls `OcrProcessor` and displays placeholder JSON.
 
+## Internal Architecture
+The DLL now uses an internal staged pipeline runner for maintainability while preserving public behavior and JSON compatibility.
+
+Developer notes:
+- [docs/InternalPipeline.md](docs/InternalPipeline.md)
+
 ## Run Smoke Runner
 ```powershell
 dotnet run --project tools/Ocr.SmokeRunner/Ocr.SmokeRunner.csproj -- "C:\path\to\input.pdf"

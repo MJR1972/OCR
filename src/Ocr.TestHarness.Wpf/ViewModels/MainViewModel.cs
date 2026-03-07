@@ -676,6 +676,9 @@ public sealed class MainViewModel : ViewModelBase
             UpdateSummary(result.Json, result.OutputJsonPath);
             LogPageSummary(result.Json);
             LogNoiseDiagnostics(result.Json);
+            LogLineReconstructionDiagnostics(result.Json);
+            LogTokenCleanupDiagnostics(result.Json);
+            LogPipelineStageTimings(result.Json);
             LogDebugArtifacts(result.Json);
             PopulatePreviewArtifacts(result.Json);
             PopulateTables(result.Json);
@@ -709,7 +712,9 @@ public sealed class MainViewModel : ViewModelBase
             var jObject = JObject.Parse(json);
             var warnings = jObject["warnings"] as JArray;
             var errors = jObject["errors"] as JArray;
-            return (warnings?.Count ?? 0, errors?.Count ?? 0);
+            var warningCount = warnings?.OfType<JObject>()
+                .Count(w => string.Equals(w["severity"]?.Value<string>(), "warning", StringComparison.OrdinalIgnoreCase)) ?? 0;
+            return (warningCount, errors?.Count ?? 0);
         }
         catch
         {
@@ -762,7 +767,9 @@ public sealed class MainViewModel : ViewModelBase
             SummaryPreprocessMs = root["metrics"]?["breakdownMs"]?["preprocessMs"]?.Value<int>() ?? 0;
             SummaryLayoutMs = root["metrics"]?["breakdownMs"]?["layoutMs"]?.Value<int>() ?? 0;
             SummaryOcrMs = root["metrics"]?["breakdownMs"]?["ocrMs"]?.Value<int>() ?? 0;
-            SummaryWarningCount = (root["warnings"] as JArray)?.Count ?? 0;
+            SummaryWarningCount = (root["warnings"] as JArray)?
+                .OfType<JObject>()
+                .Count(w => string.Equals(w["severity"]?.Value<string>(), "warning", StringComparison.OrdinalIgnoreCase)) ?? 0;
             SummaryErrorCount = (root["errors"] as JArray)?.Count ?? 0;
             SummaryUniqueWordCount = (root["documentWords"] as JArray)?.Count ?? 0;
             var fields = root["recognition"]?["fields"] as JArray;
@@ -985,11 +992,41 @@ public sealed class MainViewModel : ViewModelBase
 
             var promotedCount = (root["recognition"]?["fields"] as JArray)?.Count ?? 0;
             AddLog($"Promoted recognition fields: {promotedCount}");
+            var structuredStats = root["extensions"]?["structuredFieldExtractionStats"] as JObject;
+            if (structuredStats is not null)
+            {
+                var structuredKvCount = structuredStats["keyValueCandidateCount"]?.Value<int>() ?? 0;
+                var structuredPromotedCount = structuredStats["promotedFieldCount"]?.Value<int>() ?? 0;
+                var checkboxDerivedCount = structuredStats["checkboxDerivedFieldCount"]?.Value<int>() ?? 0;
+                AddLog($"Structured key-value candidates (additive): {structuredKvCount}");
+                AddLog($"Structured fields promoted (additive): {structuredPromotedCount}");
+                AddLog($"Checkbox/radio-derived fields promoted: {checkboxDerivedCount}");
+            }
             var uniqueWordCount = (root["documentWords"] as JArray)?.Count ?? 0;
             AddLog($"Unique words (document): {uniqueWordCount}");
             AddLog($"Detected checkboxes: {totalCheckboxes}");
             AddLog($"Detected radios: {totalRadios}");
             AddLog($"Checked regions: {totalChecked}");
+
+            var regionStats = (root["warnings"] as JArray)?
+                .OfType<JObject>()
+                .Where(w => string.Equals(w["code"]?.Value<string>(), "region_detection_stats", StringComparison.OrdinalIgnoreCase))
+                .OrderBy(w => w["pageIndex"]?.Value<int>() ?? int.MaxValue)
+                .ToList() ?? [];
+            foreach (var stat in regionStats)
+            {
+                AddLog(stat["message"]?.Value<string>() ?? "Region detection stats available.");
+            }
+
+            var cleanupStats = (root["warnings"] as JArray)?
+                .OfType<JObject>()
+                .Where(w => string.Equals(w["code"]?.Value<string>(), "token_cleanup_stats", StringComparison.OrdinalIgnoreCase))
+                .OrderBy(w => w["pageIndex"]?.Value<int>() ?? int.MaxValue)
+                .ToList() ?? [];
+            foreach (var stat in cleanupStats)
+            {
+                AddLog(stat["message"]?.Value<string>() ?? "Token cleanup stats available.");
+            }
         }
         catch
         {
@@ -1068,6 +1105,113 @@ public sealed class MainViewModel : ViewModelBase
         catch
         {
             AddLog("Unable to parse page noise diagnostics from JSON.");
+        }
+    }
+
+    private void LogLineReconstructionDiagnostics(string json)
+    {
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            return;
+        }
+
+        try
+        {
+            var root = JObject.Parse(json);
+            var diagnostics = root["extensions"]?["lineReconstructionDiagnostics"] as JArray;
+            if (diagnostics is null)
+            {
+                return;
+            }
+
+            foreach (var diag in diagnostics.OfType<JObject>().OrderBy(d => d["pageIndex"]?.Value<int>() ?? int.MaxValue))
+            {
+                var pageIndex = diag["pageIndex"]?.Value<int>() ?? 0;
+                var originalLineCount = diag["originalLineCount"]?.Value<int>() ?? 0;
+                var reconstructedLineCount = diag["reconstructedLineCount"]?.Value<int>() ?? 0;
+                var tokensAssigned = diag["tokensAssigned"]?.Value<int>() ?? 0;
+                var successful = diag["successful"]?.Value<bool>() ?? false;
+                AddLog($"Line reconstruction (page {pageIndex}): original={originalLineCount}, reconstructed={reconstructedLineCount}, tokensAssigned={tokensAssigned}, success={successful}");
+            }
+        }
+        catch
+        {
+            AddLog("Unable to parse line reconstruction diagnostics from JSON.");
+        }
+    }
+
+    private void LogTokenCleanupDiagnostics(string json)
+    {
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            return;
+        }
+
+        try
+        {
+            var root = JObject.Parse(json);
+            var stats = root["extensions"]?["tokenCleanupStats"] as JArray;
+            if (stats is null)
+            {
+                return;
+            }
+
+            foreach (var item in stats.OfType<JObject>().OrderBy(s => s["pageIndex"]?.Value<int>() ?? int.MaxValue))
+            {
+                var pageIndex = item["pageIndex"]?.Value<int>() ?? 0;
+                var tokensOriginal = item["tokensOriginal"]?.Value<int>() ?? 0;
+                var tokensCleaned = item["tokensCleaned"]?.Value<int>() ?? 0;
+                var tokensModified = item["tokensModified"]?.Value<int>() ?? 0;
+                var tokensRemoved = item["tokensRemoved"]?.Value<int>() ?? 0;
+                var tokensSplit = item["tokensSplit"]?.Value<int>() ?? 0;
+                var checkboxArtifactsRemoved = item["checkboxArtifactsRemoved"]?.Value<int>() ?? 0;
+                var underlineArtifactsRemoved = item["underlineArtifactsRemoved"]?.Value<int>() ?? 0;
+                var dictionaryCorrections = item["dictionaryCorrections"]?.Value<int>() ?? 0;
+                AddLog($"Token cleanup (page {pageIndex}): raw={tokensOriginal}, cleaned={tokensCleaned}, modified={tokensModified}, removed={tokensRemoved}, split={tokensSplit}, checkboxArtifactsRemoved={checkboxArtifactsRemoved}, underlineArtifactsRemoved={underlineArtifactsRemoved}, dictionaryCorrections={dictionaryCorrections}");
+            }
+        }
+        catch
+        {
+            AddLog("Unable to parse token cleanup stats from JSON.");
+        }
+    }
+
+    private void LogPipelineStageTimings(string json)
+    {
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            return;
+        }
+
+        try
+        {
+            var root = JObject.Parse(json);
+            var timings = root["extensions"]?["pipelineStageTimings"] as JArray;
+            if (timings is null || timings.Count == 0)
+            {
+                return;
+            }
+
+            AddLog("Pipeline stage timings:");
+            foreach (var timing in timings.OfType<JObject>())
+            {
+                var stageName = timing["stageName"]?.Value<string>() ?? "Stage";
+                var durationMs = timing["durationMs"]?.Value<int>() ?? 0;
+                var status = timing["status"]?.Value<string>() ?? "completed";
+                var note = timing["note"]?.Value<string>();
+                if (string.IsNullOrWhiteSpace(note))
+                {
+                    AddLog($"  {stageName}: {durationMs} ms ({status})");
+                }
+                else
+                {
+                    AddLog($"  {stageName}: {durationMs} ms ({status}) - {note}");
+                }
+            }
+        }
+        catch
+        {
+            AddLog("Unable to parse pipeline stage timings from JSON.");
         }
     }
 
