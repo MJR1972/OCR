@@ -32,6 +32,8 @@ Developer notes:
 - [docs/OcrDllRequirements.md](docs/OcrDllRequirements.md)
 - [docs/OcrTestHarnessRequirements.md](docs/OcrTestHarnessRequirements.md)
 - [docs/OcrSystemTestCases.md](docs/OcrSystemTestCases.md)
+- [docs/OcrDllIntegrationGuide.md](docs/OcrDllIntegrationGuide.md)
+- [docs/OcrJsonContractReference.md](docs/OcrJsonContractReference.md)
 
 ## Run Smoke Runner
 ```powershell

@@ -17,7 +17,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{304F2382-3
 	ProjectSection(SolutionItems) = preProject
 		docs\InternalPipeline.md = docs\InternalPipeline.md
 		docs\JsonContract.md = docs\JsonContract.md
+		docs\OcrDllIntegrationGuide.md = docs\OcrDllIntegrationGuide.md
 		docs\OcrDllRequirements.md = docs\OcrDllRequirements.md
+		docs\OcrJsonContractReference.md = docs\OcrJsonContractReference.md
 		docs\OcrSystemTestCases.md = docs\OcrSystemTestCases.md
 		docs\OcrTestHarnessRequirements.md = docs\OcrTestHarnessRequirements.md
 		docs\Phases.md = docs\Phases.md
@@ -77,5 +79,8 @@ Global
 		{AD8DD5D0-1A96-445C-A9C4-BC8C4CF867A0} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{718F88FD-6C6B-45E3-B7D2-DFE5D719EB45} = {07C2787E-EAC7-C090-1BA3-A61EC2A24D84}
 		{2E4AB44A-F574-42A7-B41F-24B4D883817D} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1C698552-2D92-4F71-9687-88426B5C1868}
 	EndGlobalSection
 EndGlobal
