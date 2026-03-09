@@ -29,6 +29,9 @@ The DLL now uses an internal staged pipeline runner for maintainability while pr
 
 Developer notes:
 - [docs/InternalPipeline.md](docs/InternalPipeline.md)
+- [docs/OcrDllRequirements.md](docs/OcrDllRequirements.md)
+- [docs/OcrTestHarnessRequirements.md](docs/OcrTestHarnessRequirements.md)
+- [docs/OcrSystemTestCases.md](docs/OcrSystemTestCases.md)
 
 ## Run Smoke Runner
 ```powershell

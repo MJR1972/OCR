@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31903.59
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11520.95 d18.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
 EndProject
@@ -12,6 +12,16 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ocr.SmokeRunner", "tools\Ocr.SmokeRunner\Ocr.SmokeRunner.csproj", "{718F88FD-6C6B-45E3-B7D2-DFE5D719EB45}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ocr.TestHarness.Wpf", "src\Ocr.TestHarness.Wpf\Ocr.TestHarness.Wpf.csproj", "{2E4AB44A-F574-42A7-B41F-24B4D883817D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{304F2382-3470-4413-8AC0-4693D2AAAEE6}"
+	ProjectSection(SolutionItems) = preProject
+		docs\InternalPipeline.md = docs\InternalPipeline.md
+		docs\JsonContract.md = docs\JsonContract.md
+		docs\OcrDllRequirements.md = docs\OcrDllRequirements.md
+		docs\OcrSystemTestCases.md = docs\OcrSystemTestCases.md
+		docs\OcrTestHarnessRequirements.md = docs\OcrTestHarnessRequirements.md
+		docs\Phases.md = docs\Phases.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
