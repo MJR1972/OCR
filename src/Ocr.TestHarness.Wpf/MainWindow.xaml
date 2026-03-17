@@ -5,148 +5,316 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="OCR Test Harness"
-        Height="980"
-        Width="1500"
-        MinHeight="760"
-        MinWidth="1180"
+        Height="1040"
+        Width="1620"
+        MinHeight="820"
+        MinWidth="1280"
         Background="#F5F7FA">
-    <Grid Margin="18">
+    <Window.Resources>
+        <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="SurfaceMutedBrush" Color="#F8FAFC"/>
+        <SolidColorBrush x:Key="BorderBrushSoft" Color="#D9DFE8"/>
+        <SolidColorBrush x:Key="BorderBrushMuted" Color="#E2E8F0"/>
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#1E293B"/>
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#64748B"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="#334155"/>
+        <Style x:Key="CardBorderStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushSoft}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="10"/>
+        </Style>
+        <Style x:Key="SectionTitleStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        </Style>
+        <Style x:Key="CaptionStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+        </Style>
+        <Style TargetType="TabControl">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="18,0,18,18"/>
+        </Style>
+        <Style TargetType="TabItem">
+            <Setter Property="Padding" Value="14,10"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+        </Style>
+        <Style TargetType="DataGrid">
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushMuted}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+            <Setter Property="HeadersVisibility" Value="Column"/>
+            <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+            <Setter Property="RowHeaderWidth" Value="0"/>
+        </Style>
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="{StaticResource SurfaceMutedBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushMuted}"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="10,8"/>
+        </Style>
+        <Style TargetType="DataGridCell">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="10,8"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushSoft}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Padding" Value="6"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushSoft}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="Padding" Value="14,9"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style x:Key="SecondaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#E2E8F0"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="#D5DDE7"/>
+            <Setter Property="Padding" Value="12,9"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+    </Window.Resources>
+    <Grid Margin="22">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="8"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Background="White" BorderBrush="#D9DFE8" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,12">
-            <StackPanel>
-                <TextBlock Text="OCR Test Harness" FontSize="26" FontWeight="SemiBold" Foreground="#1E293B"/>
-                <TextBlock Text="Select a file, configure options, run OCR, and inspect JSON, logs, and overlays."
-                           Margin="0,6,0,0"
-                           Foreground="#475569"
-                           FontSize="13"/>
-            </StackPanel>
+        <Border Grid.Row="0" Style="{StaticResource CardBorderStyle}" Padding="22" Margin="0,0,0,14">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="420"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel>
+                    <TextBlock Text="OCR Test Harness" FontSize="30" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                    <TextBlock Text="Professional validation workspace for exercising Ocr.Core options, preview artifacts, structured output, tables, fields, and diagnostics."
+                               Margin="0,8,0,0"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               FontSize="13"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+
+                <Border Grid.Column="1" Background="{StaticResource SurfaceMutedBrush}" BorderBrush="{StaticResource BorderBrushMuted}" BorderThickness="1" CornerRadius="8" Padding="14,12">
+                    <StackPanel>
+                        <TextBlock Text="Harness Coverage" Style="{StaticResource SectionTitleStyle}"/>
+                        <TextBlock Text="{Binding OptionsCoverageSummary}" Margin="0,8,0,4" Style="{StaticResource CaptionStyle}" TextWrapping="Wrap"/>
+                        <TextBlock Text="{Binding FeatureCoverageSummary}" Style="{StaticResource CaptionStyle}" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
         </Border>
 
-        <Border Grid.Row="1" Background="White" BorderBrush="#D9DFE8" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,12">
+        <Border Grid.Row="1" Style="{StaticResource CardBorderStyle}" Padding="16" Margin="0,0,0,14">
             <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBox Grid.Column="0"
+                <TextBlock Grid.Row="0" Grid.ColumnSpan="3" Text="Run Workspace" Style="{StaticResource SectionTitleStyle}" Margin="0,0,0,12"/>
+
+                <TextBox Grid.Row="1" Grid.Column="0"
                          Text="{Binding SelectedFilePath, UpdateSourceTrigger=PropertyChanged}"
                          IsReadOnly="True"
-                         Margin="0,0,10,0"
-                         VerticalContentAlignment="Center"
-                         Padding="8"/>
+                         Margin="0,0,12,0"
+                         VerticalContentAlignment="Center"/>
 
-                <Button Grid.Column="1"
-                        Content="Browse"
-                        Width="96"
+                <Button Grid.Row="1" Grid.Column="1"
+                        Content="Browse File"
+                        Width="110"
                         Margin="0,0,10,0"
+                        Style="{StaticResource SecondaryButtonStyle}"
                         Command="{Binding BrowseFileCommand}"/>
 
-                <Button Grid.Column="2"
+                <Button Grid.Row="1" Grid.Column="2"
                         Content="{Binding RunButtonText}"
-                        Width="112"
+                        Width="120"
+                        Style="{StaticResource PrimaryButtonStyle}"
                         Command="{Binding RunOcrCommand}"/>
             </Grid>
         </Border>
 
         <Expander Grid.Row="2"
-                  Header="Options"
+                  Header="OCR Options"
                   IsExpanded="True"
-                  Background="White"
-                  BorderBrush="#D9DFE8"
+                  Background="{StaticResource SurfaceBrush}"
+                  BorderBrush="{StaticResource BorderBrushSoft}"
                   BorderThickness="1"
-                  Padding="12"
-                  Margin="0,0,0,8">
-            <Grid Margin="0,10,0,0">
+                  Padding="16"
+                  Margin="0,0,0,14">
+            <Grid Margin="0,12,0,0">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="250"/>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="40"/>
-                    <ColumnDefinition Width="250"/>
+                    <ColumnDefinition Width="18"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="18"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="Target DPI" Margin="0,5" VerticalAlignment="Center"/>
-                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding TargetDpi, UpdateSourceTrigger=LostFocus}" Margin="0,5" Padding="6"/>
+                <Border Grid.Column="0" Background="{StaticResource SurfaceMutedBrush}" BorderBrush="{StaticResource BorderBrushMuted}" BorderThickness="1" CornerRadius="8" Padding="14">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="170"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="Language" Margin="0,5" VerticalAlignment="Center"/>
-                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Language, UpdateSourceTrigger=PropertyChanged}" Margin="0,5" Padding="6"/>
+                        <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="Core OCR" Style="{StaticResource SectionTitleStyle}" Margin="0,0,0,10"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Target DPI" Style="{StaticResource CaptionStyle}" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding TargetDpi, UpdateSourceTrigger=LostFocus}" Margin="0,0,0,8"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Language" Style="{StaticResource CaptionStyle}" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Language, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8"/>
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Page Seg Mode" Style="{StaticResource CaptionStyle}" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding PageSegMode, UpdateSourceTrigger=LostFocus, TargetNullValue=''}" Margin="0,0,0,8"/>
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Engine Mode" Style="{StaticResource CaptionStyle}" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding EngineMode, UpdateSourceTrigger=LostFocus, TargetNullValue=''}" Margin="0,0,0,8"/>
+                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Profile Name" Style="{StaticResource CaptionStyle}" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding ProfileName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8"/>
+                        <TextBlock Grid.Row="6" Grid.Column="0" Text="Preserve Spaces" Style="{StaticResource CaptionStyle}" VerticalAlignment="Center"/>
+                        <CheckBox Grid.Row="6" Grid.Column="1" IsChecked="{Binding PreserveInterwordSpaces}" VerticalAlignment="Center"/>
+                    </Grid>
+                </Border>
 
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="Page Seg Mode (int?)" Margin="0,5" VerticalAlignment="Center"/>
-                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding PageSegMode, UpdateSourceTrigger=LostFocus, TargetNullValue=''}" Margin="0,5" Padding="6"/>
+                <Border Grid.Column="2" Background="{StaticResource SurfaceMutedBrush}" BorderBrush="{StaticResource BorderBrushMuted}" BorderThickness="1" CornerRadius="8" Padding="14">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="170"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Row="3" Grid.Column="0" Text="Engine Mode (int?)" Margin="0,5" VerticalAlignment="Center"/>
-                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding EngineMode, UpdateSourceTrigger=LostFocus, TargetNullValue=''}" Margin="0,5" Padding="6"/>
+                        <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="Preprocessing" Style="{StaticResource SectionTitleStyle}" Margin="0,0,0,10"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Enable Deskew" Style="{StaticResource CaptionStyle}" VerticalAlignment="Center"/>
+                        <CheckBox Grid.Row="1" Grid.Column="1" IsChecked="{Binding EnableDeskew}" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Max Deskew Degrees" Style="{StaticResource CaptionStyle}" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding MaxDeskewDegrees, UpdateSourceTrigger=LostFocus}" Margin="0,0,0,8"/>
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Deskew Angle Step" Style="{StaticResource CaptionStyle}" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding DeskewAngleStep, UpdateSourceTrigger=LostFocus}" Margin="0,0,0,8"/>
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Min Deskew Confidence" Style="{StaticResource CaptionStyle}" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding MinDeskewConfidence, UpdateSourceTrigger=LostFocus}" Margin="0,0,0,8"/>
+                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Enable Denoise" Style="{StaticResource CaptionStyle}" VerticalAlignment="Center"/>
+                        <CheckBox Grid.Row="5" Grid.Column="1" IsChecked="{Binding EnableDenoise}" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="6" Grid.Column="0" Text="Denoise Method" Style="{StaticResource CaptionStyle}" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding DenoiseMethod, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8"/>
+                        <TextBlock Grid.Row="7" Grid.Column="0" Text="Denoise Kernel" Style="{StaticResource CaptionStyle}" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding DenoiseKernel, UpdateSourceTrigger=LostFocus}" Margin="0,0,0,8"/>
+                        <TextBlock Grid.Row="8" Grid.Column="0" Text="Noise Filtering" Style="{StaticResource CaptionStyle}" VerticalAlignment="Center"/>
+                        <CheckBox Grid.Row="8" Grid.Column="1" IsChecked="{Binding EnableNoiseFiltering}" VerticalAlignment="Center"/>
+                    </Grid>
+                </Border>
 
-                <TextBlock Grid.Row="4" Grid.Column="0" Text="Max Deskew Degrees" Margin="0,5" VerticalAlignment="Center"/>
-                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding MaxDeskewDegrees, UpdateSourceTrigger=LostFocus}" Margin="0,5" Padding="6"/>
+                <Border Grid.Column="4" Background="{StaticResource SurfaceMutedBrush}" BorderBrush="{StaticResource BorderBrushMuted}" BorderThickness="1" CornerRadius="8" Padding="14">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="170"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Row="5" Grid.Column="0" Text="Output Folder" Margin="0,5" VerticalAlignment="Center"/>
-                <Grid Grid.Row="5" Grid.Column="1" Margin="0,5">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBox Grid.Column="0" Text="{Binding OutputFolder, UpdateSourceTrigger=PropertyChanged}" Padding="6" Margin="0,0,8,0"/>
-                    <Button Grid.Column="1" Content="Browse" Width="92" Command="{Binding BrowseOutputFolderCommand}"/>
-                </Grid>
-
-                <TextBlock Grid.Row="6" Grid.Column="0" Text="Profile Name" Margin="0,5" VerticalAlignment="Center"/>
-                <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding ProfileName, UpdateSourceTrigger=PropertyChanged}" Margin="0,5" Padding="6"/>
-
-                <TextBlock Grid.Row="0" Grid.Column="3" Text="Enable Deskew" Margin="0,5" VerticalAlignment="Center"/>
-                <CheckBox Grid.Row="0" Grid.Column="4" IsChecked="{Binding EnableDeskew}" Margin="0,5"/>
-
-                <TextBlock Grid.Row="1" Grid.Column="3" Text="Preserve Interword Spaces" Margin="0,5" VerticalAlignment="Center"/>
-                <CheckBox Grid.Row="1" Grid.Column="4" IsChecked="{Binding PreserveInterwordSpaces}" Margin="0,5"/>
-
-                <TextBlock Grid.Row="2" Grid.Column="3" Text="Enable Denoise" Margin="0,5" VerticalAlignment="Center"/>
-                <CheckBox Grid.Row="2" Grid.Column="4" IsChecked="{Binding EnableDenoise}" Margin="0,5"/>
-
-                <TextBlock Grid.Row="3" Grid.Column="3" Text="Enable Binarization" Margin="0,5" VerticalAlignment="Center"/>
-                <CheckBox Grid.Row="3" Grid.Column="4" IsChecked="{Binding EnableBinarization}" Margin="0,5"/>
-
-                <TextBlock Grid.Row="4" Grid.Column="3" Text="Enable Contrast Enhancement" Margin="0,5" VerticalAlignment="Center"/>
-                <CheckBox Grid.Row="4" Grid.Column="4" IsChecked="{Binding EnableContrastEnhancement}" Margin="0,5"/>
-
-                <TextBlock Grid.Row="5" Grid.Column="3" Text="Save Debug Artifacts" Margin="0,5" VerticalAlignment="Center"/>
-                <CheckBox Grid.Row="5" Grid.Column="4" IsChecked="{Binding SaveDebugArtifacts}" Margin="0,5"/>
-
-                <TextBlock Grid.Row="6" Grid.Column="3" Text="Save Token Overlay" Margin="0,5" VerticalAlignment="Center"/>
-                <CheckBox Grid.Row="6" Grid.Column="4" IsChecked="{Binding SaveTokenOverlay}" Margin="0,5"/>
-
-                <TextBlock Grid.Row="7" Grid.Column="3" Text="Enable Noise Filtering" Margin="0,5" VerticalAlignment="Center"/>
-                <CheckBox Grid.Row="7" Grid.Column="4" IsChecked="{Binding EnableNoiseFiltering}" Margin="0,5"/>
+                        <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="Artifacts And Output" Style="{StaticResource SectionTitleStyle}" Margin="0,0,0,10"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Enable Binarization" Style="{StaticResource CaptionStyle}" VerticalAlignment="Center"/>
+                        <CheckBox Grid.Row="1" Grid.Column="1" IsChecked="{Binding EnableBinarization}" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Binarization Method" Style="{StaticResource CaptionStyle}" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding BinarizationMethod, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8"/>
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Contrast Enhancement" Style="{StaticResource CaptionStyle}" VerticalAlignment="Center"/>
+                        <CheckBox Grid.Row="3" Grid.Column="1" IsChecked="{Binding EnableContrastEnhancement}" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Contrast Method" Style="{StaticResource CaptionStyle}" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding ContrastMethod, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,8"/>
+                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Save JSON To Disk" Style="{StaticResource CaptionStyle}" VerticalAlignment="Center"/>
+                        <CheckBox Grid.Row="5" Grid.Column="1" IsChecked="{Binding SaveJsonToDisk}" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="6" Grid.Column="0" Text="Save Debug Artifacts" Style="{StaticResource CaptionStyle}" VerticalAlignment="Center"/>
+                        <CheckBox Grid.Row="6" Grid.Column="1" IsChecked="{Binding SaveDebugArtifacts}" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="7" Grid.Column="0" Text="Save Token Overlay" Style="{StaticResource CaptionStyle}" VerticalAlignment="Center"/>
+                        <CheckBox Grid.Row="7" Grid.Column="1" IsChecked="{Binding SaveTokenOverlay}" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="8" Grid.Column="0" Text="Output Folder" Style="{StaticResource CaptionStyle}" VerticalAlignment="Center"/>
+                        <Grid Grid.Row="8" Grid.Column="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" Text="{Binding OutputFolder, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
+                            <Button Grid.Column="1" Content="Browse" Width="86" Style="{StaticResource SecondaryButtonStyle}" Command="{Binding BrowseOutputFolderCommand}"/>
+                        </Grid>
+                    </Grid>
+                </Border>
             </Grid>
         </Expander>
 
-        <GridSplitter Grid.Row="3" Height="8" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="#D9DFE8"/>
+        <Border Grid.Row="3" Style="{StaticResource CardBorderStyle}" Padding="14" Margin="0,0,0,14">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="Run Status" Style="{StaticResource SectionTitleStyle}"/>
+                    <TextBlock Text="{Binding StatusMessage}" Margin="0,6,0,0" Style="{StaticResource CaptionStyle}" TextWrapping="Wrap"/>
+                </StackPanel>
+                <TextBlock Grid.Column="1"
+                           Text="{Binding OutputJsonPath, StringFormat=Output JSON: {0}}"
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           Margin="18,0,0,0"
+                           VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis"/>
+            </Grid>
+        </Border>
 
-        <TextBlock Grid.Row="4"
-                   Text="{Binding OutputJsonPath, StringFormat=Output JSON: {0}}"
-                   Foreground="#475569"
-                   Margin="2,4,0,8"/>
-
-        <TabControl Grid.Row="5" Background="White" BorderBrush="#D9DFE8" BorderThickness="1">
+        <Border Grid.Row="4" Style="{StaticResource CardBorderStyle}">
+        <TabControl>
             <TabItem Header="Summary">
                 <Grid Margin="14">
                     <Grid.RowDefinitions>
@@ -500,131 +668,159 @@
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="170"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="140"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="170"/>
                             </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Row="0" Text="Selected Table" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,8"/>
-                            <Grid Grid.Row="1" Margin="0,0,0,10">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="220"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="220"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0"
+                                       Text="Selected Table"
+                                       FontWeight="SemiBold"
+                                       FontSize="14"
+                                       Margin="0,0,0,8"/>
 
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Table Id" Foreground="#475569"/>
-                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedTableId}"/>
-                                <TextBlock Grid.Row="0" Grid.Column="2" Text="Page Index" Foreground="#475569"/>
-                                <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding SelectedTablePageIndex}"/>
-
-                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Method" Foreground="#475569"/>
-                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedTableMethod}"/>
-                                <TextBlock Grid.Row="1" Grid.Column="2" Text="Explicit Gridlines" Foreground="#475569"/>
-                                <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding SelectedTableHasExplicitGridLines}"/>
-
-                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Confidence" Foreground="#475569"/>
-                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedTableConfidence, StringFormat={}{0:F3}}"/>
-                                <TextBlock Grid.Row="2" Grid.Column="2" Text="Coverage Ratio" Foreground="#475569"/>
-                                <TextBlock Grid.Row="2" Grid.Column="3" Text="{Binding SelectedTableTokenCoverageRatio, StringFormat={}{0:F3}}"/>
-
-                                <TextBlock Grid.Row="3" Grid.Column="0" Text="BBox" Foreground="#475569"/>
-                                <TextBlock Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding SelectedTableBboxText}" TextTrimming="CharacterEllipsis"/>
-
-                                <TextBlock Grid.Row="4" Grid.Column="0" Text="Table Overlay" Foreground="#475569"/>
-                                <TextBlock Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding SelectedTableOverlayPath}" TextTrimming="CharacterEllipsis"/>
-                            </Grid>
-
-                            <TextBlock Grid.Row="2" Text="{Binding TablesStatusMessage}" Foreground="#64748B" Margin="0,0,0,6"/>
-
-                            <Border Grid.Row="3" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="6" Margin="0,0,0,10">
+                            <ScrollViewer Grid.Row="1"
+                                          VerticalScrollBarVisibility="Auto"
+                                          HorizontalScrollBarVisibility="Disabled"
+                                          CanContentScroll="False"
+                                          PanningMode="VerticalOnly">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="170"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="140"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="170"/>
                                     </Grid.RowDefinitions>
-                                    <TextBlock Grid.Row="0" Text="Extracted Table Rows" FontWeight="SemiBold" Margin="0,0,0,6"/>
-                                    <DataGrid Grid.Row="1"
-                                              ItemsSource="{Binding SelectedTableDisplayRows}"
-                                              AutoGenerateColumns="True"
+
+                                    <Grid Grid.Row="0" Margin="0,0,0,10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="220"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="220"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Table Id" Foreground="#475569"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedTableId}"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Page Index" Foreground="#475569"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding SelectedTablePageIndex}"/>
+
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Method" Foreground="#475569"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedTableMethod}"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="2" Text="Explicit Gridlines" Foreground="#475569"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding SelectedTableHasExplicitGridLines}"/>
+
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Confidence" Foreground="#475569"/>
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedTableConfidence, StringFormat={}{0:F3}}"/>
+                                        <TextBlock Grid.Row="2" Grid.Column="2" Text="Coverage Ratio" Foreground="#475569"/>
+                                        <TextBlock Grid.Row="2" Grid.Column="3" Text="{Binding SelectedTableTokenCoverageRatio, StringFormat={}{0:F3}}"/>
+
+                                        <TextBlock Grid.Row="3" Grid.Column="0" Text="BBox" Foreground="#475569"/>
+                                        <TextBlock Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding SelectedTableBboxText}" TextTrimming="CharacterEllipsis"/>
+
+                                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Table Overlay" Foreground="#475569"/>
+                                        <TextBlock Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding SelectedTableOverlayPath}" TextTrimming="CharacterEllipsis"/>
+                                    </Grid>
+
+                                    <TextBlock Grid.Row="1" Text="{Binding TablesStatusMessage}" Foreground="#64748B" Margin="0,0,0,6"/>
+
+                                    <Border Grid.Row="2" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,0,0,10" Background="#FAFBFD">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="*"/>
+                                            </Grid.RowDefinitions>
+                                            <TextBlock Grid.Row="0" Text="Visual Table Preview" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                            <TextBlock Grid.Row="1"
+                                                       Text="{Binding SelectedTableDisplayStatus}"
+                                                       Foreground="#64748B"
+                                                       FontSize="12"
+                                                       Margin="0,0,0,8"/>
+                                            <DataGrid Grid.Row="2"
+                                                      ItemsSource="{Binding SelectedTableDisplayView}"
+                                                      AutoGenerateColumns="True"
+                                                      CanUserAddRows="False"
+                                                      IsReadOnly="True"
+                                                      HeadersVisibility="Column"
+                                                      GridLinesVisibility="Horizontal"
+                                                      RowHeaderWidth="0"
+                                                      MinHeight="140"
+                                                      MaxHeight="260"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                                      ScrollViewer.HorizontalScrollBarVisibility="Auto"/>
+                                        </Grid>
+                                    </Border>
+
+                                    <TextBlock Grid.Row="3" Text="Header Columns" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                                    <DataGrid Grid.Row="4"
+                                              ItemsSource="{Binding SelectedTableHeaderColumns}"
+                                              AutoGenerateColumns="False"
                                               CanUserAddRows="False"
                                               IsReadOnly="True"
                                               HeadersVisibility="Column"
                                               GridLinesVisibility="Horizontal"
-                                              RowHeaderWidth="0"/>
+                                              RowHeaderWidth="0">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="Col" Binding="{Binding ColIndex}" Width="60"/>
+                                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="220"/>
+                                            <DataGridTextColumn Header="Key" Binding="{Binding Key}" Width="220"/>
+                                            <DataGridTextColumn Header="Conf." Binding="{Binding Confidence, StringFormat={}{0:F3}}" Width="90"/>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+
+                                    <TextBlock Grid.Row="5" Text="Raw Header Cells" FontWeight="SemiBold" Margin="0,10,0,6"/>
+                                    <DataGrid Grid.Row="6"
+                                              ItemsSource="{Binding SelectedTableHeaderCells}"
+                                              AutoGenerateColumns="False"
+                                              CanUserAddRows="False"
+                                              IsReadOnly="True"
+                                              HeadersVisibility="Column"
+                                              GridLinesVisibility="Horizontal"
+                                              RowHeaderWidth="0">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="Row" Binding="{Binding RowIndex}" Width="60"/>
+                                            <DataGridTextColumn Header="Col" Binding="{Binding ColIndex}" Width="60"/>
+                                            <DataGridTextColumn Header="Text" Binding="{Binding Text}" Width="*"/>
+                                            <DataGridTextColumn Header="Conf." Binding="{Binding Confidence, StringFormat={}{0:F3}}" Width="90"/>
+                                            <DataGridTextColumn Header="Tokens" Binding="{Binding TokenCount}" Width="80"/>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+
+                                    <TextBlock Grid.Row="7" Text="Raw Cells" FontWeight="SemiBold" Margin="0,10,0,6"/>
+                                    <DataGrid Grid.Row="8"
+                                              ItemsSource="{Binding SelectedTableRawCells}"
+                                              AutoGenerateColumns="False"
+                                              CanUserAddRows="False"
+                                              IsReadOnly="True"
+                                              HeadersVisibility="Column"
+                                              GridLinesVisibility="Horizontal"
+                                              RowHeaderWidth="0">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="Row" Binding="{Binding RowIndex}" Width="60"/>
+                                            <DataGridTextColumn Header="Col" Binding="{Binding ColIndex}" Width="60"/>
+                                            <DataGridTextColumn Header="Text" Binding="{Binding Text}" Width="*"/>
+                                            <DataGridTextColumn Header="Conf." Binding="{Binding Confidence, StringFormat={}{0:F3}}" Width="90"/>
+                                            <DataGridTextColumn Header="Tokens" Binding="{Binding TokenCount}" Width="80"/>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
                                 </Grid>
-                            </Border>
-
-                            <TextBlock Grid.Row="4" Text="Header Columns" FontWeight="SemiBold" Margin="0,0,0,6"/>
-                            <DataGrid Grid.Row="5"
-                                      ItemsSource="{Binding SelectedTableHeaderColumns}"
-                                      AutoGenerateColumns="False"
-                                      CanUserAddRows="False"
-                                      IsReadOnly="True"
-                                      HeadersVisibility="Column"
-                                      GridLinesVisibility="Horizontal"
-                                      RowHeaderWidth="0">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Col" Binding="{Binding ColIndex}" Width="60"/>
-                                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="220"/>
-                                    <DataGridTextColumn Header="Key" Binding="{Binding Key}" Width="220"/>
-                                    <DataGridTextColumn Header="Conf." Binding="{Binding Confidence, StringFormat={}{0:F3}}" Width="90"/>
-                                </DataGrid.Columns>
-                            </DataGrid>
-
-                            <TextBlock Grid.Row="6" Text="Raw Header Cells" FontWeight="SemiBold" Margin="0,10,0,6"/>
-                            <DataGrid Grid.Row="7"
-                                      ItemsSource="{Binding SelectedTableHeaderCells}"
-                                      AutoGenerateColumns="False"
-                                      CanUserAddRows="False"
-                                      IsReadOnly="True"
-                                      HeadersVisibility="Column"
-                                      GridLinesVisibility="Horizontal"
-                                      RowHeaderWidth="0">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Row" Binding="{Binding RowIndex}" Width="60"/>
-                                    <DataGridTextColumn Header="Col" Binding="{Binding ColIndex}" Width="60"/>
-                                    <DataGridTextColumn Header="Text" Binding="{Binding Text}" Width="*"/>
-                                    <DataGridTextColumn Header="Conf." Binding="{Binding Confidence, StringFormat={}{0:F3}}" Width="90"/>
-                                    <DataGridTextColumn Header="Tokens" Binding="{Binding TokenCount}" Width="80"/>
-                                </DataGrid.Columns>
-                            </DataGrid>
-
-                            <TextBlock Grid.Row="8" Text="Raw Cells" FontWeight="SemiBold" Margin="0,10,0,6"/>
-                            <DataGrid Grid.Row="9"
-                                      ItemsSource="{Binding SelectedTableRawCells}"
-                                      AutoGenerateColumns="False"
-                                      CanUserAddRows="False"
-                                      IsReadOnly="True"
-                                      HeadersVisibility="Column"
-                                      GridLinesVisibility="Horizontal"
-                                      RowHeaderWidth="0">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Row" Binding="{Binding RowIndex}" Width="60"/>
-                                    <DataGridTextColumn Header="Col" Binding="{Binding ColIndex}" Width="60"/>
-                                    <DataGridTextColumn Header="Text" Binding="{Binding Text}" Width="*"/>
-                                    <DataGridTextColumn Header="Conf." Binding="{Binding Confidence, StringFormat={}{0:F3}}" Width="90"/>
-                                    <DataGridTextColumn Header="Tokens" Binding="{Binding TokenCount}" Width="80"/>
-                                </DataGrid.Columns>
-                            </DataGrid>
+                            </ScrollViewer>
                         </Grid>
                     </Border>
                 </Grid>
             </TabItem>
         </TabControl>
+        </Border>
     </Grid>
 </Window>

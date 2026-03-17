@@ -171,94 +171,133 @@ public sealed class LayoutTableDetector : ITableDetector
         var rowBands = rows.Select((r, idx) => new TableRowBandInfo
         {
             RowIndex = idx,
-            Type = idx == 0 ? "header" : "data",
+            Type = "data",
             Bbox = r.Line.Bbox
         }).ToList();
 
-        var headerRow = rows[0];
-        var isWeakHeader = !IsHeaderLikely(headerRow, rows.Skip(1).ToList());
-
         var headerColumns = new List<TableHeaderColumnInfo>();
         var headerCells = new List<TableHeaderCellInfo>();
-        var columnKeys = BuildColumnKeys(headerRow, colBands);
-        var totalCellTokenAssignments = 0;
-
-        for (var c = 0; c < colBands.Count; c++)
-        {
-            var cellTokens = TokensInColumn(headerRow.Tokens, colBands[c]);
-            totalCellTokenAssignments += cellTokens.Count;
-            var text = string.Join(' ', cellTokens.Select(t => t.Text));
-            var bbox = cellTokens.Count == 0 ? colBands[c].Bbox : Union(cellTokens.Select(t => t.Bbox));
-            var confidence = cellTokens.Count == 0 ? 0 : cellTokens.Average(t => t.Confidence);
-
-            headerColumns.Add(new TableHeaderColumnInfo
-            {
-                ColIndex = c,
-                Name = text,
-                Key = columnKeys[c],
-                Bbox = bbox,
-                Confidence = confidence
-            });
-
-            headerCells.Add(new TableHeaderCellInfo
-            {
-                RowIndex = 0,
-                ColIndex = c,
-                RowSpan = 1,
-                ColSpan = 1,
-                Text = text,
-                Confidence = confidence,
-                Bbox = bbox,
-                TokenIds = cellTokens.Select(t => t.Id).ToList()
-            });
-        }
-
         var dataCells = new List<TableCellInfo>();
         var dataRows = new List<TableRowInfo>();
+        var tokenIdsInCells = new HashSet<string>(StringComparer.Ordinal);
+        var totalCellTokenAssignments = 0;
+        var candidateRows = new List<TableCellCandidateRow>(rows.Count);
 
-        for (var rowIdx = 1; rowIdx < rows.Count; rowIdx++)
+        for (var rowIdx = 0; rowIdx < rows.Count; rowIdx++)
         {
             var row = rows[rowIdx];
-            var rowCellRefs = new List<TableCellRefInfo>();
-            var rowValues = new Dictionary<string, object?>();
-            var rowConfidences = new List<double>();
-
+            var candidates = new List<TableCellCandidate>(colBands.Count);
             for (var c = 0; c < colBands.Count; c++)
             {
                 var cellTokens = TokensInColumn(row.Tokens, colBands[c]);
                 totalCellTokenAssignments += cellTokens.Count;
-                var text = string.Join(' ', cellTokens.Select(t => t.Text));
-                var bbox = cellTokens.Count == 0 ? Intersect(row.Line.Bbox, colBands[c].Bbox) : Union(cellTokens.Select(t => t.Bbox));
-                var confidence = cellTokens.Count == 0 ? 0 : cellTokens.Average(t => t.Confidence);
-                var normalized = NormalizeValue(text);
+                candidates.Add(new TableCellCandidate(
+                    rowIdx,
+                    c,
+                    TableParsingHeuristics.CleanCellText(string.Join(' ', cellTokens.Select(t => t.Text))),
+                    cellTokens.Count == 0 ? 0 : cellTokens.Average(t => t.Confidence),
+                    cellTokens.Count == 0 ? Intersect(row.Line.Bbox, colBands[c].Bbox) : Union(cellTokens.Select(t => t.Bbox)),
+                    cellTokens.Select(t => t.Id).ToList()));
+            }
 
-                var cell = new TableCellInfo
+            candidateRows.Add(new TableCellCandidateRow(rowIdx, row.Line.Bbox, candidates));
+        }
+
+        var rowTexts = candidateRows
+            .Select(row => (IReadOnlyList<string>)row.Cells.Select(cell => cell.Text).ToList())
+            .ToList();
+        var headerRowIndex = TableParsingHeuristics.SelectHeaderRowIndex(rowTexts);
+        var headerStrength = TableParsingHeuristics.GetHeaderStrength(rowTexts, headerRowIndex);
+        var columnNames = TableParsingHeuristics.BuildColumnNames(rowTexts, headerRowIndex, colBands.Count);
+        var columnKeys = BuildColumnKeys(columnNames);
+        var removedNoiseRows = 0;
+
+        foreach (var row in candidateRows)
+        {
+            var rowType = TableParsingHeuristics.ClassifyRow(rowTexts, row.RowIndex, headerRowIndex);
+            rowBands[row.RowIndex].Type = rowType;
+
+            if (string.Equals(rowType, "noise", StringComparison.Ordinal))
+            {
+                removedNoiseRows++;
+                continue;
+            }
+
+            if (string.Equals(rowType, "header", StringComparison.Ordinal))
+            {
+                for (var c = 0; c < row.Cells.Count; c++)
                 {
-                    RowIndex = rowIdx,
+                    var cell = row.Cells[c];
+                    foreach (var tokenId in cell.TokenIds)
+                    {
+                        tokenIdsInCells.Add(tokenId);
+                    }
+
+                    var headerName = string.IsNullOrWhiteSpace(cell.Text) ? columnNames[c] : cell.Text;
+                    headerColumns.Add(new TableHeaderColumnInfo
+                    {
+                        ColIndex = c,
+                        Name = headerName,
+                        Key = columnKeys[c],
+                        Bbox = cell.Bbox,
+                        Confidence = cell.Confidence
+                    });
+
+                    headerCells.Add(new TableHeaderCellInfo
+                    {
+                        RowIndex = row.RowIndex,
+                        ColIndex = c,
+                        RowSpan = 1,
+                        ColSpan = 1,
+                        Text = headerName,
+                        Confidence = cell.Confidence,
+                        Bbox = cell.Bbox,
+                        TokenIds = [.. cell.TokenIds]
+                    });
+                }
+
+                continue;
+            }
+
+            var rowCellRefs = new List<TableCellRefInfo>();
+            var rowValues = new Dictionary<string, object?>();
+            var rowConfidences = new List<double>();
+
+            for (var c = 0; c < row.Cells.Count; c++)
+            {
+                var cell = row.Cells[c];
+                foreach (var tokenId in cell.TokenIds)
+                {
+                    tokenIdsInCells.Add(tokenId);
+                }
+
+                var normalized = NormalizeValue(cell.Text);
+                dataCells.Add(new TableCellInfo
+                {
+                    RowIndex = row.RowIndex,
                     ColIndex = c,
                     RowSpan = 1,
                     ColSpan = 1,
-                    Text = text,
+                    Text = cell.Text,
                     Normalized = normalized,
-                    Confidence = confidence,
-                    Bbox = bbox,
-                    TokenIds = cellTokens.Select(t => t.Id).ToList(),
-                    IsLowConfidence = confidence < page.Quality.MeanTokenConfidence && confidence < 0.75
-                };
+                    Confidence = cell.Confidence,
+                    Bbox = cell.Bbox,
+                    TokenIds = [.. cell.TokenIds],
+                    IsLowConfidence = cell.Confidence < page.Quality.MeanTokenConfidence && cell.Confidence < 0.75
+                });
 
-                dataCells.Add(cell);
-                rowCellRefs.Add(new TableCellRefInfo { RowIndex = rowIdx, ColIndex = c });
+                rowCellRefs.Add(new TableCellRefInfo { RowIndex = row.RowIndex, ColIndex = c });
                 rowValues[columnKeys[c]] = normalized.Value;
-                if (confidence > 0)
+                if (cell.Confidence > 0)
                 {
-                    rowConfidences.Add(confidence);
+                    rowConfidences.Add(cell.Confidence);
                 }
             }
 
             dataRows.Add(new TableRowInfo
             {
-                RowIndex = rowIdx,
-                Type = "data",
+                RowIndex = row.RowIndex,
+                Type = rowType,
                 Values = rowValues,
                 Source = new TableRowSourceInfo { CellRefs = rowCellRefs },
                 Confidence = rowConfidences.Count == 0 ? 0 : rowConfidences.Average(),
@@ -273,7 +312,12 @@ public sealed class LayoutTableDetector : ITableDetector
         {
             return null;
         }
-        var tokenCountInCells = dataCells.SelectMany(c => c.TokenIds).Concat(headerCells.SelectMany(c => c.TokenIds)).Distinct().Count();
+        if (dataRows.Count == 0)
+        {
+            return null;
+        }
+
+        var tokenCountInCells = tokenIdsInCells.Count;
         var overlappingTokens = page.Tokens.Count(t => Overlaps(t.Bbox, tableBbox));
         var coverageRatio = overlappingTokens == 0 ? 0 : (double)tokenCountInCells / overlappingTokens;
 
@@ -283,9 +327,19 @@ public sealed class LayoutTableDetector : ITableDetector
             issues.Add(new IssueInfo { Code = "low_coverage", Severity = "warning", Message = "Table cell coverage is low." });
         }
 
-        if (isWeakHeader)
+        if (headerStrength < 0.45)
         {
             issues.Add(new IssueInfo { Code = "weak_header_detection", Severity = "warning", Message = "Header detection confidence is weak." });
+        }
+
+        if (removedNoiseRows > 0)
+        {
+            issues.Add(new IssueInfo
+            {
+                Code = "artifact_rows_removed",
+                Severity = "info",
+                Message = $"Removed {removedNoiseRows} row(s) classified as OCR noise or border artifacts."
+            });
         }
 
         var medianCols = rows.Select(r => r.Tokens.Count).OrderBy(x => x).ElementAt(rows.Count / 2);
@@ -299,7 +353,7 @@ public sealed class LayoutTableDetector : ITableDetector
             issues.Add(new IssueInfo { Code = "sparse_table_candidate", Severity = "warning", Message = "Detected table candidate is sparse." });
         }
 
-        var tableConfidence = Math.Clamp((coverageRatio * 0.55) + (isWeakHeader ? 0.15 : 0.3) + (Math.Min(1.0, rows.Count / 8.0) * 0.15), 0, 1);
+        var tableConfidence = Math.Clamp((coverageRatio * 0.55) + (headerStrength < 0.45 ? 0.15 : 0.3) + (Math.Min(1.0, rows.Count / 8.0) * 0.15), 0, 1);
 
         var table = new TableInfo
         {
@@ -309,7 +363,12 @@ public sealed class LayoutTableDetector : ITableDetector
             Detection = new TableDetectionInfo
             {
                 Method = "layout",
-                HasExplicitGridLines = false
+                HasExplicitGridLines = false,
+                Notes =
+                [
+                    headerRowIndex == 0 ? "Header row selected from first detected row." : $"Header row selected from detected row {headerRowIndex}.",
+                    removedNoiseRows > 0 ? $"Removed {removedNoiseRows} artifact row(s) from structured output." : "No artifact rows removed."
+                ]
             },
             Grid = new TableGridInfo
             {
@@ -320,7 +379,7 @@ public sealed class LayoutTableDetector : ITableDetector
             },
             Header = new TableHeaderInfo
             {
-                RowIndex = 0,
+                RowIndex = headerRowIndex,
                 Columns = headerColumns,
                 Cells = headerCells
             },
@@ -502,21 +561,14 @@ public sealed class LayoutTableDetector : ITableDetector
         return (double)numeric / tokens.Count;
     }
 
-    private static List<string> BuildColumnKeys(LineRow headerRow, List<ColumnBand> colBands)
+    private static List<string> BuildColumnKeys(IReadOnlyList<string> columnNames)
     {
-        var keys = new List<string>(colBands.Count);
+        var keys = new List<string>(columnNames.Count);
         var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        for (var c = 0; c < colBands.Count; c++)
+        for (var c = 0; c < columnNames.Count; c++)
         {
-            var headerTokens = TokensInColumn(headerRow.Tokens, colBands[c]);
-            var rawName = string.Join(' ', headerTokens.Select(t => t.Text)).Trim();
-            if (string.IsNullOrWhiteSpace(rawName))
-            {
-                rawName = $"Column {c + 1}";
-            }
-
-            var baseKey = ToSnakeCase(rawName);
+            var baseKey = ToSnakeCase(columnNames[c]);
             if (string.IsNullOrWhiteSpace(baseKey))
             {
                 baseKey = $"col_{c + 1}";
@@ -607,6 +659,19 @@ public sealed class LayoutTableDetector : ITableDetector
             H = y2 - y1
         };
     }
+
+    private sealed record TableCellCandidate(
+        int RowIndex,
+        int ColIndex,
+        string Text,
+        double Confidence,
+        BboxInfo Bbox,
+        List<string> TokenIds);
+
+    private sealed record TableCellCandidateRow(
+        int RowIndex,
+        BboxInfo Bbox,
+        List<TableCellCandidate> Cells);
 
     private sealed class LineRow
     {

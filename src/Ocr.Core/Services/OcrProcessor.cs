@@ -44,6 +44,8 @@ public sealed class OcrProcessor : IOcrProcessor
     private const double NoiseWarningRatioThreshold = 0.2;
     private const int FilteredTokenWarningThreshold = 25;
     private static readonly Regex SymbolLikeRegex = new(@"^[\p{P}\p{S}]+$", RegexOptions.Compiled);
+    private static readonly Regex TableArtifactRegex = new(@"[\|\}\{\]\[¦]+", RegexOptions.Compiled);
+    private static readonly Regex NumericLikeRegex = new(@"^[\$€£]?\s*[-+]?\d[\d,\.\s]*%?$", RegexOptions.Compiled);
 
     public OcrProcessor()
         : this(new HybridTableDetector(), new GeometryLineReconstructor(), new OpenCvRegionDetector(), new TokenCleanupService(), new HeuristicKeyValueExtractor(), new HeuristicFieldRecognizer(), new StructuredFieldExtractor())
@@ -298,6 +300,7 @@ public sealed class OcrProcessor : IOcrProcessor
                             BlankPage = string.IsNullOrWhiteSpace(layout.FullText)
                         }
                     }, preprocessResult.ProcessedMat));
+                RefineDetectedTables(engine, preprocessResult.ProcessedMat, tableDetection.Tables);
                 tableSw.Stop();
                 pageTiming.TableDetectMs = (int)tableSw.ElapsedMilliseconds;
 
@@ -1132,6 +1135,462 @@ public sealed class OcrProcessor : IOcrProcessor
 
         return words;
     }
+
+    private static void RefineDetectedTables(TesseractEngine engine, Mat processedMat, IReadOnlyList<TableInfo> tables)
+    {
+        foreach (var table in tables)
+        {
+            RefineTableHeader(engine, processedMat, table);
+            RefineTableCells(engine, processedMat, table);
+            RebuildTableRows(table);
+        }
+    }
+
+    private static void RefineTableHeader(TesseractEngine engine, Mat processedMat, TableInfo table)
+    {
+        var refinedNames = new List<string>(table.Header.Columns.Count);
+
+        foreach (var headerCell in table.Header.Cells.OrderBy(cell => cell.ColIndex))
+        {
+            var originalText = TableParsingHeuristics.CleanCellText(headerCell.Text);
+            var refined = RefineCellText(engine, processedMat, headerCell.Bbox, originalText, isHeader: true, expectedNumeric: false);
+            var finalText = ChooseRefinedText(originalText, refined.Text, isHeader: true, expectedNumeric: false);
+            finalText = TableParsingHeuristics.CleanCellText(finalText);
+
+            if (string.IsNullOrWhiteSpace(finalText))
+            {
+                finalText = $"Column {headerCell.ColIndex + 1}";
+            }
+
+            headerCell.Text = finalText;
+            headerCell.Confidence = Math.Max(headerCell.Confidence, refined.Confidence);
+            refinedNames.Add(finalText);
+        }
+
+        var columnKeys = BuildUniqueColumnKeys(refinedNames);
+        for (var index = 0; index < table.Header.Columns.Count; index++)
+        {
+            var column = table.Header.Columns[index];
+            var displayName = index < refinedNames.Count ? refinedNames[index] : $"Column {index + 1}";
+            column.Name = displayName;
+            column.Key = columnKeys[index];
+            column.Confidence = Math.Max(column.Confidence, table.Header.Cells.FirstOrDefault(cell => cell.ColIndex == column.ColIndex)?.Confidence ?? column.Confidence);
+        }
+    }
+
+    private static void RefineTableCells(TesseractEngine engine, Mat processedMat, TableInfo table)
+    {
+        var headerByCol = table.Header.Columns.ToDictionary(column => column.ColIndex);
+
+        foreach (var cell in table.Cells)
+        {
+            var originalText = TableParsingHeuristics.CleanCellText(cell.Text);
+            var expectedNumeric = IsExpectedNumericColumn(headerByCol.GetValueOrDefault(cell.ColIndex)?.Name, originalText, cell.Normalized);
+            var shouldRefine = cell.IsLowConfidence || expectedNumeric || ContainsTableArtifacts(originalText);
+            if (!shouldRefine)
+            {
+                cell.Text = originalText;
+                continue;
+            }
+
+            var refined = RefineCellText(engine, processedMat, cell.Bbox, originalText, isHeader: false, expectedNumeric: expectedNumeric);
+            var finalText = ChooseRefinedText(originalText, refined.Text, isHeader: false, expectedNumeric: expectedNumeric);
+            finalText = PostProcessTableCellText(finalText, expectedNumeric);
+
+            if (string.IsNullOrWhiteSpace(finalText))
+            {
+                finalText = originalText;
+            }
+
+            cell.Text = finalText;
+            cell.Confidence = Math.Max(cell.Confidence, refined.Confidence);
+            cell.Normalized = NormalizeTableCellValue(finalText);
+            cell.IsLowConfidence = cell.Confidence > 0 && cell.Confidence < 0.75;
+        }
+    }
+
+    private static void RebuildTableRows(TableInfo table)
+    {
+        var headerByCol = table.Header.Columns
+            .OrderBy(column => column.ColIndex)
+            .ToDictionary(column => column.ColIndex);
+        var cellsByRow = table.Cells
+            .GroupBy(cell => cell.RowIndex)
+            .ToDictionary(group => group.Key, group => group.OrderBy(cell => cell.ColIndex).ToList());
+
+        foreach (var row in table.Rows)
+        {
+            if (!cellsByRow.TryGetValue(row.RowIndex, out var rowCells))
+            {
+                continue;
+            }
+
+            var values = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
+            var confidences = new List<double>();
+
+            foreach (var cell in rowCells)
+            {
+                if (!headerByCol.TryGetValue(cell.ColIndex, out var header))
+                {
+                    continue;
+                }
+
+                values[header.Key] = cell.Normalized.Value;
+                if (cell.Confidence > 0)
+                {
+                    confidences.Add(cell.Confidence);
+                }
+            }
+
+            row.Values = values;
+            row.Confidence = confidences.Count == 0 ? row.Confidence : confidences.Average();
+            row.IsLowConfidence = row.Confidence > 0 && row.Confidence < 0.75;
+        }
+    }
+
+    private static RefinedCellResult RefineCellText(
+        TesseractEngine engine,
+        Mat processedMat,
+        BboxInfo bbox,
+        string originalText,
+        bool isHeader,
+        bool expectedNumeric)
+    {
+        using var crop = CropWithPadding(processedMat, bbox, isHeader ? 4 : 3);
+        if (crop.Empty())
+        {
+            return new RefinedCellResult(originalText, 0);
+        }
+
+        var candidates = new List<RefinedCellResult>
+        {
+            new(originalText, 0)
+        };
+
+        foreach (var variant in BuildRefinementVariants(crop, isHeader))
+        {
+            using (variant)
+            {
+                var pageSegModes = expectedNumeric
+                    ? new[] { PageSegMode.SingleWord, PageSegMode.SingleLine }
+                    : new[] { PageSegMode.SingleLine, PageSegMode.SingleWord };
+
+                foreach (var pageSegMode in pageSegModes)
+                {
+                    var candidate = ExtractTextFromCrop(engine, variant, pageSegMode, expectedNumeric);
+                    if (!string.IsNullOrWhiteSpace(candidate.Text))
+                    {
+                        candidates.Add(candidate);
+                    }
+                }
+            }
+        }
+
+        return candidates
+            .OrderByDescending(candidate => ScoreCandidateText(candidate.Text, isHeader, expectedNumeric) + (candidate.Confidence * 0.2))
+            .First();
+    }
+
+    private static IEnumerable<Mat> BuildRefinementVariants(Mat crop, bool isHeader)
+    {
+        var variants = new List<Mat>();
+
+        using var gray = crop.Channels() == 1 ? crop.Clone() : crop.CvtColor(ColorConversionCodes.BGR2GRAY);
+
+        var scale = isHeader ? 4.0 : 3.0;
+        var enlarged = new Mat();
+        Cv2.Resize(gray, enlarged, new OpenCvSharp.Size(), scale, scale, InterpolationFlags.Cubic);
+        variants.Add(enlarged);
+
+        var threshold = new Mat();
+        Cv2.Threshold(enlarged, threshold, 0, 255, ThresholdTypes.Binary | ThresholdTypes.Otsu);
+        variants.Add(threshold);
+
+        var inverted = new Mat();
+        Cv2.BitwiseNot(threshold, inverted);
+        variants.Add(inverted);
+
+        return variants;
+    }
+
+    private static RefinedCellResult ExtractTextFromCrop(TesseractEngine engine, Mat crop, PageSegMode pageSegMode, bool expectedNumeric)
+    {
+        var originalMode = engine.DefaultPageSegMode;
+        engine.DefaultPageSegMode = pageSegMode;
+        if (expectedNumeric)
+        {
+            engine.SetVariable("tessedit_char_whitelist", "0123456789$€£,.-%");
+        }
+
+        try
+        {
+            using var pix = MatToPix(crop);
+            using var page = engine.Process(pix);
+            var text = TableParsingHeuristics.CleanCellText(page.GetText());
+            var confidence = Math.Clamp(page.GetMeanConfidence() / 100.0, 0, 1);
+            return new RefinedCellResult(text, confidence);
+        }
+        finally
+        {
+            if (expectedNumeric)
+            {
+                engine.SetVariable("tessedit_char_whitelist", string.Empty);
+            }
+
+            engine.DefaultPageSegMode = originalMode;
+        }
+    }
+
+    private static Mat CropWithPadding(Mat image, BboxInfo bbox, int padding)
+    {
+        var x = Math.Max(0, bbox.X - padding);
+        var y = Math.Max(0, bbox.Y - padding);
+        var right = Math.Min(image.Width, bbox.X + bbox.W + padding);
+        var bottom = Math.Min(image.Height, bbox.Y + bbox.H + padding);
+        var width = Math.Max(1, right - x);
+        var height = Math.Max(1, bottom - y);
+
+        return new Mat(image, new OpenCvSharp.Rect(x, y, width, height)).Clone();
+    }
+
+    private static string ChooseRefinedText(string originalText, string refinedText, bool isHeader, bool expectedNumeric)
+    {
+        var cleanedOriginal = TableParsingHeuristics.CleanCellText(originalText);
+        var cleanedRefined = TableParsingHeuristics.CleanCellText(refinedText);
+        if (string.IsNullOrWhiteSpace(cleanedRefined))
+        {
+            return cleanedOriginal;
+        }
+
+        var originalScore = ScoreCandidateText(cleanedOriginal, isHeader, expectedNumeric);
+        var refinedScore = ScoreCandidateText(cleanedRefined, isHeader, expectedNumeric);
+
+        if (isHeader && !ShouldAcceptHeaderRefinement(cleanedOriginal, cleanedRefined, originalScore, refinedScore))
+        {
+            return cleanedOriginal;
+        }
+
+        return refinedScore >= originalScore ? cleanedRefined : cleanedOriginal;
+    }
+
+    private static double ScoreCandidateText(string text, bool isHeader, bool expectedNumeric)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return 0;
+        }
+
+        var cleaned = TableParsingHeuristics.CleanCellText(text);
+        if (string.IsNullOrWhiteSpace(cleaned))
+        {
+            return 0;
+        }
+
+        var letters = cleaned.Count(char.IsLetter);
+        var digits = cleaned.Count(char.IsDigit);
+        var score = Math.Min(4, cleaned.Length) * 0.1;
+
+        if (ContainsTableArtifacts(cleaned))
+        {
+            score -= 1.0;
+        }
+
+        if (isHeader)
+        {
+            score += letters * 0.18;
+            score -= digits * 0.25;
+            if (cleaned.Contains(' '))
+            {
+                score += 0.4;
+            }
+        }
+        else if (expectedNumeric)
+        {
+            if (NumericLikeRegex.IsMatch(cleaned))
+            {
+                score += 1.5;
+            }
+
+            score += digits * 0.12;
+            score -= letters * 0.25;
+        }
+        else
+        {
+            score += letters * 0.08;
+        }
+
+        return score;
+    }
+
+    private static bool IsExpectedNumericColumn(string? headerName, string cellText, TableCellNormalizedInfo normalized)
+    {
+        if (normalized.Type is "number" or "currency" or "percent")
+        {
+            return true;
+        }
+
+        if (NumericLikeRegex.IsMatch(cellText))
+        {
+            return true;
+        }
+
+        if (string.IsNullOrWhiteSpace(headerName))
+        {
+            return false;
+        }
+
+        return headerName.Contains("price", StringComparison.OrdinalIgnoreCase) ||
+               headerName.Contains("total", StringComparison.OrdinalIgnoreCase) ||
+               headerName.Contains("amount", StringComparison.OrdinalIgnoreCase) ||
+               headerName.Contains("qty", StringComparison.OrdinalIgnoreCase) ||
+               headerName.Contains("unit", StringComparison.OrdinalIgnoreCase) ||
+               headerName.Contains("sold", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool ShouldAcceptHeaderRefinement(string originalText, string refinedText, double originalScore, double refinedScore)
+    {
+        if (string.IsNullOrWhiteSpace(originalText))
+        {
+            return true;
+        }
+
+        var originalLooksClean = LooksLikeCleanHeader(originalText);
+        var refinedLooksSuspicious = ContainsSuspiciousHeaderCharacters(refinedText);
+
+        if (originalLooksClean && refinedLooksSuspicious)
+        {
+            return false;
+        }
+
+        if (originalLooksClean &&
+            refinedText.Length > originalText.Length + 4 &&
+            refinedText.Count(char.IsDigit) > originalText.Count(char.IsDigit))
+        {
+            return false;
+        }
+
+        if (originalLooksClean && refinedScore < originalScore + 0.35)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private static bool LooksLikeCleanHeader(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return false;
+        }
+
+        var letters = text.Count(char.IsLetter);
+        var digits = text.Count(char.IsDigit);
+        return letters >= Math.Max(3, text.Length / 2) && digits <= 1 && !ContainsSuspiciousHeaderCharacters(text);
+    }
+
+    private static bool ContainsSuspiciousHeaderCharacters(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return false;
+        }
+
+        return text.Any(ch => char.IsDigit(ch)) ||
+               text.Contains('$') ||
+               text.Contains('}') ||
+               text.Contains('{') ||
+               text.Contains('|');
+    }
+
+    private static bool ContainsTableArtifacts(string text)
+        => !string.IsNullOrWhiteSpace(text) && TableArtifactRegex.IsMatch(text);
+
+    private static string PostProcessTableCellText(string text, bool expectedNumeric)
+    {
+        var cleaned = TableParsingHeuristics.CleanCellText(text);
+        if (string.IsNullOrWhiteSpace(cleaned))
+        {
+            return string.Empty;
+        }
+
+        cleaned = TableArtifactRegex.Replace(cleaned, string.Empty).Trim();
+        if (expectedNumeric)
+        {
+            cleaned = cleaned.Replace(" ", string.Empty);
+        }
+
+        return cleaned;
+    }
+
+    private static TableCellNormalizedInfo NormalizeTableCellValue(string text)
+    {
+        var trimmed = text.Trim();
+        if (string.IsNullOrWhiteSpace(trimmed))
+        {
+            return new TableCellNormalizedInfo { Type = "string", Value = null };
+        }
+
+        if (trimmed.Length > 1 && "$€£".Contains(trimmed[0]))
+        {
+            var numeric = trimmed[1..].Replace(",", string.Empty);
+            if (decimal.TryParse(numeric, NumberStyles.Any, CultureInfo.InvariantCulture, out var currencyValue))
+            {
+                return new TableCellNormalizedInfo { Type = "currency", Value = currencyValue, Currency = trimmed[0].ToString() };
+            }
+        }
+
+        if (decimal.TryParse(trimmed.Replace(",", string.Empty), NumberStyles.Any, CultureInfo.InvariantCulture, out var number))
+        {
+            return new TableCellNormalizedInfo { Type = "number", Value = number };
+        }
+
+        return new TableCellNormalizedInfo { Type = "string", Value = trimmed };
+    }
+
+    private static List<string> BuildUniqueColumnKeys(IReadOnlyList<string> columnNames)
+    {
+        var keys = new List<string>(columnNames.Count);
+        var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        for (var index = 0; index < columnNames.Count; index++)
+        {
+            var baseKey = ToSnakeCase(columnNames[index]);
+            if (string.IsNullOrWhiteSpace(baseKey))
+            {
+                baseKey = $"col_{index + 1}";
+            }
+
+            var key = baseKey;
+            var suffix = 2;
+            while (!used.Add(key))
+            {
+                key = $"{baseKey}_{suffix++}";
+            }
+
+            keys.Add(key);
+        }
+
+        return keys;
+    }
+
+    private static string ToSnakeCase(string input)
+    {
+        var chars = input
+            .Trim()
+            .Select(ch => char.IsLetterOrDigit(ch) ? char.ToLowerInvariant(ch) : '_')
+            .ToArray();
+
+        var normalized = new string(chars);
+        while (normalized.Contains("__", StringComparison.Ordinal))
+        {
+            normalized = normalized.Replace("__", "_", StringComparison.Ordinal);
+        }
+
+        return normalized.Trim('_');
+    }
+
+    private sealed record RefinedCellResult(string Text, double Confidence);
 
     private static Pix MatToPix(Mat image)
     {

@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Dynamic;
+using System.Data;
 using System.IO;
 using System.Windows;
 using System.Windows.Media.Imaging;
@@ -18,6 +19,8 @@ public sealed class MainViewModel : ViewModelBase
     private string _selectedFilePath = string.Empty;
     private string _jsonOutput = string.Empty;
     private string _outputJsonPath = string.Empty;
+    private string _statusMessage = "Ready. Select a file and run OCR.";
+    private string _featureCoverageSummary = "Run OCR to inspect tables, fields, regions, preview artifacts, diagnostics, and JSON output.";
     private bool _isBusy;
     private BitmapImage? _previewImage;
     private string _previewStatusMessage = "Run OCR to generate preview assets.";
@@ -61,6 +64,8 @@ public sealed class MainViewModel : ViewModelBase
     private double _selectedTableTokenCoverageRatio;
     private string _selectedTableOverlayPath = string.Empty;
     private string _tablesStatusMessage = "Run OCR to populate table review.";
+    private DataView? _selectedTableDisplayView;
+    private string _selectedTableDisplayStatus = "Select a table to preview its structured rows.";
     private string _selectedWordScope = "All";
     private int _displayWordCount;
 
@@ -140,6 +145,18 @@ public sealed class MainViewModel : ViewModelBase
     public ObservableCollection<TableCellDisplayItem> SelectedTableRawCells { get; } = [];
     public ObservableCollection<ExpandoObject> SelectedTableDisplayRows { get; } = [];
 
+    public DataView? SelectedTableDisplayView
+    {
+        get => _selectedTableDisplayView;
+        set => SetProperty(ref _selectedTableDisplayView, value);
+    }
+
+    public string SelectedTableDisplayStatus
+    {
+        get => _selectedTableDisplayStatus;
+        set => SetProperty(ref _selectedTableDisplayStatus, value);
+    }
+
     public string SelectedFilePath
     {
         get => _selectedFilePath;
@@ -163,6 +180,21 @@ public sealed class MainViewModel : ViewModelBase
         get => _outputJsonPath;
         set => SetProperty(ref _outputJsonPath, value);
     }
+
+    public string StatusMessage
+    {
+        get => _statusMessage;
+        set => SetProperty(ref _statusMessage, value);
+    }
+
+    public string FeatureCoverageSummary
+    {
+        get => _featureCoverageSummary;
+        set => SetProperty(ref _featureCoverageSummary, value);
+    }
+
+    public string OptionsCoverageSummary =>
+        "Harness coverage: all current OcrOptions fields from Ocr.Core are exposed for testing in this UI.";
 
     public bool IsBusy
     {
@@ -604,6 +636,7 @@ public sealed class MainViewModel : ViewModelBase
         if (dialog.ShowDialog() == true)
         {
             SelectedFilePath = dialog.FileName;
+            StatusMessage = $"Selected {Path.GetFileName(SelectedFilePath)}";
             AddLog($"Selected file: {SelectedFilePath}");
         }
     }
@@ -620,6 +653,7 @@ public sealed class MainViewModel : ViewModelBase
         if (dialog.ShowDialog() == WinForms.DialogResult.OK)
         {
             OutputFolder = dialog.SelectedPath;
+            StatusMessage = $"Output folder set to {OutputFolder}";
             AddLog($"Selected output folder: {OutputFolder}");
         }
     }
@@ -631,6 +665,7 @@ public sealed class MainViewModel : ViewModelBase
         try
         {
             AddLog("Starting OCR processor.");
+            StatusMessage = "Running OCR pipeline...";
 
             var options = new OcrOptions
             {
@@ -666,10 +701,12 @@ public sealed class MainViewModel : ViewModelBase
             if (!string.IsNullOrWhiteSpace(OutputJsonPath))
             {
                 AddLog($"Output path: {OutputJsonPath}");
+                StatusMessage = $"OCR completed. JSON written to {OutputJsonPath}";
             }
             else
             {
                 AddLog("Output path: (not written)");
+                StatusMessage = "OCR completed. JSON kept in memory only for this run.";
             }
 
             var (warningCount, errorCount) = CountWarningsAndErrors(result.Json);
@@ -687,6 +724,7 @@ public sealed class MainViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            StatusMessage = "OCR run failed. Review the log for details.";
             AddLog($"Failed: {ex.Message}");
             System.Windows.MessageBox.Show(
                 $"Run failed: {ex.Message}",
@@ -752,6 +790,7 @@ public sealed class MainViewModel : ViewModelBase
             SummaryUniqueWordCount = 0;
             SummaryKeyValueCandidateCount = 0;
             SummaryPromotedFieldCount = 0;
+            FeatureCoverageSummary = "No OCR result loaded.";
             return;
         }
 
@@ -794,11 +833,12 @@ public sealed class MainViewModel : ViewModelBase
                 SummaryTokenCount = 0;
                 SummaryMeanConfidence = 0;
                 SummaryLowConfidenceTokenCount = 0;
-                SummaryCheckboxCount = 0;
-                SummaryRadioCount = 0;
-                SummaryCheckedRegionCount = 0;
-                return;
-            }
+            SummaryCheckboxCount = 0;
+            SummaryRadioCount = 0;
+            SummaryCheckedRegionCount = 0;
+            FeatureCoverageSummary = "OCR completed, but no page payloads were available to summarize.";
+            return;
+        }
 
             var totalTokenCount = 0;
             var totalLowConfidenceCount = 0;
@@ -882,6 +922,9 @@ public sealed class MainViewModel : ViewModelBase
             SummaryCheckboxCount = totalCheckboxes;
             SummaryRadioCount = totalRadios;
             SummaryCheckedRegionCount = totalCheckedRegions;
+            var previewArtifactCount = (root["extensions"]?["debugArtifactPaths"] as JArray)?.Count ?? 0;
+            FeatureCoverageSummary =
+                $"Run coverage: pages={SummaryPageCount}, tables={SummaryTableCount}, promoted fields={SummaryPromotedFieldCount}, key-value candidates={SummaryKeyValueCandidateCount}, regions={SummaryCheckboxCount + SummaryRadioCount}, unique words={SummaryUniqueWordCount}, preview artifacts={previewArtifactCount}.";
         }
         catch
         {
@@ -898,6 +941,7 @@ public sealed class MainViewModel : ViewModelBase
             SummaryUniqueWordCount = 0;
             SummaryKeyValueCandidateCount = 0;
             SummaryPromotedFieldCount = 0;
+            FeatureCoverageSummary = "Unable to summarize OCR feature coverage for this run.";
         }
     }
 
@@ -1402,6 +1446,8 @@ public sealed class MainViewModel : ViewModelBase
         SelectedTableHeaderCells.Clear();
         SelectedTableRawCells.Clear();
         SelectedTableDisplayRows.Clear();
+        SelectedTableDisplayView = null;
+        SelectedTableDisplayStatus = "Select a table to preview its structured rows.";
 
         if (SelectedTableSummary is null)
         {
@@ -1486,12 +1532,25 @@ public sealed class MainViewModel : ViewModelBase
 
     private void BuildDisplayRows(JObject table)
     {
+        SelectedTableDisplayRows.Clear();
+        SelectedTableDisplayView = null;
+
         var rows = table["rows"] as JArray;
         var columns = SelectedTableHeaderColumns
             .OrderBy(c => c.ColIndex)
-            .Select(c => !string.IsNullOrWhiteSpace(c.Key) ? c.Key : c.Name)
-            .Where(c => !string.IsNullOrWhiteSpace(c))
+            .Select(c => new
+            {
+                Header = !string.IsNullOrWhiteSpace(c.Name) ? c.Name : $"Column {c.ColIndex + 1}",
+                Key = !string.IsNullOrWhiteSpace(c.Key) ? c.Key : c.Name
+            })
+            .Where(c => !string.IsNullOrWhiteSpace(c.Key) || !string.IsNullOrWhiteSpace(c.Header))
             .ToList();
+
+        var tableView = new DataTable();
+        foreach (var column in columns)
+        {
+            tableView.Columns.Add(column.Header);
+        }
 
         if (rows is not null && rows.Count > 0)
         {
@@ -1502,14 +1561,22 @@ public sealed class MainViewModel : ViewModelBase
                 var rowIndex = row["rowIndex"]?.Value<int>() ?? 0;
                 dict["row_index"] = rowIndex;
                 var values = row["values"] as JObject;
-                foreach (var key in columns)
+                var displayRow = tableView.NewRow();
+                foreach (var column in columns)
                 {
-                    dict[key] = values?[key]?.ToString() ?? string.Empty;
+                    var rawValue = values?[column.Key!]?.ToString() ?? string.Empty;
+                    dict[column.Key!] = rawValue;
+                    displayRow[column.Header] = rawValue;
                 }
 
                 SelectedTableDisplayRows.Add((ExpandoObject)expando);
+                tableView.Rows.Add(displayRow);
             }
 
+            SelectedTableDisplayView = tableView.DefaultView;
+            SelectedTableDisplayStatus = tableView.Rows.Count == 0
+                ? "No structured table rows were emitted for this table."
+                : $"Structured preview showing {tableView.Rows.Count} row(s).";
             return;
         }
 
@@ -1527,15 +1594,29 @@ public sealed class MainViewModel : ViewModelBase
             dynamic expando = new ExpandoObject();
             var dict = (IDictionary<string, object?>)expando;
             dict["row_index"] = row.Key;
+            var displayRow = tableView.NewRow();
             foreach (var header in SelectedTableHeaderColumns.OrderBy(h => h.ColIndex))
             {
                 var key = !string.IsNullOrWhiteSpace(header.Key) ? header.Key : $"col_{header.ColIndex}";
+                var headerName = !string.IsNullOrWhiteSpace(header.Name) ? header.Name : $"Column {header.ColIndex + 1}";
                 var cell = row.FirstOrDefault(c => c.ColIndex == header.ColIndex);
                 dict[key] = cell?.Text ?? string.Empty;
+                if (!tableView.Columns.Contains(headerName))
+                {
+                    tableView.Columns.Add(headerName);
+                }
+
+                displayRow[headerName] = cell?.Text ?? string.Empty;
             }
 
             SelectedTableDisplayRows.Add((ExpandoObject)expando);
+            tableView.Rows.Add(displayRow);
         }
+
+        SelectedTableDisplayView = tableView.DefaultView;
+        SelectedTableDisplayStatus = tableView.Rows.Count == 0
+            ? "No displayable table cells were found for this table."
+            : $"Structured preview reconstructed from raw cells with {tableView.Rows.Count} row(s).";
     }
 
     private void ClearSelectedTableDetails()
@@ -1548,6 +1629,8 @@ public sealed class MainViewModel : ViewModelBase
         SelectedTableBboxText = string.Empty;
         SelectedTableTokenCoverageRatio = 0;
         SelectedTableOverlayPath = string.Empty;
+        SelectedTableDisplayView = null;
+        SelectedTableDisplayStatus = "Select a table to preview its structured rows.";
     }
 
     private static string FormatBbox(JObject? bbox)
