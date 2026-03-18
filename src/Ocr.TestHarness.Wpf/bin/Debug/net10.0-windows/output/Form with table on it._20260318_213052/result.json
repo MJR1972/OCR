@@ -1,0 +1,6231 @@
+{
+  "schema": {
+    "name": "com.yourcompany.ocr.document",
+    "version": "1.1.0",
+    "status": "draft"
+  },
+  "definitions": {
+    "coordinateSystem": {
+      "unit": "px",
+      "origin": "top-left",
+      "xDirection": "right",
+      "yDirection": "down",
+      "bboxFormat": "x,y,w,h",
+      "pageRotationAppliedToCoords": true,
+      "notes": "All bbox coordinates are relative to the final, processed page image (after render + rotation + deskew)."
+    },
+    "confidence": {
+      "scale": "0to1",
+      "lowTokenThreshold": 0.7,
+      "lowLineThreshold": 0.75,
+      "lowBlockThreshold": 0.8,
+      "lowCellThreshold": 0.75,
+      "lowTableThreshold": 0.8,
+      "lowFieldThreshold": 0.8
+    },
+    "readingOrder": {
+      "default": "top-to-bottom-left-to-right",
+      "supported": [
+        "top-to-bottom-left-to-right",
+        "top-to-bottom-right-to-left",
+        "custom"
+      ]
+    },
+    "enums": {
+      "severity": [
+        "info",
+        "warning",
+        "error",
+        "fatal"
+      ],
+      "tokenType": [
+        "word",
+        "punct",
+        "number",
+        "symbol",
+        "unknown"
+      ],
+      "blockType": [
+        "text",
+        "table",
+        "image",
+        "barcode",
+        "signature",
+        "stamp",
+        "unknown"
+      ],
+      "regionType": [
+        "checkbox",
+        "radio",
+        "signature",
+        "barcode",
+        "qr",
+        "image",
+        "stamp",
+        "unknown"
+      ],
+      "normalizedType": [
+        "string",
+        "number",
+        "date",
+        "currency",
+        "percent",
+        "boolean",
+        "unknown"
+      ],
+      "tableDetectionMethod": [
+        "lines",
+        "layout",
+        "lines+layout",
+        "model",
+        "unknown"
+      ],
+      "fieldSourceMethod": [
+        "ocr",
+        "ocr+layout",
+        "ocr+regex",
+        "table",
+        "model",
+        "human"
+      ]
+    }
+  },
+  "document": {
+    "documentId": "00000000-0000-0000-0000-000000000000",
+    "correlationId": "optional-run-id-for-tracing",
+    "createdUtc": "2026-03-18T21:30:52.7746942Z",
+    "source": {
+      "originalFileName": "Form with table on it..png",
+      "fileType": "image",
+      "fileHashSha256": null,
+      "pageCount": 1,
+      "mimeType": "image/png"
+    },
+    "processing": {
+      "pipelineVersion": "ocr-pipeline-1.1.0",
+      "engine": {
+        "name": "tesseract",
+        "version": "5.x",
+        "language": [
+          "eng"
+        ],
+        "params": {
+          "psm": "optional",
+          "oem": "optional"
+        }
+      },
+      "render": {
+        "dpiOriginal": 300,
+        "dpiNormalizedTo": 300,
+        "colorMode": "grayscale",
+        "pageImageFormat": "png"
+      },
+      "preprocessing": {
+        "rotation": {
+          "attempted": false,
+          "applied": false,
+          "degrees": 0.0,
+          "confidence": 0.0
+        },
+        "deskew": {
+          "attempted": true,
+          "applied": false,
+          "degrees": 0.0,
+          "confidence": 0.0
+        },
+        "denoise": {
+          "enabled": false,
+          "method": "median"
+        },
+        "binarization": {
+          "enabled": false,
+          "method": "otsu"
+        },
+        "contrastEnhancement": {
+          "enabled": false,
+          "method": null
+        }
+      },
+      "postprocessing": {
+        "fixCommonOcrErrors": false,
+        "normalizeWhitespace": true
+      },
+      "confidencePolicy": {
+        "scale": "0to1",
+        "lowTokenThreshold": 0.7,
+        "aggregation": {
+          "lineConfidence": "mean(tokens.confidence)",
+          "blockConfidence": "mean(lines.confidence)",
+          "cellConfidence": "mean(tokenIds.confidence)",
+          "rowConfidence": "mean(cells.confidence)",
+          "tableConfidence": "mean(rows.confidence)",
+          "fieldConfidence": "mean(tokenIds.confidence)"
+        }
+      }
+    }
+  },
+  "metrics": {
+    "totalMs": 4137,
+    "documentOcrMs": 474,
+    "pagesMs": [
+      1075
+    ],
+    "breakdownMs": {
+      "renderMs": 0,
+      "preprocessMs": 522,
+      "ocrMs": 474,
+      "layoutMs": 65,
+      "tableDetectMs": 2503,
+      "recognitionMs": 34,
+      "postprocessMs": 14
+    }
+  },
+  "pages": [
+    {
+      "pageIndex": 1,
+      "pageId": "page-1",
+      "size": {
+        "widthPx": 817,
+        "heightPx": 1157,
+        "dpi": 300,
+        "rotationDegrees": 0.0
+      },
+      "timing": {
+        "renderMs": 0,
+        "preprocessMs": 522,
+        "ocrMs": 474,
+        "layoutMs": 65,
+        "tableDetectMs": 2503,
+        "postprocessMs": 14
+      },
+      "quality": {
+        "meanTokenConfidence": 0.7451456104625358,
+        "lowConfidenceTokenCount": 36,
+        "blankPage": false
+      },
+      "text": {
+        "fullText": "Monthly Sales Report\r\nReport Date: February 2024 Sales Region: Northeast\r\nPrepared By: Jane Doe Contact: 8.5 x 11 inca\r\nProduct [or: 1 Yo 1 e 1% its Sold Unit Price Total Sales\r\nLaptop Pro Electronics 120 $1,200 $144,000\r\n| Ffcechair | Fumitre | 350 | $150 52500\r\n¥Wireless Mouse ‘ Electronics ‘ 500 1 $25 $12,500 “\r\nﬁCoiffetre Maker Appli;nces 210 $80 $16,800 \\\r\n‘\r\nDesk Organizer Office Suppli&? 620 $15 $9,300 |||\r\n‘\r\nLED Monitor Electronics ‘ 180 | $300S 5 $54,000 1|\r\nBRI WS I |\r\nHotal S 60 $15 | $54,000 |\r\nTotal $289,100\r\ne Top product: Laptop Pro\r\n¢ Note: Increase in office supplies sales compared to last month.",
+        "readingOrder": "top-to-bottom-left-to-right"
+      },
+      "tokens": [
+        {
+          "id": "t-001-000001",
+          "type": "word",
+          "text": "Monthly",
+          "confidence": 0.8981253051757813,
+          "confidenceRaw": 89.81253051757812,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 22,
+            "y": 50,
+            "w": 245,
+            "h": 74
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00001",
+          "alternates": [
+            {
+              "text": "Monthly",
+              "confidence": 0.8981253051757813
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000002",
+          "type": "word",
+          "text": "Sales",
+          "confidence": 0.9197987365722656,
+          "confidenceRaw": 91.97987365722656,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 286,
+            "y": 50,
+            "w": 158,
+            "h": 48
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00001",
+          "alternates": [
+            {
+              "text": "Sales",
+              "confidence": 0.9197987365722656
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000003",
+          "type": "word",
+          "text": "Report",
+          "confidence": 0.9143827819824218,
+          "confidenceRaw": 91.43827819824219,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 467,
+            "y": 52,
+            "w": 204,
+            "h": 58
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00001",
+          "alternates": [
+            {
+              "text": "Report",
+              "confidence": 0.9143827819824218
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000004",
+          "type": "word",
+          "text": "Report",
+          "confidence": 0.9098773956298828,
+          "confidenceRaw": 90.98773956298828,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 27,
+            "y": 153,
+            "w": 79,
+            "h": 22
+          },
+          "blockId": "blk-001-00005",
+          "lineId": "ln-001-00002",
+          "alternates": [
+            {
+              "text": "Report",
+              "confidence": 0.9098773956298828
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000005",
+          "type": "word",
+          "text": "Date:",
+          "confidence": 0.9098773956298828,
+          "confidenceRaw": 90.98773956298828,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 114,
+            "y": 153,
+            "w": 60,
+            "h": 18
+          },
+          "blockId": "blk-001-00005",
+          "lineId": "ln-001-00002",
+          "alternates": [
+            {
+              "text": "Date:",
+              "confidence": 0.9098773956298828
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000006",
+          "type": "word",
+          "text": "February",
+          "confidence": 0.9055175018310547,
+          "confidenceRaw": 90.55175018310547,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 183,
+            "y": 152,
+            "w": 104,
+            "h": 23
+          },
+          "blockId": "blk-001-00005",
+          "lineId": "ln-001-00002",
+          "alternates": [
+            {
+              "text": "February",
+              "confidence": 0.9055175018310547
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000007",
+          "type": "word",
+          "text": "2024",
+          "confidence": 0.96740478515625,
+          "confidenceRaw": 96.740478515625,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 294,
+            "y": 153,
+            "w": 57,
+            "h": 17
+          },
+          "blockId": "blk-001-00005",
+          "lineId": "ln-001-00002",
+          "alternates": [
+            {
+              "text": "2024",
+              "confidence": 0.96740478515625
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000008",
+          "type": "word",
+          "text": "Sales",
+          "confidence": 0.9168933868408203,
+          "confidenceRaw": 91.68933868408203,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 500,
+            "y": 152,
+            "w": 61,
+            "h": 19
+          },
+          "blockId": "blk-001-00005",
+          "lineId": "ln-001-00002",
+          "alternates": [
+            {
+              "text": "Sales",
+              "confidence": 0.9168933868408203
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000009",
+          "type": "word",
+          "text": "Region:",
+          "confidence": 0.9168933868408203,
+          "confidenceRaw": 91.68933868408203,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 570,
+            "y": 152,
+            "w": 87,
+            "h": 23
+          },
+          "blockId": "blk-001-00005",
+          "lineId": "ln-001-00002",
+          "alternates": [
+            {
+              "text": "Region:",
+              "confidence": 0.9168933868408203
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000010",
+          "type": "word",
+          "text": "Northeast",
+          "confidence": 0.9218328094482422,
+          "confidenceRaw": 92.18328094482422,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 666,
+            "y": 152,
+            "w": 120,
+            "h": 19
+          },
+          "blockId": "blk-001-00005",
+          "lineId": "ln-001-00002",
+          "alternates": [
+            {
+              "text": "Northeast",
+              "confidence": 0.9218328094482422
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000011",
+          "type": "word",
+          "text": "Prepared",
+          "confidence": 0.9182443237304687,
+          "confidenceRaw": 91.82443237304688,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 27,
+            "y": 203,
+            "w": 109,
+            "h": 23
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00003",
+          "alternates": [
+            {
+              "text": "Prepared",
+              "confidence": 0.9182443237304687
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000012",
+          "type": "word",
+          "text": "By:",
+          "confidence": 0.9227855682373047,
+          "confidenceRaw": 92.27855682373047,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 146,
+            "y": 204,
+            "w": 34,
+            "h": 22
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00003",
+          "alternates": [
+            {
+              "text": "By:",
+              "confidence": 0.9227855682373047
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000013",
+          "type": "word",
+          "text": "Jane",
+          "confidence": 0.9246600341796875,
+          "confidenceRaw": 92.46600341796875,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 197,
+            "y": 204,
+            "w": 55,
+            "h": 17
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00003",
+          "alternates": [
+            {
+              "text": "Jane",
+              "confidence": 0.9246600341796875
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000014",
+          "type": "word",
+          "text": "Doe",
+          "confidence": 0.9164016723632813,
+          "confidenceRaw": 91.64016723632812,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 261,
+            "y": 204,
+            "w": 44,
+            "h": 17
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00003",
+          "alternates": [
+            {
+              "text": "Doe",
+              "confidence": 0.9164016723632813
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000015",
+          "type": "word",
+          "text": "Contact:",
+          "confidence": 0.8749143981933594,
+          "confidenceRaw": 87.49143981933594,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 531,
+            "y": 204,
+            "w": 100,
+            "h": 18
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00003",
+          "alternates": [
+            {
+              "text": "Contact:",
+              "confidence": 0.8749143981933594
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000016",
+          "type": "word",
+          "text": "8.5 x 11",
+          "confidence": 0.8458942413330078,
+          "confidenceRaw": 84.58942413330078,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 650,
+            "y": 204,
+            "w": 78,
+            "h": 18
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00003",
+          "alternates": [
+            {
+              "text": "8.5x11",
+              "confidence": 0.8458942413330078
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000017",
+          "type": "word",
+          "text": "inca",
+          "confidence": 0.776234130859375,
+          "confidenceRaw": 77.6234130859375,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 738,
+            "y": 203,
+            "w": 48,
+            "h": 18
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00003",
+          "alternates": [
+            {
+              "text": "inca",
+              "confidence": 0.776234130859375
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000018",
+          "type": "word",
+          "text": "Product",
+          "confidence": 0.9186524963378906,
+          "confidenceRaw": 91.86524963378906,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 40,
+            "y": 306,
+            "w": 89,
+            "h": 17
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00004",
+          "alternates": [
+            {
+              "text": "Product",
+              "confidence": 0.9186524963378906
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000019",
+          "type": "word",
+          "text": "[or: 1",
+          "confidence": 0.1804790496826172,
+          "confidenceRaw": 18.04790496826172,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 255,
+            "y": 302,
+            "w": 37,
+            "h": 29
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00004",
+          "alternates": [
+            {
+              "text": "[or:1",
+              "confidence": 0.1804790496826172
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000020",
+          "type": "word",
+          "text": "Yo",
+          "confidence": 0.22847610473632812,
+          "confidenceRaw": 22.847610473632812,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 298,
+            "y": 311,
+            "w": 20,
+            "h": 16
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00004",
+          "alternates": [
+            {
+              "text": "Yo",
+              "confidence": 0.22847610473632812
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000021",
+          "type": "word",
+          "text": "1 e 1%",
+          "confidence": 0.0,
+          "confidenceRaw": 0.0,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 322,
+            "y": 302,
+            "w": 38,
+            "h": 29
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00004",
+          "alternates": [
+            {
+              "text": "1e1%",
+              "confidence": 0.0
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000022",
+          "type": "word",
+          "text": "its",
+          "confidence": 0.9076943206787109,
+          "confidenceRaw": 90.7694320678711,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 440,
+            "y": 306,
+            "w": 24,
+            "h": 17
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00004",
+          "alternates": [
+            {
+              "text": "its",
+              "confidence": 0.9076943206787109
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000023",
+          "type": "word",
+          "text": "Sold",
+          "confidence": 0.6293181610107422,
+          "confidenceRaw": 62.93181610107422,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 471,
+            "y": 306,
+            "w": 46,
+            "h": 17
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00004",
+          "alternates": [
+            {
+              "text": "Sold",
+              "confidence": 0.6293181610107422
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000024",
+          "type": "word",
+          "text": "Unit",
+          "confidence": 0.6293181610107422,
+          "confidenceRaw": 62.93181610107422,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 557,
+            "y": 306,
+            "w": 45,
+            "h": 17
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00004",
+          "alternates": [
+            {
+              "text": "Unit",
+              "confidence": 0.6293181610107422
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000025",
+          "type": "word",
+          "text": "Price",
+          "confidence": 0.9189785766601563,
+          "confidenceRaw": 91.89785766601562,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 610,
+            "y": 306,
+            "w": 53,
+            "h": 17
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00004",
+          "alternates": [
+            {
+              "text": "Price",
+              "confidence": 0.9189785766601563
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000026",
+          "type": "word",
+          "text": "Total",
+          "confidence": 0.924701919555664,
+          "confidenceRaw": 92.4701919555664,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 677,
+            "y": 306,
+            "w": 50,
+            "h": 17
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00004",
+          "alternates": [
+            {
+              "text": "Total",
+              "confidence": 0.924701919555664
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000027",
+          "type": "word",
+          "text": "Sales",
+          "confidence": 0.9163082122802735,
+          "confidenceRaw": 91.63082122802734,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 735,
+            "y": 306,
+            "w": 55,
+            "h": 17
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00004",
+          "alternates": [
+            {
+              "text": "Sales",
+              "confidence": 0.9163082122802735
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000028",
+          "type": "word",
+          "text": "Laptop",
+          "confidence": 0.9122279357910156,
+          "confidenceRaw": 91.22279357910156,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 40,
+            "y": 358,
+            "w": 75,
+            "h": 20
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00005",
+          "alternates": [
+            {
+              "text": "Laptop",
+              "confidence": 0.9122279357910156
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000029",
+          "type": "word",
+          "text": "Pro",
+          "confidence": 0.9264743041992187,
+          "confidenceRaw": 92.64743041992188,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 123,
+            "y": 357,
+            "w": 35,
+            "h": 17
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00005",
+          "alternates": [
+            {
+              "text": "Pro",
+              "confidence": 0.9264743041992187
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000030",
+          "type": "word",
+          "text": "Electronics",
+          "confidence": 0.9243550872802735,
+          "confidenceRaw": 92.43550872802734,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 251,
+            "y": 351,
+            "w": 117,
+            "h": 31
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00005",
+          "alternates": [
+            {
+              "text": "Electronics",
+              "confidence": 0.9243550872802735
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000031",
+          "type": "word",
+          "text": "120",
+          "confidence": 0.9642539215087891,
+          "confidenceRaw": 96.4253921508789,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 445,
+            "y": 358,
+            "w": 39,
+            "h": 16
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00005",
+          "alternates": [
+            {
+              "text": "120",
+              "confidence": 0.9642539215087891
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000032",
+          "type": "word",
+          "text": "$1,200",
+          "confidence": 0.9250943756103516,
+          "confidenceRaw": 92.50943756103516,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 553,
+            "y": 356,
+            "w": 75,
+            "h": 21
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00005",
+          "alternates": [
+            {
+              "text": "$1,200",
+              "confidence": 0.9250943756103516
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000033",
+          "type": "word",
+          "text": "$144,000",
+          "confidence": 0.9297496795654296,
+          "confidenceRaw": 92.97496795654297,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 679,
+            "y": 356,
+            "w": 101,
+            "h": 20
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00005",
+          "alternates": [
+            {
+              "text": "$144,000",
+              "confidence": 0.9297496795654296
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000034",
+          "type": "word",
+          "text": "|",
+          "confidence": 0.21830162048339843,
+          "confidenceRaw": 21.830162048339844,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 21,
+            "y": 389,
+            "w": 6,
+            "h": 1
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00006",
+          "alternates": [
+            {
+              "text": "|",
+              "confidence": 0.21830162048339843
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000035",
+          "type": "word",
+          "text": "Ffcechair",
+          "confidence": 0.3186988830566406,
+          "confidenceRaw": 31.869888305664062,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 39,
+            "y": 389,
+            "w": 143,
+            "h": 34
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00006",
+          "alternates": [
+            {
+              "text": "Offcechair",
+              "confidence": 0.3186988830566406
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000036",
+          "type": "word",
+          "text": "|",
+          "confidence": 0.7597380065917969,
+          "confidenceRaw": 75.97380065917969,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 206,
+            "y": 389,
+            "w": 3,
+            "h": 1
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00006",
+          "alternates": [
+            {
+              "text": "|",
+              "confidence": 0.7597380065917969
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000037",
+          "type": "word",
+          "text": "Fumitre",
+          "confidence": 0.5069698333740235,
+          "confidenceRaw": 50.696983337402344,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 234,
+            "y": 389,
+            "w": 138,
+            "h": 34
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00006",
+          "alternates": [
+            {
+              "text": "Fumitre",
+              "confidence": 0.5069698333740235
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000038",
+          "type": "word",
+          "text": "|",
+          "confidence": 0.6765813446044922,
+          "confidenceRaw": 67.65813446044922,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 390,
+            "y": 389,
+            "w": 9,
+            "h": 25
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00006",
+          "alternates": [
+            {
+              "text": "|",
+              "confidence": 0.6765813446044922
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000039",
+          "type": "word",
+          "text": "350",
+          "confidence": 0.6330031204223633,
+          "confidenceRaw": 63.30031204223633,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 423,
+            "y": 389,
+            "w": 68,
+            "h": 34
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00006",
+          "alternates": [
+            {
+              "text": "350",
+              "confidence": 0.6330031204223633
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000040",
+          "type": "word",
+          "text": "|",
+          "confidence": 0.5842983627319336,
+          "confidenceRaw": 58.42983627319336,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 517,
+            "y": 378,
+            "w": 25,
+            "h": 60
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00006",
+          "alternates": [
+            {
+              "text": "|",
+              "confidence": 0.5842983627319336
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000041",
+          "type": "word",
+          "text": "$150",
+          "confidence": 0.6830284118652343,
+          "confidenceRaw": 68.30284118652344,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 573,
+            "y": 389,
+            "w": 55,
+            "h": 35
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00006",
+          "alternates": [
+            {
+              "text": "$150",
+              "confidence": 0.6830284118652343
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000042",
+          "type": "word",
+          "text": "52500",
+          "confidence": 0.0,
+          "confidenceRaw": 0.0,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 692,
+            "y": 382,
+            "w": 108,
+            "h": 52
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00006",
+          "alternates": [
+            {
+              "text": "52500",
+              "confidence": 0.0
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000043",
+          "type": "word",
+          "text": "¥Wireless",
+          "confidence": 0.19716384887695312,
+          "confidenceRaw": 19.716384887695312,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 21,
+            "y": 437,
+            "w": 107,
+            "h": 34
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00007",
+          "alternates": [
+            {
+              "text": "¥Wireless",
+              "confidence": 0.19716384887695312
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000044",
+          "type": "word",
+          "text": "Mouse",
+          "confidence": 0.920938720703125,
+          "confidenceRaw": 92.0938720703125,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 136,
+            "y": 455,
+            "w": 68,
+            "h": 16
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00007",
+          "alternates": [
+            {
+              "text": "Mouse",
+              "confidence": 0.920938720703125
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000045",
+          "type": "word",
+          "text": "‘",
+          "confidence": 0.5683517456054688,
+          "confidenceRaw": 56.835174560546875,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 231,
+            "y": 481,
+            "w": 2,
+            "h": 7
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00007",
+          "alternates": [
+            {
+              "text": "‘",
+              "confidence": 0.5683517456054688
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000046",
+          "type": "word",
+          "text": "Electronics",
+          "confidence": 0.9050265502929687,
+          "confidenceRaw": 90.50265502929688,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 251,
+            "y": 450,
+            "w": 117,
+            "h": 28
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00007",
+          "alternates": [
+            {
+              "text": "Electronics",
+              "confidence": 0.9050265502929687
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000047",
+          "type": "word",
+          "text": "‘",
+          "confidence": 0.3863027572631836,
+          "confidenceRaw": 38.63027572631836,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 390,
+            "y": 478,
+            "w": 1,
+            "h": 7
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00007",
+          "alternates": [
+            {
+              "text": "‘",
+              "confidence": 0.3863027572631836
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000048",
+          "type": "word",
+          "text": "500",
+          "confidence": 0.9654592132568359,
+          "confidenceRaw": 96.5459213256836,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 444,
+            "y": 455,
+            "w": 40,
+            "h": 17
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00007",
+          "alternates": [
+            {
+              "text": "500",
+              "confidence": 0.9654592132568359
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000049",
+          "type": "word",
+          "text": "1",
+          "confidence": 0.7655636596679688,
+          "confidenceRaw": 76.55636596679688,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 526,
+            "y": 438,
+            "w": 4,
+            "h": 1
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00007",
+          "alternates": [
+            {
+              "text": "1",
+              "confidence": 0.7655636596679688
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000050",
+          "type": "word",
+          "text": "$25",
+          "confidence": 0.6679680633544922,
+          "confidenceRaw": 66.79680633544922,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 579,
+            "y": 453,
+            "w": 49,
+            "h": 20
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00007",
+          "alternates": [
+            {
+              "text": "$25",
+              "confidence": 0.6679680633544922
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000051",
+          "type": "word",
+          "text": "$12,500",
+          "confidence": 0.9269078063964844,
+          "confidenceRaw": 92.69078063964844,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 692,
+            "y": 454,
+            "w": 88,
+            "h": 20
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00007",
+          "alternates": [
+            {
+              "text": "$12,500",
+              "confidence": 0.9269078063964844
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000052",
+          "type": "word",
+          "text": "“",
+          "confidence": 0.37114295959472654,
+          "confidenceRaw": 37.114295959472656,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 798,
+            "y": 438,
+            "w": 2,
+            "h": 45
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00007",
+          "alternates": [
+            {
+              "text": "“",
+              "confidence": 0.37114295959472654
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000053",
+          "type": "word",
+          "text": "ﬁCoiffetre",
+          "confidence": 0.2166423797607422,
+          "confidenceRaw": 21.66423797607422,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 20,
+            "y": 487,
+            "w": 90,
+            "h": 34
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00008",
+          "alternates": [
+            {
+              "text": "ﬁCoiffetre",
+              "confidence": 0.2166423797607422
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000054",
+          "type": "word",
+          "text": "Maker",
+          "confidence": 0.5886041641235351,
+          "confidenceRaw": 58.860416412353516,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 118,
+            "y": 487,
+            "w": 65,
+            "h": 34
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00008",
+          "alternates": [
+            {
+              "text": "Maker",
+              "confidence": 0.5886041641235351
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000055",
+          "type": "word",
+          "text": "Appli;nces",
+          "confidence": 0.4257416534423828,
+          "confidenceRaw": 42.57416534423828,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 250,
+            "y": 487,
+            "w": 118,
+            "h": 38
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00008",
+          "alternates": [
+            {
+              "text": "Appli;nces",
+              "confidence": 0.4257416534423828
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000057",
+          "type": "word",
+          "text": "210",
+          "confidence": 0.965628890991211,
+          "confidenceRaw": 96.5628890991211,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 444,
+            "y": 504,
+            "w": 40,
+            "h": 16
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00008",
+          "alternates": [
+            {
+              "text": "210",
+              "confidence": 0.965628890991211
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000058",
+          "type": "word",
+          "text": "$80",
+          "confidence": 0.9093399047851562,
+          "confidenceRaw": 90.93399047851562,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 587,
+            "y": 503,
+            "w": 41,
+            "h": 19
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00008",
+          "alternates": [
+            {
+              "text": "$80",
+              "confidence": 0.9093399047851562
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000059",
+          "type": "word",
+          "text": "$16,800",
+          "confidence": 0.9291259002685547,
+          "confidenceRaw": 92.91259002685547,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 692,
+            "y": 503,
+            "w": 88,
+            "h": 20
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00008",
+          "alternates": [
+            {
+              "text": "$16,800",
+              "confidence": 0.9291259002685547
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000060",
+          "type": "word",
+          "text": "\\",
+          "confidence": 0.6452672576904297,
+          "confidenceRaw": 64.52672576904297,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 799,
+            "y": 508,
+            "w": 1,
+            "h": 14
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00008",
+          "alternates": [
+            {
+              "text": "\\",
+              "confidence": 0.6452672576904297
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000056",
+          "type": "word",
+          "text": "‘",
+          "confidence": 0.360091438293457,
+          "confidenceRaw": 36.0091438293457,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 390,
+            "y": 528,
+            "w": 1,
+            "h": 6
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00009",
+          "alternates": [
+            {
+              "text": "‘",
+              "confidence": 0.360091438293457
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000061",
+          "type": "word",
+          "text": "Desk",
+          "confidence": 0.9173343658447266,
+          "confidenceRaw": 91.73343658447266,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 40,
+            "y": 552,
+            "w": 48,
+            "h": 17
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00010",
+          "alternates": [
+            {
+              "text": "Desk",
+              "confidence": 0.9173343658447266
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000062",
+          "type": "word",
+          "text": "Organizer",
+          "confidence": 0.926395034790039,
+          "confidenceRaw": 92.6395034790039,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 100,
+            "y": 546,
+            "w": 103,
+            "h": 31
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00010",
+          "alternates": [
+            {
+              "text": "Organizer",
+              "confidence": 0.926395034790039
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000064",
+          "type": "word",
+          "text": "Office",
+          "confidence": 0.9312648010253907,
+          "confidenceRaw": 93.12648010253906,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 251,
+            "y": 547,
+            "w": 61,
+            "h": 31
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00010",
+          "alternates": [
+            {
+              "text": "Office",
+              "confidence": 0.9312648010253907
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000065",
+          "type": "word",
+          "text": "Suppli&?",
+          "confidence": 0.24764640808105468,
+          "confidenceRaw": 24.76464080810547,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 320,
+            "y": 535,
+            "w": 71,
+            "h": 48
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00010",
+          "alternates": [
+            {
+              "text": "Suppli&?",
+              "confidence": 0.24764640808105468
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000066",
+          "type": "word",
+          "text": "620",
+          "confidence": 0.9646562957763671,
+          "confidenceRaw": 96.46562957763672,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 444,
+            "y": 553,
+            "w": 40,
+            "h": 16
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00010",
+          "alternates": [
+            {
+              "text": "620",
+              "confidence": 0.9646562957763671
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000067",
+          "type": "word",
+          "text": "$15",
+          "confidence": 0.9141804504394532,
+          "confidenceRaw": 91.41804504394531,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 588,
+            "y": 551,
+            "w": 40,
+            "h": 20
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00010",
+          "alternates": [
+            {
+              "text": "$15",
+              "confidence": 0.9141804504394532
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000068",
+          "type": "word",
+          "text": "$9,300",
+          "confidence": 0.9299798583984376,
+          "confidenceRaw": 92.99798583984375,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 706,
+            "y": 551,
+            "w": 74,
+            "h": 21
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00010",
+          "alternates": [
+            {
+              "text": "$9,300",
+              "confidence": 0.9299798583984376
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000069",
+          "type": "word",
+          "text": "|",
+          "confidence": 0.9096170043945313,
+          "confidenceRaw": 90.96170043945312,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 799,
+            "y": 543,
+            "w": 1,
+            "h": 5
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00010",
+          "alternates": [
+            {
+              "text": "|",
+              "confidence": 0.9096170043945313
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000070",
+          "type": "word",
+          "text": "|",
+          "confidence": 0.8858275604248047,
+          "confidenceRaw": 88.58275604248047,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 799,
+            "y": 558,
+            "w": 1,
+            "h": 9
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00010",
+          "alternates": [
+            {
+              "text": "|",
+              "confidence": 0.8858275604248047
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000071",
+          "type": "word",
+          "text": "|",
+          "confidence": 0.9608962249755859,
+          "confidenceRaw": 96.0896224975586,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 799,
+            "y": 571,
+            "w": 1,
+            "h": 11
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00010",
+          "alternates": [
+            {
+              "text": "|",
+              "confidence": 0.9608962249755859
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000063",
+          "type": "word",
+          "text": "‘",
+          "confidence": 0.36939048767089844,
+          "confidenceRaw": 36.939048767089844,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 231,
+            "y": 535,
+            "w": 2,
+            "h": 2
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00011",
+          "alternates": [
+            {
+              "text": "‘",
+              "confidence": 0.36939048767089844
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000074",
+          "type": "word",
+          "text": "LED",
+          "confidence": 0.9161215972900391,
+          "confidenceRaw": 91.6121597290039,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 40,
+            "y": 602,
+            "w": 40,
+            "h": 16
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00012",
+          "alternates": [
+            {
+              "text": "LED",
+              "confidence": 0.9161215972900391
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000075",
+          "type": "word",
+          "text": "Monitor",
+          "confidence": 0.8997449493408203,
+          "confidenceRaw": 89.97449493408203,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 88,
+            "y": 601,
+            "w": 83,
+            "h": 18
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00012",
+          "alternates": [
+            {
+              "text": "Monitor",
+              "confidence": 0.8997449493408203
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000076",
+          "type": "word",
+          "text": "Electronics",
+          "confidence": 0.9107838439941406,
+          "confidenceRaw": 91.07838439941406,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 251,
+            "y": 602,
+            "w": 117,
+            "h": 17
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00012",
+          "alternates": [
+            {
+              "text": "Electronics",
+              "confidence": 0.9107838439941406
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000077",
+          "type": "word",
+          "text": "‘",
+          "confidence": 0.5233096313476563,
+          "confidenceRaw": 52.330963134765625,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 390,
+            "y": 587,
+            "w": 1,
+            "h": 37
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00012",
+          "alternates": [
+            {
+              "text": "‘",
+              "confidence": 0.5233096313476563
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000078",
+          "type": "word",
+          "text": "180",
+          "confidence": 0.9623924255371094,
+          "confidenceRaw": 96.23924255371094,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 445,
+            "y": 602,
+            "w": 39,
+            "h": 16
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00012",
+          "alternates": [
+            {
+              "text": "180",
+              "confidence": 0.9623924255371094
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000079",
+          "type": "word",
+          "text": "|",
+          "confidence": 0.8824951934814453,
+          "confidenceRaw": 88.24951934814453,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 529,
+            "y": 620,
+            "w": 1,
+            "h": 3
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00012",
+          "alternates": [
+            {
+              "text": "|",
+              "confidence": 0.8824951934814453
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000080",
+          "type": "word",
+          "text": "$300",
+          "confidence": 0.9283605194091797,
+          "confidenceRaw": 92.83605194091797,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 574,
+            "y": 601,
+            "w": 54,
+            "h": 20
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00012",
+          "alternates": [
+            {
+              "text": "$300",
+              "confidence": 0.9283605194091797
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000072",
+          "type": "word",
+          "text": "S 5",
+          "confidence": 0.24591278076171874,
+          "confidenceRaw": 24.591278076171875,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 607,
+            "y": 581,
+            "w": 16,
+            "h": 27
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00012",
+          "alternates": [
+            {
+              "text": "S5",
+              "confidence": 0.24591278076171874
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000081",
+          "type": "word",
+          "text": "$54,000",
+          "confidence": 0.9185203552246094,
+          "confidenceRaw": 91.85203552246094,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 691,
+            "y": 601,
+            "w": 89,
+            "h": 21
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00012",
+          "alternates": [
+            {
+              "text": "$54,000",
+              "confidence": 0.9185203552246094
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000073",
+          "type": "word",
+          "text": "1",
+          "confidence": 0.8650168609619141,
+          "confidenceRaw": 86.5016860961914,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 797,
+            "y": 585,
+            "w": 3,
+            "h": 14
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00012",
+          "alternates": [
+            {
+              "text": "1",
+              "confidence": 0.8650168609619141
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000082",
+          "type": "word",
+          "text": "|",
+          "confidence": 0.9664418029785157,
+          "confidenceRaw": 96.64418029785156,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 799,
+            "y": 600,
+            "w": 1,
+            "h": 24
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00012",
+          "alternates": [
+            {
+              "text": "|",
+              "confidence": 0.9664418029785157
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000083",
+          "type": "word",
+          "text": "BRI",
+          "confidence": 0.0,
+          "confidenceRaw": 0.0,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 48,
+            "y": 633,
+            "w": 68,
+            "h": 2
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00013",
+          "alternates": [
+            {
+              "text": "BRI",
+              "confidence": 0.0
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000084",
+          "type": "word",
+          "text": "WS",
+          "confidence": 0.15552833557128906,
+          "confidenceRaw": 15.552833557128906,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 152,
+            "y": 634,
+            "w": 5,
+            "h": 1
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00013",
+          "alternates": [
+            {
+              "text": "WS",
+              "confidence": 0.15552833557128906
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000085",
+          "type": "word",
+          "text": "I",
+          "confidence": 0.593890380859375,
+          "confidenceRaw": 59.3890380859375,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 390,
+            "y": 636,
+            "w": 1,
+            "h": 8
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00013",
+          "alternates": [
+            {
+              "text": "I",
+              "confidence": 0.593890380859375
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000086",
+          "type": "word",
+          "text": "|",
+          "confidence": 0.7601215362548828,
+          "confidenceRaw": 76.01215362548828,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 798,
+            "y": 630,
+            "w": 2,
+            "h": 11
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00013",
+          "alternates": [
+            {
+              "text": "|",
+              "confidence": 0.7601215362548828
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000087",
+          "type": "word",
+          "text": "Hotal",
+          "confidence": 0.9277745056152343,
+          "confidenceRaw": 92.77745056152344,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 39,
+            "y": 646,
+            "w": 57,
+            "h": 30
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00014",
+          "alternates": [
+            {
+              "text": "Hotal",
+              "confidence": 0.9277745056152343
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000088",
+          "type": "word",
+          "text": "S 60",
+          "confidence": 0.29786087036132813,
+          "confidenceRaw": 29.786087036132812,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 444,
+            "y": 651,
+            "w": 40,
+            "h": 16
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00014",
+          "alternates": [
+            {
+              "text": "S60",
+              "confidence": 0.29786087036132813
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000089",
+          "type": "word",
+          "text": "$15",
+          "confidence": 0.5656587600708007,
+          "confidenceRaw": 56.56587600708008,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 583,
+            "y": 649,
+            "w": 45,
+            "h": 20
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00014",
+          "alternates": [
+            {
+              "text": "$15",
+              "confidence": 0.5656587600708007
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000090",
+          "type": "word",
+          "text": "|",
+          "confidence": 0.9090065765380859,
+          "confidenceRaw": 90.9006576538086,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 648,
+            "y": 647,
+            "w": 1,
+            "h": 8
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00014",
+          "alternates": [
+            {
+              "text": "|",
+              "confidence": 0.9090065765380859
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000091",
+          "type": "word",
+          "text": "$54,000",
+          "confidence": 0.9233368682861328,
+          "confidenceRaw": 92.33368682861328,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 693,
+            "y": 649,
+            "w": 87,
+            "h": 21
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00014",
+          "alternates": [
+            {
+              "text": "$54,000",
+              "confidence": 0.9233368682861328
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000092",
+          "type": "word",
+          "text": "|",
+          "confidence": 0.9340233612060547,
+          "confidenceRaw": 93.40233612060547,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 799,
+            "y": 647,
+            "w": 1,
+            "h": 20
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00014",
+          "alternates": [
+            {
+              "text": "|",
+              "confidence": 0.9340233612060547
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000093",
+          "type": "word",
+          "text": "Total",
+          "confidence": 0.8434930419921876,
+          "confidenceRaw": 84.34930419921875,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 571,
+            "y": 701,
+            "w": 58,
+            "h": 18
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00015",
+          "alternates": [
+            {
+              "text": "Total",
+              "confidence": 0.8434930419921876
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000094",
+          "type": "word",
+          "text": "$289,100",
+          "confidence": 0.670767822265625,
+          "confidenceRaw": 67.0767822265625,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 668,
+            "y": 700,
+            "w": 113,
+            "h": 23
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00015",
+          "alternates": [
+            {
+              "text": "$289,100",
+              "confidence": 0.670767822265625
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000095",
+          "type": "word",
+          "text": "e",
+          "confidence": 0.4559580230712891,
+          "confidenceRaw": 45.595802307128906,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 22,
+            "y": 788,
+            "w": 9,
+            "h": 10
+          },
+          "blockId": "blk-001-00003",
+          "lineId": "ln-001-00016",
+          "alternates": [
+            {
+              "text": "e",
+              "confidence": 0.4559580230712891
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000096",
+          "type": "word",
+          "text": "Top",
+          "confidence": 0.7786734771728515,
+          "confidenceRaw": 77.86734771728516,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 54,
+            "y": 783,
+            "w": 43,
+            "h": 23
+          },
+          "blockId": "blk-001-00003",
+          "lineId": "ln-001-00016",
+          "alternates": [
+            {
+              "text": "Top",
+              "confidence": 0.7786734771728515
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000097",
+          "type": "word",
+          "text": "product:",
+          "confidence": 0.914022216796875,
+          "confidenceRaw": 91.4022216796875,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 105,
+            "y": 783,
+            "w": 99,
+            "h": 23
+          },
+          "blockId": "blk-001-00003",
+          "lineId": "ln-001-00016",
+          "alternates": [
+            {
+              "text": "product:",
+              "confidence": 0.914022216796875
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000098",
+          "type": "word",
+          "text": "Laptop",
+          "confidence": 0.9159253692626953,
+          "confidenceRaw": 91.59253692626953,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 214,
+            "y": 784,
+            "w": 82,
+            "h": 22
+          },
+          "blockId": "blk-001-00003",
+          "lineId": "ln-001-00016",
+          "alternates": [
+            {
+              "text": "Laptop",
+              "confidence": 0.9159253692626953
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000099",
+          "type": "word",
+          "text": "Pro",
+          "confidence": 0.9159253692626953,
+          "confidenceRaw": 91.59253692626953,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 305,
+            "y": 783,
+            "w": 38,
+            "h": 19
+          },
+          "blockId": "blk-001-00003",
+          "lineId": "ln-001-00016",
+          "alternates": [
+            {
+              "text": "Pro",
+              "confidence": 0.9159253692626953
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000100",
+          "type": "word",
+          "text": "¢",
+          "confidence": 0.3151486206054688,
+          "confidenceRaw": 31.514862060546875,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 22,
+            "y": 836,
+            "w": 9,
+            "h": 8
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00017",
+          "alternates": [
+            {
+              "text": "¢",
+              "confidence": 0.3151486206054688
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000101",
+          "type": "word",
+          "text": "Note:",
+          "confidence": 0.61404052734375,
+          "confidenceRaw": 61.404052734375,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 56,
+            "y": 831,
+            "w": 60,
+            "h": 18
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00017",
+          "alternates": [
+            {
+              "text": "Note:",
+              "confidence": 0.61404052734375
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000102",
+          "type": "word",
+          "text": "Increase",
+          "confidence": 0.9140135192871094,
+          "confidenceRaw": 91.40135192871094,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 125,
+            "y": 831,
+            "w": 96,
+            "h": 18
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00017",
+          "alternates": [
+            {
+              "text": "Increase",
+              "confidence": 0.9140135192871094
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000103",
+          "type": "word",
+          "text": "in",
+          "confidence": 0.8844456481933594,
+          "confidenceRaw": 88.44456481933594,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 230,
+            "y": 830,
+            "w": 18,
+            "h": 19
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00017",
+          "alternates": [
+            {
+              "text": "in",
+              "confidence": 0.8844456481933594
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000104",
+          "type": "word",
+          "text": "office",
+          "confidence": 0.8844456481933594,
+          "confidenceRaw": 88.44456481933594,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 256,
+            "y": 830,
+            "w": 63,
+            "h": 19
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00017",
+          "alternates": [
+            {
+              "text": "office",
+              "confidence": 0.8844456481933594
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000105",
+          "type": "word",
+          "text": "supplies",
+          "confidence": 0.9144916534423828,
+          "confidenceRaw": 91.44916534423828,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 327,
+            "y": 830,
+            "w": 96,
+            "h": 24
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00017",
+          "alternates": [
+            {
+              "text": "supplies",
+              "confidence": 0.9144916534423828
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000106",
+          "type": "word",
+          "text": "sales",
+          "confidence": 0.915656967163086,
+          "confidenceRaw": 91.5656967163086,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 430,
+            "y": 830,
+            "w": 57,
+            "h": 19
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00017",
+          "alternates": [
+            {
+              "text": "sales",
+              "confidence": 0.915656967163086
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000107",
+          "type": "word",
+          "text": "compared",
+          "confidence": 0.9229499816894531,
+          "confidenceRaw": 92.29499816894531,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 495,
+            "y": 830,
+            "w": 118,
+            "h": 24
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00017",
+          "alternates": [
+            {
+              "text": "compared",
+              "confidence": 0.9229499816894531
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000108",
+          "type": "word",
+          "text": "to",
+          "confidence": 0.9296785736083985,
+          "confidenceRaw": 92.96785736083984,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 621,
+            "y": 832,
+            "w": 24,
+            "h": 17
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00017",
+          "alternates": [
+            {
+              "text": "to",
+              "confidence": 0.9296785736083985
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000109",
+          "type": "word",
+          "text": "last",
+          "confidence": 0.9180962371826172,
+          "confidenceRaw": 91.80962371826172,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 653,
+            "y": 830,
+            "w": 40,
+            "h": 19
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00017",
+          "alternates": [
+            {
+              "text": "last",
+              "confidence": 0.9180962371826172
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000110",
+          "type": "word",
+          "text": "month.",
+          "confidence": 0.923088150024414,
+          "confidenceRaw": 92.3088150024414,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 701,
+            "y": 830,
+            "w": 82,
+            "h": 19
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00017",
+          "alternates": [
+            {
+              "text": "month.",
+              "confidence": 0.923088150024414
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        }
+      ],
+      "lines": [
+        {
+          "lineId": "ln-001-00001",
+          "bbox": {
+            "x": 22,
+            "y": 50,
+            "w": 649,
+            "h": 74
+          },
+          "tokenIds": [
+            "t-001-000001",
+            "t-001-000002",
+            "t-001-000003"
+          ],
+          "confidence": 0.9107689412434895,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00002",
+          "bbox": {
+            "x": 27,
+            "y": 152,
+            "w": 759,
+            "h": 23
+          },
+          "tokenIds": [
+            "t-001-000004",
+            "t-001-000005",
+            "t-001-000006",
+            "t-001-000007",
+            "t-001-000008",
+            "t-001-000009",
+            "t-001-000010"
+          ],
+          "confidence": 0.9211852373395647,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00003",
+          "bbox": {
+            "x": 27,
+            "y": 203,
+            "w": 759,
+            "h": 23
+          },
+          "tokenIds": [
+            "t-001-000011",
+            "t-001-000012",
+            "t-001-000013",
+            "t-001-000014",
+            "t-001-000015",
+            "t-001-000016",
+            "t-001-000017"
+          ],
+          "confidence": 0.8827334812709263,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00004",
+          "bbox": {
+            "x": 40,
+            "y": 302,
+            "w": 750,
+            "h": 29
+          },
+          "tokenIds": [
+            "t-001-000018",
+            "t-001-000019",
+            "t-001-000020",
+            "t-001-000021",
+            "t-001-000022",
+            "t-001-000023",
+            "t-001-000024",
+            "t-001-000025",
+            "t-001-000026",
+            "t-001-000027"
+          ],
+          "confidence": 0.6253927001953125,
+          "isLowConfidence": true
+        },
+        {
+          "lineId": "ln-001-00005",
+          "bbox": {
+            "x": 40,
+            "y": 351,
+            "w": 740,
+            "h": 31
+          },
+          "tokenIds": [
+            "t-001-000028",
+            "t-001-000029",
+            "t-001-000030",
+            "t-001-000031",
+            "t-001-000032",
+            "t-001-000033"
+          ],
+          "confidence": 0.9303592173258464,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00006",
+          "bbox": {
+            "x": 21,
+            "y": 378,
+            "w": 779,
+            "h": 60
+          },
+          "tokenIds": [
+            "t-001-000034",
+            "t-001-000035",
+            "t-001-000036",
+            "t-001-000037",
+            "t-001-000038",
+            "t-001-000039",
+            "t-001-000040",
+            "t-001-000041",
+            "t-001-000042"
+          ],
+          "confidence": 0.4867355092366536,
+          "isLowConfidence": true
+        },
+        {
+          "lineId": "ln-001-00007",
+          "bbox": {
+            "x": 21,
+            "y": 437,
+            "w": 779,
+            "h": 51
+          },
+          "tokenIds": [
+            "t-001-000043",
+            "t-001-000044",
+            "t-001-000045",
+            "t-001-000046",
+            "t-001-000047",
+            "t-001-000048",
+            "t-001-000049",
+            "t-001-000050",
+            "t-001-000051",
+            "t-001-000052"
+          ],
+          "confidence": 0.6674825325012207,
+          "isLowConfidence": true
+        },
+        {
+          "lineId": "ln-001-00008",
+          "bbox": {
+            "x": 20,
+            "y": 487,
+            "w": 780,
+            "h": 38
+          },
+          "tokenIds": [
+            "t-001-000053",
+            "t-001-000054",
+            "t-001-000055",
+            "t-001-000057",
+            "t-001-000058",
+            "t-001-000059",
+            "t-001-000060"
+          ],
+          "confidence": 0.6686214501517159,
+          "isLowConfidence": true
+        },
+        {
+          "lineId": "ln-001-00009",
+          "bbox": {
+            "x": 390,
+            "y": 528,
+            "w": 1,
+            "h": 6
+          },
+          "tokenIds": [
+            "t-001-000056"
+          ],
+          "confidence": 0.360091438293457,
+          "isLowConfidence": true
+        },
+        {
+          "lineId": "ln-001-00010",
+          "bbox": {
+            "x": 40,
+            "y": 535,
+            "w": 760,
+            "h": 48
+          },
+          "tokenIds": [
+            "t-001-000061",
+            "t-001-000062",
+            "t-001-000064",
+            "t-001-000065",
+            "t-001-000066",
+            "t-001-000067",
+            "t-001-000068",
+            "t-001-000069",
+            "t-001-000070",
+            "t-001-000071"
+          ],
+          "confidence": 0.8587798004150391,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00011",
+          "bbox": {
+            "x": 231,
+            "y": 535,
+            "w": 2,
+            "h": 2
+          },
+          "tokenIds": [
+            "t-001-000063"
+          ],
+          "confidence": 0.36939048767089844,
+          "isLowConfidence": true
+        },
+        {
+          "lineId": "ln-001-00012",
+          "bbox": {
+            "x": 40,
+            "y": 581,
+            "w": 760,
+            "h": 43
+          },
+          "tokenIds": [
+            "t-001-000074",
+            "t-001-000075",
+            "t-001-000076",
+            "t-001-000077",
+            "t-001-000078",
+            "t-001-000079",
+            "t-001-000080",
+            "t-001-000072",
+            "t-001-000081",
+            "t-001-000073",
+            "t-001-000082"
+          ],
+          "confidence": 0.8199181782115589,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00013",
+          "bbox": {
+            "x": 48,
+            "y": 630,
+            "w": 752,
+            "h": 14
+          },
+          "tokenIds": [
+            "t-001-000083",
+            "t-001-000084",
+            "t-001-000085",
+            "t-001-000086"
+          ],
+          "confidence": 0.3773850631713867,
+          "isLowConfidence": true
+        },
+        {
+          "lineId": "ln-001-00014",
+          "bbox": {
+            "x": 39,
+            "y": 646,
+            "w": 761,
+            "h": 30
+          },
+          "tokenIds": [
+            "t-001-000087",
+            "t-001-000088",
+            "t-001-000089",
+            "t-001-000090",
+            "t-001-000091",
+            "t-001-000092"
+          ],
+          "confidence": 0.7596101570129393,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00015",
+          "bbox": {
+            "x": 571,
+            "y": 700,
+            "w": 210,
+            "h": 23
+          },
+          "tokenIds": [
+            "t-001-000093",
+            "t-001-000094"
+          ],
+          "confidence": 0.7571304321289063,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00016",
+          "bbox": {
+            "x": 22,
+            "y": 783,
+            "w": 321,
+            "h": 23
+          },
+          "tokenIds": [
+            "t-001-000095",
+            "t-001-000096",
+            "t-001-000097",
+            "t-001-000098",
+            "t-001-000099"
+          ],
+          "confidence": 0.7961008911132812,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00017",
+          "bbox": {
+            "x": 22,
+            "y": 830,
+            "w": 761,
+            "h": 24
+          },
+          "tokenIds": [
+            "t-001-000100",
+            "t-001-000101",
+            "t-001-000102",
+            "t-001-000103",
+            "t-001-000104",
+            "t-001-000105",
+            "t-001-000106",
+            "t-001-000107",
+            "t-001-000108",
+            "t-001-000109",
+            "t-001-000110"
+          ],
+          "confidence": 0.830550502430309,
+          "isLowConfidence": false
+        }
+      ],
+      "blocks": [
+        {
+          "blockId": "blk-001-00001",
+          "type": "text",
+          "bbox": {
+            "x": 20,
+            "y": 302,
+            "w": 780,
+            "h": 281
+          },
+          "lineIds": [
+            "ln-001-00004",
+            "ln-001-00005",
+            "ln-001-00006",
+            "ln-001-00007",
+            "ln-001-00008",
+            "ln-001-00009",
+            "ln-001-00010",
+            "ln-001-00011"
+          ],
+          "tokenIds": [
+            "t-001-000018",
+            "t-001-000019",
+            "t-001-000020",
+            "t-001-000021",
+            "t-001-000022",
+            "t-001-000023",
+            "t-001-000024",
+            "t-001-000025",
+            "t-001-000026",
+            "t-001-000027",
+            "t-001-000028",
+            "t-001-000029",
+            "t-001-000030",
+            "t-001-000031",
+            "t-001-000032",
+            "t-001-000033",
+            "t-001-000034",
+            "t-001-000035",
+            "t-001-000036",
+            "t-001-000037",
+            "t-001-000038",
+            "t-001-000039",
+            "t-001-000040",
+            "t-001-000041",
+            "t-001-000042",
+            "t-001-000043",
+            "t-001-000044",
+            "t-001-000045",
+            "t-001-000046",
+            "t-001-000047",
+            "t-001-000048",
+            "t-001-000049",
+            "t-001-000050",
+            "t-001-000051",
+            "t-001-000052",
+            "t-001-000053",
+            "t-001-000054",
+            "t-001-000055",
+            "t-001-000057",
+            "t-001-000058",
+            "t-001-000059",
+            "t-001-000060",
+            "t-001-000056",
+            "t-001-000061",
+            "t-001-000062",
+            "t-001-000064",
+            "t-001-000065",
+            "t-001-000066",
+            "t-001-000067",
+            "t-001-000068",
+            "t-001-000069",
+            "t-001-000070",
+            "t-001-000071",
+            "t-001-000063"
+          ],
+          "confidence": 0.620856641973768,
+          "isLowConfidence": true
+        },
+        {
+          "blockId": "blk-001-00002",
+          "type": "text",
+          "bbox": {
+            "x": 22,
+            "y": 50,
+            "w": 649,
+            "h": 74
+          },
+          "lineIds": [
+            "ln-001-00001"
+          ],
+          "tokenIds": [
+            "t-001-000001",
+            "t-001-000002",
+            "t-001-000003"
+          ],
+          "confidence": 0.9107689412434895,
+          "isLowConfidence": false
+        },
+        {
+          "blockId": "blk-001-00003",
+          "type": "text",
+          "bbox": {
+            "x": 22,
+            "y": 783,
+            "w": 321,
+            "h": 23
+          },
+          "lineIds": [
+            "ln-001-00016"
+          ],
+          "tokenIds": [
+            "t-001-000095",
+            "t-001-000096",
+            "t-001-000097",
+            "t-001-000098",
+            "t-001-000099"
+          ],
+          "confidence": 0.7961008911132812,
+          "isLowConfidence": true
+        },
+        {
+          "blockId": "blk-001-00004",
+          "type": "text",
+          "bbox": {
+            "x": 22,
+            "y": 830,
+            "w": 761,
+            "h": 24
+          },
+          "lineIds": [
+            "ln-001-00017"
+          ],
+          "tokenIds": [
+            "t-001-000100",
+            "t-001-000101",
+            "t-001-000102",
+            "t-001-000103",
+            "t-001-000104",
+            "t-001-000105",
+            "t-001-000106",
+            "t-001-000107",
+            "t-001-000108",
+            "t-001-000109",
+            "t-001-000110"
+          ],
+          "confidence": 0.830550502430309,
+          "isLowConfidence": false
+        },
+        {
+          "blockId": "blk-001-00005",
+          "type": "text",
+          "bbox": {
+            "x": 27,
+            "y": 152,
+            "w": 759,
+            "h": 23
+          },
+          "lineIds": [
+            "ln-001-00002"
+          ],
+          "tokenIds": [
+            "t-001-000004",
+            "t-001-000005",
+            "t-001-000006",
+            "t-001-000007",
+            "t-001-000008",
+            "t-001-000009",
+            "t-001-000010"
+          ],
+          "confidence": 0.9211852373395647,
+          "isLowConfidence": false
+        },
+        {
+          "blockId": "blk-001-00006",
+          "type": "text",
+          "bbox": {
+            "x": 27,
+            "y": 203,
+            "w": 759,
+            "h": 23
+          },
+          "lineIds": [
+            "ln-001-00003"
+          ],
+          "tokenIds": [
+            "t-001-000011",
+            "t-001-000012",
+            "t-001-000013",
+            "t-001-000014",
+            "t-001-000015",
+            "t-001-000016",
+            "t-001-000017"
+          ],
+          "confidence": 0.8827334812709263,
+          "isLowConfidence": false
+        },
+        {
+          "blockId": "blk-001-00007",
+          "type": "text",
+          "bbox": {
+            "x": 39,
+            "y": 581,
+            "w": 761,
+            "h": 142
+          },
+          "lineIds": [
+            "ln-001-00012",
+            "ln-001-00013",
+            "ln-001-00014",
+            "ln-001-00015"
+          ],
+          "tokenIds": [
+            "t-001-000074",
+            "t-001-000075",
+            "t-001-000076",
+            "t-001-000077",
+            "t-001-000078",
+            "t-001-000079",
+            "t-001-000080",
+            "t-001-000072",
+            "t-001-000081",
+            "t-001-000073",
+            "t-001-000082",
+            "t-001-000083",
+            "t-001-000084",
+            "t-001-000085",
+            "t-001-000086",
+            "t-001-000087",
+            "t-001-000088",
+            "t-001-000089",
+            "t-001-000090",
+            "t-001-000091",
+            "t-001-000092",
+            "t-001-000093",
+            "t-001-000094"
+          ],
+          "confidence": 0.6785109576311978,
+          "isLowConfidence": true
+        }
+      ],
+      "tables": [
+        {
+          "tableId": "tbl-0001",
+          "confidence": 0.8967567217280312,
+          "bbox": {
+            "x": 19,
+            "y": 289,
+            "w": 783,
+            "h": 449
+          },
+          "detection": {
+            "method": "lines",
+            "hasExplicitGridLines": true,
+            "modelName": null,
+            "modelVersion": null,
+            "notes": [
+              "Header row selected from detected row 1.",
+              "Removed 2 artifact row(s) from structured output."
+            ]
+          },
+          "grid": {
+            "rows": 11,
+            "cols": 5,
+            "rowBands": [
+              {
+                "rowIndex": 0,
+                "type": "noise",
+                "bbox": {
+                  "x": 19,
+                  "y": 292,
+                  "w": 783,
+                  "h": 13
+                }
+              },
+              {
+                "rowIndex": 1,
+                "type": "header",
+                "bbox": {
+                  "x": 19,
+                  "y": 305,
+                  "w": 783,
+                  "h": 20
+                }
+              },
+              {
+                "rowIndex": 2,
+                "type": "noise",
+                "bbox": {
+                  "x": 19,
+                  "y": 325,
+                  "w": 783,
+                  "h": 11
+                }
+              },
+              {
+                "rowIndex": 3,
+                "type": "data",
+                "bbox": {
+                  "x": 19,
+                  "y": 336,
+                  "w": 783,
+                  "h": 53
+                }
+              },
+              {
+                "rowIndex": 4,
+                "type": "data",
+                "bbox": {
+                  "x": 19,
+                  "y": 389,
+                  "w": 783,
+                  "h": 49
+                }
+              },
+              {
+                "rowIndex": 5,
+                "type": "data",
+                "bbox": {
+                  "x": 19,
+                  "y": 438,
+                  "w": 783,
+                  "h": 49
+                }
+              },
+              {
+                "rowIndex": 6,
+                "type": "data",
+                "bbox": {
+                  "x": 19,
+                  "y": 487,
+                  "w": 783,
+                  "h": 49
+                }
+              },
+              {
+                "rowIndex": 7,
+                "type": "data",
+                "bbox": {
+                  "x": 19,
+                  "y": 536,
+                  "w": 783,
+                  "h": 49
+                }
+              },
+              {
+                "rowIndex": 8,
+                "type": "data",
+                "bbox": {
+                  "x": 19,
+                  "y": 585,
+                  "w": 783,
+                  "h": 49
+                }
+              },
+              {
+                "rowIndex": 9,
+                "type": "data",
+                "bbox": {
+                  "x": 19,
+                  "y": 634,
+                  "w": 783,
+                  "h": 51
+                }
+              },
+              {
+                "rowIndex": 10,
+                "type": "summary",
+                "bbox": {
+                  "x": 19,
+                  "y": 685,
+                  "w": 783,
+                  "h": 50
+                }
+              }
+            ],
+            "colBands": [
+              {
+                "colIndex": 0,
+                "bbox": {
+                  "x": 21,
+                  "y": 289,
+                  "w": 211,
+                  "h": 449
+                }
+              },
+              {
+                "colIndex": 1,
+                "bbox": {
+                  "x": 232,
+                  "y": 289,
+                  "w": 158,
+                  "h": 449
+                }
+              },
+              {
+                "colIndex": 2,
+                "bbox": {
+                  "x": 390,
+                  "y": 289,
+                  "w": 140,
+                  "h": 449
+                }
+              },
+              {
+                "colIndex": 3,
+                "bbox": {
+                  "x": 530,
+                  "y": 289,
+                  "w": 119,
+                  "h": 449
+                }
+              },
+              {
+                "colIndex": 4,
+                "bbox": {
+                  "x": 649,
+                  "y": 289,
+                  "w": 151,
+                  "h": 449
+                }
+              }
+            ]
+          },
+          "header": {
+            "rowIndex": 1,
+            "columns": [
+              {
+                "colIndex": 0,
+                "name": "ad gole Flen",
+                "key": "ad_gole_flen",
+                "bbox": {
+                  "x": 40,
+                  "y": 306,
+                  "w": 89,
+                  "h": 17
+                },
+                "confidence": 0.9186524963378906
+              },
+              {
+                "colIndex": 1,
+                "name": "Category",
+                "key": "category",
+                "bbox": {
+                  "x": 255,
+                  "y": 302,
+                  "w": 105,
+                  "h": 29
+                },
+                "confidence": 0.1363183848063151
+              },
+              {
+                "colIndex": 2,
+                "name": "its Sold",
+                "key": "its_sold",
+                "bbox": {
+                  "x": 440,
+                  "y": 306,
+                  "w": 77,
+                  "h": 17
+                },
+                "confidence": 0.7685062408447265
+              },
+              {
+                "colIndex": 3,
+                "name": "Unit Price",
+                "key": "unit_price",
+                "bbox": {
+                  "x": 557,
+                  "y": 306,
+                  "w": 106,
+                  "h": 17
+                },
+                "confidence": 0.7741483688354492
+              },
+              {
+                "colIndex": 4,
+                "name": "Total Sales",
+                "key": "total_sales",
+                "bbox": {
+                  "x": 677,
+                  "y": 306,
+                  "w": 113,
+                  "h": 17
+                },
+                "confidence": 0.9205050659179688
+              }
+            ],
+            "cells": [
+              {
+                "rowIndex": 1,
+                "colIndex": 0,
+                "rowSpan": 1,
+                "colSpan": 1,
+                "text": "ad gole Flen",
+                "confidence": 0.9186524963378906,
+                "bbox": {
+                  "x": 40,
+                  "y": 306,
+                  "w": 89,
+                  "h": 17
+                },
+                "tokenIds": [
+                  "t-001-000018"
+                ]
+              },
+              {
+                "rowIndex": 1,
+                "colIndex": 1,
+                "rowSpan": 1,
+                "colSpan": 1,
+                "text": "Category",
+                "confidence": 0.1363183848063151,
+                "bbox": {
+                  "x": 255,
+                  "y": 302,
+                  "w": 105,
+                  "h": 29
+                },
+                "tokenIds": [
+                  "t-001-000019",
+                  "t-001-000021",
+                  "t-001-000020"
+                ]
+              },
+              {
+                "rowIndex": 1,
+                "colIndex": 2,
+                "rowSpan": 1,
+                "colSpan": 1,
+                "text": "its Sold",
+                "confidence": 0.7685062408447265,
+                "bbox": {
+                  "x": 440,
+                  "y": 306,
+                  "w": 77,
+                  "h": 17
+                },
+                "tokenIds": [
+                  "t-001-000022",
+                  "t-001-000023"
+                ]
+              },
+              {
+                "rowIndex": 1,
+                "colIndex": 3,
+                "rowSpan": 1,
+                "colSpan": 1,
+                "text": "Unit Price",
+                "confidence": 0.7741483688354492,
+                "bbox": {
+                  "x": 557,
+                  "y": 306,
+                  "w": 106,
+                  "h": 17
+                },
+                "tokenIds": [
+                  "t-001-000024",
+                  "t-001-000025"
+                ]
+              },
+              {
+                "rowIndex": 1,
+                "colIndex": 4,
+                "rowSpan": 1,
+                "colSpan": 1,
+                "text": "Total Sales",
+                "confidence": 0.9205050659179688,
+                "bbox": {
+                  "x": 677,
+                  "y": 306,
+                  "w": 113,
+                  "h": 17
+                },
+                "tokenIds": [
+                  "t-001-000026",
+                  "t-001-000027"
+                ]
+              }
+            ]
+          },
+          "cells": [
+            {
+              "rowIndex": 3,
+              "colIndex": 0,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "Laptop Pro",
+              "normalized": {
+                "type": "string",
+                "value": "Laptop Pro",
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.7041854667663574,
+              "bbox": {
+                "x": 21,
+                "y": 357,
+                "w": 188,
+                "h": 33
+              },
+              "tokenIds": [
+                "t-001-000029",
+                "t-001-000028",
+                "t-001-000034",
+                "t-001-000036"
+              ],
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 3,
+              "colIndex": 1,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "Electronics",
+              "normalized": {
+                "type": "string",
+                "value": "Electronics",
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.9243550872802735,
+              "bbox": {
+                "x": 251,
+                "y": 351,
+                "w": 117,
+                "h": 31
+              },
+              "tokenIds": [
+                "t-001-000030"
+              ],
+              "isLowConfidence": false
+            },
+            {
+              "rowIndex": 3,
+              "colIndex": 2,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "120",
+              "normalized": {
+                "type": "number",
+                "value": 120.0,
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.9642539215087891,
+              "bbox": {
+                "x": 445,
+                "y": 358,
+                "w": 39,
+                "h": 16
+              },
+              "tokenIds": [
+                "t-001-000031"
+              ],
+              "isLowConfidence": false
+            },
+            {
+              "rowIndex": 3,
+              "colIndex": 3,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "$1,200",
+              "normalized": {
+                "type": "currency",
+                "value": 1200.0,
+                "currency": "$",
+                "unit": null
+              },
+              "confidence": 0.9250943756103516,
+              "bbox": {
+                "x": 553,
+                "y": 356,
+                "w": 75,
+                "h": 21
+              },
+              "tokenIds": [
+                "t-001-000032"
+              ],
+              "isLowConfidence": false
+            },
+            {
+              "rowIndex": 3,
+              "colIndex": 4,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "$144,000",
+              "normalized": {
+                "type": "currency",
+                "value": 144000.0,
+                "currency": "$",
+                "unit": null
+              },
+              "confidence": 0.9297496795654296,
+              "bbox": {
+                "x": 679,
+                "y": 356,
+                "w": 101,
+                "h": 20
+              },
+              "tokenIds": [
+                "t-001-000033"
+              ],
+              "isLowConfidence": false
+            },
+            {
+              "rowIndex": 4,
+              "colIndex": 0,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "Office Chair",
+              "normalized": {
+                "type": "string",
+                "value": "Office Chair",
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.4322461700439453,
+              "bbox": {
+                "x": 21,
+                "y": 389,
+                "w": 188,
+                "h": 34
+              },
+              "tokenIds": [
+                "t-001-000034",
+                "t-001-000035",
+                "t-001-000036"
+              ],
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 4,
+              "colIndex": 1,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "Furniture",
+              "normalized": {
+                "type": "string",
+                "value": "Furniture",
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.5069698333740235,
+              "bbox": {
+                "x": 234,
+                "y": 389,
+                "w": 138,
+                "h": 34
+              },
+              "tokenIds": [
+                "t-001-000037"
+              ],
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 4,
+              "colIndex": 2,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "3501",
+              "normalized": {
+                "type": "number",
+                "value": 3501.0,
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.6648616218566895,
+              "bbox": {
+                "x": 390,
+                "y": 378,
+                "w": 152,
+                "h": 61
+              },
+              "tokenIds": [
+                "t-001-000040",
+                "t-001-000038",
+                "t-001-000039",
+                "t-001-000049"
+              ],
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 4,
+              "colIndex": 3,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "$150",
+              "normalized": {
+                "type": "currency",
+                "value": 150.0,
+                "currency": "$",
+                "unit": null
+              },
+              "confidence": 0.633663387298584,
+              "bbox": {
+                "x": 517,
+                "y": 378,
+                "w": 111,
+                "h": 60
+              },
+              "tokenIds": [
+                "t-001-000040",
+                "t-001-000041"
+              ],
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 4,
+              "colIndex": 4,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "$52,500",
+              "normalized": {
+                "type": "currency",
+                "value": 52500.0,
+                "currency": "$",
+                "unit": null
+              },
+              "confidence": 0.009300000071525573,
+              "bbox": {
+                "x": 692,
+                "y": 382,
+                "w": 108,
+                "h": 52
+              },
+              "tokenIds": [
+                "t-001-000042"
+              ],
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 5,
+              "colIndex": 0,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "Wireless Mouse",
+              "normalized": {
+                "type": "string",
+                "value": "Wireless Mouse",
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.5621514383951823,
+              "bbox": {
+                "x": 21,
+                "y": 437,
+                "w": 212,
+                "h": 51
+              },
+              "tokenIds": [
+                "t-001-000043",
+                "t-001-000044",
+                "t-001-000045"
+              ],
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 5,
+              "colIndex": 1,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "Electronics",
+              "normalized": {
+                "type": "string",
+                "value": "Electronics",
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.619893684387207,
+              "bbox": {
+                "x": 231,
+                "y": 450,
+                "w": 160,
+                "h": 38
+              },
+              "tokenIds": [
+                "t-001-000046",
+                "t-001-000047",
+                "t-001-000045"
+              ],
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 5,
+              "colIndex": 2,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "5100",
+              "normalized": {
+                "type": "number",
+                "value": 5100.0,
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.7057752100626628,
+              "bbox": {
+                "x": 390,
+                "y": 438,
+                "w": 140,
+                "h": 47
+              },
+              "tokenIds": [
+                "t-001-000049",
+                "t-001-000048",
+                "t-001-000047"
+              ],
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 5,
+              "colIndex": 3,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "$225",
+              "normalized": {
+                "type": "currency",
+                "value": 225.0,
+                "currency": "$",
+                "unit": null
+              },
+              "confidence": 0.6679680633544922,
+              "bbox": {
+                "x": 579,
+                "y": 453,
+                "w": 49,
+                "h": 20
+              },
+              "tokenIds": [
+                "t-001-000050"
+              ],
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 5,
+              "colIndex": 4,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "$12,500",
+              "normalized": {
+                "type": "currency",
+                "value": 12500.0,
+                "currency": "$",
+                "unit": null
+              },
+              "confidence": 0.6490253829956054,
+              "bbox": {
+                "x": 692,
+                "y": 438,
+                "w": 108,
+                "h": 45
+              },
+              "tokenIds": [
+                "t-001-000052",
+                "t-001-000051"
+              ],
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 6,
+              "colIndex": 0,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "ﬁCoiffetre Maker ‘",
+              "normalized": {
+                "type": "string",
+                "value": "ﬁCoiffetre Maker ‘",
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.39154567718505856,
+              "bbox": {
+                "x": 20,
+                "y": 487,
+                "w": 213,
+                "h": 50
+              },
+              "tokenIds": [
+                "t-001-000053",
+                "t-001-000054",
+                "t-001-000063"
+              ],
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 6,
+              "colIndex": 1,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "Appliances",
+              "normalized": {
+                "type": "string",
+                "value": "Appliances",
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.38507452646891277,
+              "bbox": {
+                "x": 231,
+                "y": 487,
+                "w": 160,
+                "h": 50
+              },
+              "tokenIds": [
+                "t-001-000055",
+                "t-001-000056",
+                "t-001-000063"
+              ],
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 6,
+              "colIndex": 2,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "210",
+              "normalized": {
+                "type": "number",
+                "value": 210.0,
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.662860164642334,
+              "bbox": {
+                "x": 390,
+                "y": 504,
+                "w": 94,
+                "h": 30
+              },
+              "tokenIds": [
+                "t-001-000057",
+                "t-001-000056"
+              ],
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 6,
+              "colIndex": 3,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "$80",
+              "normalized": {
+                "type": "currency",
+                "value": 80.0,
+                "currency": "$",
+                "unit": null
+              },
+              "confidence": 0.9093399047851562,
+              "bbox": {
+                "x": 587,
+                "y": 503,
+                "w": 41,
+                "h": 19
+              },
+              "tokenIds": [
+                "t-001-000058"
+              ],
+              "isLowConfidence": false
+            },
+            {
+              "rowIndex": 6,
+              "colIndex": 4,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "$16,800",
+              "normalized": {
+                "type": "currency",
+                "value": 16800.0,
+                "currency": "$",
+                "unit": null
+              },
+              "confidence": 0.7871965789794921,
+              "bbox": {
+                "x": 692,
+                "y": 503,
+                "w": 108,
+                "h": 20
+              },
+              "tokenIds": [
+                "t-001-000059",
+                "t-001-000060"
+              ],
+              "isLowConfidence": false
+            },
+            {
+              "rowIndex": 7,
+              "colIndex": 0,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "Desk Organizer",
+              "normalized": {
+                "type": "string",
+                "value": "Desk Organizer",
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.7377066294352215,
+              "bbox": {
+                "x": 40,
+                "y": 535,
+                "w": 193,
+                "h": 42
+              },
+              "tokenIds": [
+                "t-001-000063",
+                "t-001-000062",
+                "t-001-000061"
+              ],
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 7,
+              "colIndex": 1,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "Office Supplie",
+              "normalized": {
+                "type": "string",
+                "value": "Office Supplie",
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.5161005655924479,
+              "bbox": {
+                "x": 231,
+                "y": 535,
+                "w": 160,
+                "h": 48
+              },
+              "tokenIds": [
+                "t-001-000063",
+                "t-001-000065",
+                "t-001-000064"
+              ],
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 7,
+              "colIndex": 2,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "620",
+              "normalized": {
+                "type": "number",
+                "value": 620.0,
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.9646562957763671,
+              "bbox": {
+                "x": 444,
+                "y": 553,
+                "w": 40,
+                "h": 16
+              },
+              "tokenIds": [
+                "t-001-000066"
+              ],
+              "isLowConfidence": false
+            },
+            {
+              "rowIndex": 7,
+              "colIndex": 3,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "$15",
+              "normalized": {
+                "type": "currency",
+                "value": 15.0,
+                "currency": "$",
+                "unit": null
+              },
+              "confidence": 0.9141804504394532,
+              "bbox": {
+                "x": 588,
+                "y": 551,
+                "w": 40,
+                "h": 20
+              },
+              "tokenIds": [
+                "t-001-000067"
+              ],
+              "isLowConfidence": false
+            },
+            {
+              "rowIndex": 7,
+              "colIndex": 4,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "$9,300",
+              "normalized": {
+                "type": "currency",
+                "value": 9300.0,
+                "currency": "$",
+                "unit": null
+              },
+              "confidence": 0.9215801620483399,
+              "bbox": {
+                "x": 706,
+                "y": 543,
+                "w": 94,
+                "h": 39
+              },
+              "tokenIds": [
+                "t-001-000069",
+                "t-001-000068",
+                "t-001-000070",
+                "t-001-000071"
+              ],
+              "isLowConfidence": false
+            },
+            {
+              "rowIndex": 8,
+              "colIndex": 0,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "LED Monitor BRI WS",
+              "normalized": {
+                "type": "string",
+                "value": "LED Monitor BRI WS",
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.49284872055053713,
+              "bbox": {
+                "x": 40,
+                "y": 601,
+                "w": 131,
+                "h": 34
+              },
+              "tokenIds": [
+                "t-001-000075",
+                "t-001-000074",
+                "t-001-000083",
+                "t-001-000084"
+              ],
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 8,
+              "colIndex": 1,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "Electronics",
+              "normalized": {
+                "type": "string",
+                "value": "Electronics",
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.7170467376708984,
+              "bbox": {
+                "x": 251,
+                "y": 587,
+                "w": 140,
+                "h": 37
+              },
+              "tokenIds": [
+                "t-001-000077",
+                "t-001-000076"
+              ],
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 8,
+              "colIndex": 2,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "180",
+              "normalized": {
+                "type": "number",
+                "value": 180.0,
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.7893990834554035,
+              "bbox": {
+                "x": 390,
+                "y": 587,
+                "w": 140,
+                "h": 37
+              },
+              "tokenIds": [
+                "t-001-000077",
+                "t-001-000078",
+                "t-001-000079"
+              ],
+              "isLowConfidence": false
+            },
+            {
+              "rowIndex": 8,
+              "colIndex": 3,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "$300",
+              "normalized": {
+                "type": "currency",
+                "value": 300.0,
+                "currency": "$",
+                "unit": null
+              },
+              "confidence": 0.5871366500854492,
+              "bbox": {
+                "x": 574,
+                "y": 581,
+                "w": 54,
+                "h": 40
+              },
+              "tokenIds": [
+                "t-001-000072",
+                "t-001-000080"
+              ],
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 8,
+              "colIndex": 4,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "$54,000",
+              "normalized": {
+                "type": "currency",
+                "value": 54000.0,
+                "currency": "$",
+                "unit": null
+              },
+              "confidence": 0.8775251388549805,
+              "bbox": {
+                "x": 691,
+                "y": 585,
+                "w": 109,
+                "h": 56
+              },
+              "tokenIds": [
+                "t-001-000073",
+                "t-001-000082",
+                "t-001-000081",
+                "t-001-000086"
+              ],
+              "isLowConfidence": false
+            },
+            {
+              "rowIndex": 9,
+              "colIndex": 0,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "BRI WS Hotal",
+              "normalized": {
+                "type": "string",
+                "value": "BRI WS Hotal",
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.36110094706217444,
+              "bbox": {
+                "x": 39,
+                "y": 633,
+                "w": 118,
+                "h": 43
+              },
+              "tokenIds": [
+                "t-001-000083",
+                "t-001-000084",
+                "t-001-000087"
+              ],
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 9,
+              "colIndex": 1,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "I",
+              "normalized": {
+                "type": "string",
+                "value": "I",
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.593890380859375,
+              "bbox": {
+                "x": 390,
+                "y": 636,
+                "w": 1,
+                "h": 8
+              },
+              "tokenIds": [
+                "t-001-000085"
+              ],
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 9,
+              "colIndex": 2,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "3210",
+              "normalized": {
+                "type": "number",
+                "value": 3210.0,
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.44587562561035154,
+              "bbox": {
+                "x": 390,
+                "y": 636,
+                "w": 94,
+                "h": 31
+              },
+              "tokenIds": [
+                "t-001-000085",
+                "t-001-000088"
+              ],
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 9,
+              "colIndex": 3,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "$15",
+              "normalized": {
+                "type": "currency",
+                "value": 15.0,
+                "currency": "$",
+                "unit": null
+              },
+              "confidence": 0.7373326683044433,
+              "bbox": {
+                "x": 583,
+                "y": 647,
+                "w": 66,
+                "h": 22
+              },
+              "tokenIds": [
+                "t-001-000090",
+                "t-001-000089"
+              ],
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 9,
+              "colIndex": 4,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "$54,000",
+              "normalized": {
+                "type": "currency",
+                "value": 54000.0,
+                "currency": "$",
+                "unit": null
+              },
+              "confidence": 0.8724939219156901,
+              "bbox": {
+                "x": 693,
+                "y": 630,
+                "w": 107,
+                "h": 40
+              },
+              "tokenIds": [
+                "t-001-000086",
+                "t-001-000092",
+                "t-001-000091"
+              ],
+              "isLowConfidence": false
+            },
+            {
+              "rowIndex": 10,
+              "colIndex": 0,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "",
+              "normalized": {
+                "type": "string",
+                "value": null,
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.0,
+              "bbox": {
+                "x": 21,
+                "y": 685,
+                "w": 211,
+                "h": 50
+              },
+              "tokenIds": [],
+              "isLowConfidence": false
+            },
+            {
+              "rowIndex": 10,
+              "colIndex": 1,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "",
+              "normalized": {
+                "type": "string",
+                "value": null,
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.0,
+              "bbox": {
+                "x": 232,
+                "y": 685,
+                "w": 158,
+                "h": 50
+              },
+              "tokenIds": [],
+              "isLowConfidence": false
+            },
+            {
+              "rowIndex": 10,
+              "colIndex": 2,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "",
+              "normalized": {
+                "type": "string",
+                "value": null,
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.0,
+              "bbox": {
+                "x": 390,
+                "y": 685,
+                "w": 140,
+                "h": 50
+              },
+              "tokenIds": [],
+              "isLowConfidence": false
+            },
+            {
+              "rowIndex": 10,
+              "colIndex": 3,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "10£3",
+              "normalized": {
+                "type": "string",
+                "value": "10£3",
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.8434930419921876,
+              "bbox": {
+                "x": 571,
+                "y": 701,
+                "w": 58,
+                "h": 18
+              },
+              "tokenIds": [
+                "t-001-000093"
+              ],
+              "isLowConfidence": false
+            },
+            {
+              "rowIndex": 10,
+              "colIndex": 4,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "$289,100",
+              "normalized": {
+                "type": "currency",
+                "value": 289100.0,
+                "currency": "$",
+                "unit": null
+              },
+              "confidence": 0.670767822265625,
+              "bbox": {
+                "x": 668,
+                "y": 700,
+                "w": 113,
+                "h": 23
+              },
+              "tokenIds": [
+                "t-001-000094"
+              ],
+              "isLowConfidence": true
+            }
+          ],
+          "rows": [
+            {
+              "rowIndex": 3,
+              "type": "data",
+              "values": {
+                "ad_gole_flen": "Laptop Pro",
+                "category": "Electronics",
+                "its_sold": 120.0,
+                "unit_price": 1200.0,
+                "total_sales": 144000.0
+              },
+              "source": {
+                "cellRefs": [
+                  {
+                    "rowIndex": 3,
+                    "colIndex": 0
+                  },
+                  {
+                    "rowIndex": 3,
+                    "colIndex": 1
+                  },
+                  {
+                    "rowIndex": 3,
+                    "colIndex": 2
+                  },
+                  {
+                    "rowIndex": 3,
+                    "colIndex": 3
+                  },
+                  {
+                    "rowIndex": 3,
+                    "colIndex": 4
+                  }
+                ]
+              },
+              "confidence": 0.8895277061462403,
+              "isLowConfidence": false
+            },
+            {
+              "rowIndex": 4,
+              "type": "data",
+              "values": {
+                "ad_gole_flen": "Office Chair",
+                "category": "Furniture",
+                "its_sold": 3501.0,
+                "unit_price": 150.0,
+                "total_sales": 52500.0
+              },
+              "source": {
+                "cellRefs": [
+                  {
+                    "rowIndex": 4,
+                    "colIndex": 0
+                  },
+                  {
+                    "rowIndex": 4,
+                    "colIndex": 1
+                  },
+                  {
+                    "rowIndex": 4,
+                    "colIndex": 2
+                  },
+                  {
+                    "rowIndex": 4,
+                    "colIndex": 3
+                  },
+                  {
+                    "rowIndex": 4,
+                    "colIndex": 4
+                  }
+                ]
+              },
+              "confidence": 0.4494082025289535,
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 5,
+              "type": "data",
+              "values": {
+                "ad_gole_flen": "Wireless Mouse",
+                "category": "Electronics",
+                "its_sold": 5100.0,
+                "unit_price": 225.0,
+                "total_sales": 12500.0
+              },
+              "source": {
+                "cellRefs": [
+                  {
+                    "rowIndex": 5,
+                    "colIndex": 0
+                  },
+                  {
+                    "rowIndex": 5,
+                    "colIndex": 1
+                  },
+                  {
+                    "rowIndex": 5,
+                    "colIndex": 2
+                  },
+                  {
+                    "rowIndex": 5,
+                    "colIndex": 3
+                  },
+                  {
+                    "rowIndex": 5,
+                    "colIndex": 4
+                  }
+                ]
+              },
+              "confidence": 0.6409627558390298,
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 6,
+              "type": "data",
+              "values": {
+                "ad_gole_flen": "ﬁCoiffetre Maker ‘",
+                "category": "Appliances",
+                "its_sold": 210.0,
+                "unit_price": 80.0,
+                "total_sales": 16800.0
+              },
+              "source": {
+                "cellRefs": [
+                  {
+                    "rowIndex": 6,
+                    "colIndex": 0
+                  },
+                  {
+                    "rowIndex": 6,
+                    "colIndex": 1
+                  },
+                  {
+                    "rowIndex": 6,
+                    "colIndex": 2
+                  },
+                  {
+                    "rowIndex": 6,
+                    "colIndex": 3
+                  },
+                  {
+                    "rowIndex": 6,
+                    "colIndex": 4
+                  }
+                ]
+              },
+              "confidence": 0.6272033704121907,
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 7,
+              "type": "data",
+              "values": {
+                "ad_gole_flen": "Desk Organizer",
+                "category": "Office Supplie",
+                "its_sold": 620.0,
+                "unit_price": 15.0,
+                "total_sales": 9300.0
+              },
+              "source": {
+                "cellRefs": [
+                  {
+                    "rowIndex": 7,
+                    "colIndex": 0
+                  },
+                  {
+                    "rowIndex": 7,
+                    "colIndex": 1
+                  },
+                  {
+                    "rowIndex": 7,
+                    "colIndex": 2
+                  },
+                  {
+                    "rowIndex": 7,
+                    "colIndex": 3
+                  },
+                  {
+                    "rowIndex": 7,
+                    "colIndex": 4
+                  }
+                ]
+              },
+              "confidence": 0.8108448206583659,
+              "isLowConfidence": false
+            },
+            {
+              "rowIndex": 8,
+              "type": "data",
+              "values": {
+                "ad_gole_flen": "LED Monitor BRI WS",
+                "category": "Electronics",
+                "its_sold": 180.0,
+                "unit_price": 300.0,
+                "total_sales": 54000.0
+              },
+              "source": {
+                "cellRefs": [
+                  {
+                    "rowIndex": 8,
+                    "colIndex": 0
+                  },
+                  {
+                    "rowIndex": 8,
+                    "colIndex": 1
+                  },
+                  {
+                    "rowIndex": 8,
+                    "colIndex": 2
+                  },
+                  {
+                    "rowIndex": 8,
+                    "colIndex": 3
+                  },
+                  {
+                    "rowIndex": 8,
+                    "colIndex": 4
+                  }
+                ]
+              },
+              "confidence": 0.6927912661234539,
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 9,
+              "type": "data",
+              "values": {
+                "ad_gole_flen": "BRI WS Hotal",
+                "category": "I",
+                "its_sold": 3210.0,
+                "unit_price": 15.0,
+                "total_sales": 54000.0
+              },
+              "source": {
+                "cellRefs": [
+                  {
+                    "rowIndex": 9,
+                    "colIndex": 0
+                  },
+                  {
+                    "rowIndex": 9,
+                    "colIndex": 1
+                  },
+                  {
+                    "rowIndex": 9,
+                    "colIndex": 2
+                  },
+                  {
+                    "rowIndex": 9,
+                    "colIndex": 3
+                  },
+                  {
+                    "rowIndex": 9,
+                    "colIndex": 4
+                  }
+                ]
+              },
+              "confidence": 0.6021387087504069,
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 10,
+              "type": "summary",
+              "values": {
+                "ad_gole_flen": null,
+                "category": null,
+                "its_sold": null,
+                "unit_price": "10£3",
+                "total_sales": 289100.0
+              },
+              "source": {
+                "cellRefs": [
+                  {
+                    "rowIndex": 10,
+                    "colIndex": 0
+                  },
+                  {
+                    "rowIndex": 10,
+                    "colIndex": 1
+                  },
+                  {
+                    "rowIndex": 10,
+                    "colIndex": 2
+                  },
+                  {
+                    "rowIndex": 10,
+                    "colIndex": 3
+                  },
+                  {
+                    "rowIndex": 10,
+                    "colIndex": 4
+                  }
+                ]
+              },
+              "confidence": 0.7571304321289063,
+              "isLowConfidence": false
+            }
+          ],
+          "tokenCoverage": {
+            "tokenCountInCells": 77,
+            "tokenCountOverlappingTableBbox": 77,
+            "coverageRatio": 1.0
+          },
+          "issues": [
+            {
+              "code": "artifact_rows_removed",
+              "severity": "info",
+              "message": "Removed 2 row(s) classified as OCR noise or border artifacts.",
+              "pageIndex": null,
+              "details": {}
+            }
+          ]
+        }
+      ],
+      "keyValueCandidates": [
+        {
+          "pairId": "kv-001-00001",
+          "label": {
+            "text": "Monthly Sales Report",
+            "confidence": 0.9107689412434895,
+            "bbox": {
+              "x": 22,
+              "y": 50,
+              "w": 649,
+              "h": 74
+            },
+            "tokenIds": [
+              "t-001-000001",
+              "t-001-000002",
+              "t-001-000003"
+            ]
+          },
+          "value": {
+            "text": "Report Date: February 2024 Sales Region: Northeast",
+            "confidence": 0.9211852373395647,
+            "bbox": {
+              "x": 27,
+              "y": 152,
+              "w": 759,
+              "h": 23
+            },
+            "tokenIds": [
+              "t-001-000004",
+              "t-001-000005",
+              "t-001-000006",
+              "t-001-000007",
+              "t-001-000008",
+              "t-001-000009",
+              "t-001-000010"
+            ]
+          },
+          "confidence": 0.8693024862380254,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00002",
+          "label": {
+            "text": "Report Date",
+            "confidence": 0.9098773956298828,
+            "bbox": {
+              "x": 27,
+              "y": 153,
+              "w": 147,
+              "h": 22
+            },
+            "tokenIds": [
+              "t-001-000004",
+              "t-001-000005"
+            ]
+          },
+          "value": {
+            "text": "February 2024 Sales Region: Northeast",
+            "confidence": 0.9257083740234375,
+            "bbox": {
+              "x": 183,
+              "y": 152,
+              "w": 603,
+              "h": 23
+            },
+            "tokenIds": [
+              "t-001-000006",
+              "t-001-000007",
+              "t-001-000008",
+              "t-001-000009",
+              "t-001-000010"
+            ]
+          },
+          "confidence": 0.9150258567810059,
+          "method": "ocr+regex"
+        },
+        {
+          "pairId": "kv-001-00003",
+          "label": {
+            "text": "Report Date",
+            "confidence": 0.9098773956298828,
+            "bbox": {
+              "x": 27,
+              "y": 153,
+              "w": 147,
+              "h": 22
+            },
+            "tokenIds": [
+              "t-001-000004",
+              "t-001-000005"
+            ]
+          },
+          "value": {
+            "text": "February 2024 Sales Region: Northeast",
+            "confidence": 0.9257083740234375,
+            "bbox": {
+              "x": 183,
+              "y": 152,
+              "w": 603,
+              "h": 23
+            },
+            "tokenIds": [
+              "t-001-000006",
+              "t-001-000007",
+              "t-001-000008",
+              "t-001-000009",
+              "t-001-000010"
+            ]
+          },
+          "confidence": 0.9030258567810059,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00004",
+          "label": {
+            "text": "Prepared By",
+            "confidence": 0.9205149459838867,
+            "bbox": {
+              "x": 27,
+              "y": 203,
+              "w": 153,
+              "h": 23
+            },
+            "tokenIds": [
+              "t-001-000011",
+              "t-001-000012"
+            ]
+          },
+          "value": {
+            "text": "Jane Doe Contact: 8.5 x 11 inca",
+            "confidence": 0.8676208953857423,
+            "bbox": {
+              "x": 197,
+              "y": 203,
+              "w": 589,
+              "h": 19
+            },
+            "tokenIds": [
+              "t-001-000013",
+              "t-001-000014",
+              "t-001-000015",
+              "t-001-000016",
+              "t-001-000017"
+            ]
+          },
+          "confidence": 0.8926096340179445,
+          "method": "ocr+regex"
+        },
+        {
+          "pairId": "kv-001-00005",
+          "label": {
+            "text": "Prepared By",
+            "confidence": 0.9205149459838867,
+            "bbox": {
+              "x": 27,
+              "y": 203,
+              "w": 153,
+              "h": 23
+            },
+            "tokenIds": [
+              "t-001-000011",
+              "t-001-000012"
+            ]
+          },
+          "value": {
+            "text": "Jane Doe Contact: 8.5 x 11 inca",
+            "confidence": 0.8676208953857423,
+            "bbox": {
+              "x": 197,
+              "y": 203,
+              "w": 589,
+              "h": 19
+            },
+            "tokenIds": [
+              "t-001-000013",
+              "t-001-000014",
+              "t-001-000015",
+              "t-001-000016",
+              "t-001-000017"
+            ]
+          },
+          "confidence": 0.8806096340179445,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00006",
+          "label": {
+            "text": "e Top product",
+            "confidence": 0.7162179056803385,
+            "bbox": {
+              "x": 22,
+              "y": 783,
+              "w": 182,
+              "h": 23
+            },
+            "tokenIds": [
+              "t-001-000095",
+              "t-001-000096",
+              "t-001-000097"
+            ]
+          },
+          "value": {
+            "text": "Laptop Pro",
+            "confidence": 0.9159253692626953,
+            "bbox": {
+              "x": 214,
+              "y": 783,
+              "w": 129,
+              "h": 23
+            },
+            "tokenIds": [
+              "t-001-000098",
+              "t-001-000099"
+            ]
+          },
+          "confidence": 0.8428426831563314,
+          "method": "ocr+regex"
+        },
+        {
+          "pairId": "kv-001-00007",
+          "label": {
+            "text": "e Top product",
+            "confidence": 0.7162179056803385,
+            "bbox": {
+              "x": 22,
+              "y": 783,
+              "w": 182,
+              "h": 23
+            },
+            "tokenIds": [
+              "t-001-000095",
+              "t-001-000096",
+              "t-001-000097"
+            ]
+          },
+          "value": {
+            "text": "Laptop Pro",
+            "confidence": 0.9159253692626953,
+            "bbox": {
+              "x": 214,
+              "y": 783,
+              "w": 129,
+              "h": 23
+            },
+            "tokenIds": [
+              "t-001-000098",
+              "t-001-000099"
+            ]
+          },
+          "confidence": 0.8308426831563314,
+          "method": "ocr+layout"
+        }
+      ],
+      "regions": [
+        {
+          "regionId": "chk-001-0001",
+          "type": "checkbox",
+          "bbox": {
+            "x": 407,
+            "y": 306,
+            "w": 17,
+            "h": 18
+          },
+          "confidence": 0.9936226495726496,
+          "value": true,
+          "labelTokenIds": [
+            "t-001-000022",
+            "t-001-000023"
+          ],
+          "notes": [
+            "strong_label_match"
+          ]
+        },
+        {
+          "regionId": "chk-001-0002",
+          "type": "checkbox",
+          "bbox": {
+            "x": 424,
+            "y": 309,
+            "w": 14,
+            "h": 15
+          },
+          "confidence": 1.0,
+          "value": true,
+          "labelTokenIds": [
+            "t-001-000022",
+            "t-001-000023",
+            "t-001-000024"
+          ],
+          "notes": [
+            "strong_label_match"
+          ]
+        },
+        {
+          "regionId": "chk-001-0003",
+          "type": "checkbox",
+          "bbox": {
+            "x": 663,
+            "y": 315,
+            "w": 21,
+            "h": 19
+          },
+          "confidence": 0.8270105263157894,
+          "value": true,
+          "labelTokenIds": [
+            "t-001-000027"
+          ],
+          "notes": [
+            "strong_label_match"
+          ]
+        },
+        {
+          "regionId": "rad-001-0001",
+          "type": "radio",
+          "bbox": {
+            "x": 22,
+            "y": 583,
+            "w": 22,
+            "h": 22
+          },
+          "confidence": 0.774731451856896,
+          "value": false,
+          "labelTokenIds": [
+            "t-001-000075"
+          ],
+          "notes": [
+            "hough_candidate",
+            "circularity_pass",
+            "strong_label_match"
+          ]
+        }
+      ],
+      "pageWords": [
+        "$1,200",
+        "$12,500",
+        "$144,000",
+        "$15",
+        "$150",
+        "$16,800",
+        "$25",
+        "$289,100",
+        "$300",
+        "$54,000",
+        "$80",
+        "$9,300",
+        "1",
+        "1 e 1%",
+        "120",
+        "180",
+        "2024",
+        "210",
+        "350",
+        "500",
+        "52500",
+        "620",
+        "8.5 x 11",
+        "Appli;nces",
+        "BRI",
+        "By:",
+        "compared",
+        "Contact:",
+        "Date:",
+        "Desk",
+        "Doe",
+        "e",
+        "Electronics",
+        "February",
+        "Ffcechair",
+        "Fumitre",
+        "Hotal",
+        "I",
+        "in",
+        "inca",
+        "Increase",
+        "its",
+        "Jane",
+        "Laptop",
+        "last",
+        "LED",
+        "Maker",
+        "Monitor",
+        "month.",
+        "Monthly",
+        "Mouse",
+        "Northeast",
+        "Note:",
+        "Office",
+        "Organizer",
+        "Prepared",
+        "Price",
+        "Pro",
+        "Product",
+        "product:",
+        "Region:",
+        "Report",
+        "S 5",
+        "S 60",
+        "Sales",
+        "Sold",
+        "Suppli&?",
+        "supplies",
+        "to",
+        "Top",
+        "Total",
+        "Unit",
+        "WS",
+        "Yo",
+        "[or: 1",
+        "\\",
+        "|",
+        "¢",
+        "¥Wireless",
+        "‘",
+        "“",
+        "ﬁCoiffetre"
+      ],
+      "unassignedTokenIds": [],
+      "artifacts": {
+        "pageImageRef": null,
+        "debugOverlayRef": null
+      }
+    }
+  ],
+  "recognition": {
+    "documentType": {
+      "name": null,
+      "version": null,
+      "confidence": 0.0
+    },
+    "anchors": {
+      "matchedAnchors": [],
+      "unmatchedAnchors": []
+    },
+    "fields": [
+      {
+        "fieldId": "e_top_product",
+        "label": "e Top product",
+        "type": "string",
+        "value": "Laptop Pro",
+        "normalized": {
+          "type": "string",
+          "value": "Laptop Pro",
+          "currency": null,
+          "unit": null
+        },
+        "confidence": 0.8428426831563314,
+        "isLowConfidence": false,
+        "source": {
+          "pageIndex": 1,
+          "bbox": {
+            "x": 22,
+            "y": 783,
+            "w": 321,
+            "h": 23
+          },
+          "tokenIds": [
+            "t-001-000095",
+            "t-001-000096",
+            "t-001-000097",
+            "t-001-000098",
+            "t-001-000099"
+          ],
+          "method": "ocr+regex"
+        },
+        "validation": {
+          "rulesApplied": [
+            "non_empty_value",
+            "basic_normalization",
+            "confidence_threshold"
+          ],
+          "validated": true,
+          "issues": []
+        },
+        "review": {
+          "needsReview": false,
+          "reason": null
+        }
+      },
+      {
+        "fieldId": "monthly_sales_report",
+        "label": "Monthly Sales Report",
+        "type": "string",
+        "value": "Report Date: February 2024 Sales Region: Northeast",
+        "normalized": {
+          "type": "string",
+          "value": "Report Date: February 2024 Sales Region: Northeast",
+          "currency": null,
+          "unit": null
+        },
+        "confidence": 0.8693024862380254,
+        "isLowConfidence": false,
+        "source": {
+          "pageIndex": 1,
+          "bbox": {
+            "x": 22,
+            "y": 50,
+            "w": 764,
+            "h": 125
+          },
+          "tokenIds": [
+            "t-001-000001",
+            "t-001-000002",
+            "t-001-000003",
+            "t-001-000004",
+            "t-001-000005",
+            "t-001-000006",
+            "t-001-000007",
+            "t-001-000008",
+            "t-001-000009",
+            "t-001-000010"
+          ],
+          "method": "ocr+layout"
+        },
+        "validation": {
+          "rulesApplied": [
+            "non_empty_value",
+            "basic_normalization",
+            "spatial_pairing"
+          ],
+          "validated": true,
+          "issues": []
+        },
+        "review": {
+          "needsReview": false,
+          "reason": null
+        }
+      },
+      {
+        "fieldId": "prepared_by",
+        "label": "Prepared By",
+        "type": "string",
+        "value": "Jane Doe Contact: 8.5 x 11 inca",
+        "normalized": {
+          "type": "string",
+          "value": "Jane Doe Contact: 8.5 x 11 inca",
+          "currency": null,
+          "unit": null
+        },
+        "confidence": 0.8926096340179445,
+        "isLowConfidence": false,
+        "source": {
+          "pageIndex": 1,
+          "bbox": {
+            "x": 27,
+            "y": 203,
+            "w": 759,
+            "h": 23
+          },
+          "tokenIds": [
+            "t-001-000011",
+            "t-001-000012",
+            "t-001-000013",
+            "t-001-000014",
+            "t-001-000015",
+            "t-001-000016",
+            "t-001-000017"
+          ],
+          "method": "ocr+regex"
+        },
+        "validation": {
+          "rulesApplied": [
+            "non_empty_value",
+            "basic_normalization",
+            "confidence_threshold"
+          ],
+          "validated": true,
+          "issues": []
+        },
+        "review": {
+          "needsReview": false,
+          "reason": null
+        }
+      },
+      {
+        "fieldId": "report_date",
+        "label": "Report Date",
+        "type": "string",
+        "value": "February 2024 Sales Region: Northeast",
+        "normalized": {
+          "type": "string",
+          "value": "February 2024 Sales Region: Northeast",
+          "currency": null,
+          "unit": null
+        },
+        "confidence": 0.9150258567810059,
+        "isLowConfidence": false,
+        "source": {
+          "pageIndex": 1,
+          "bbox": {
+            "x": 27,
+            "y": 152,
+            "w": 759,
+            "h": 23
+          },
+          "tokenIds": [
+            "t-001-000004",
+            "t-001-000005",
+            "t-001-000006",
+            "t-001-000007",
+            "t-001-000008",
+            "t-001-000009",
+            "t-001-000010"
+          ],
+          "method": "ocr+regex"
+        },
+        "validation": {
+          "rulesApplied": [
+            "non_empty_value",
+            "basic_normalization",
+            "confidence_threshold"
+          ],
+          "validated": true,
+          "issues": []
+        },
+        "review": {
+          "needsReview": false,
+          "reason": null
+        }
+      }
+    ],
+    "tableMappings": []
+  },
+  "review": {
+    "required": false,
+    "reviewedBy": null,
+    "reviewedUtc": null,
+    "changes": []
+  },
+  "warnings": [
+    {
+      "code": "ambiguous_label_value_pairing",
+      "severity": "warning",
+      "message": "Page 1 had 1 overlapping key-value candidates; strongest retained.",
+      "pageIndex": 1,
+      "details": {}
+    },
+    {
+      "code": "high_low_confidence_token_count",
+      "severity": "warning",
+      "message": "Page 1 has many low-confidence tokens (36).",
+      "pageIndex": 1,
+      "details": {
+        "lowConfidenceTokenCount": 36,
+        "threshold": 25
+      }
+    },
+    {
+      "code": "deskew_rejected_low_confidence",
+      "severity": "warning",
+      "message": "Page 1 detected candidate deskew angle -40.00 but confidence 0.012 was too low to apply.",
+      "pageIndex": 1,
+      "details": {
+        "detectedDegrees": -40.0,
+        "detectedConfidence": 0.012386317360699207
+      }
+    },
+    {
+      "code": "region_detection_stats",
+      "severity": "info",
+      "message": "Page 1 region detection: raw=917, geometry=16, label=4, finalCheckbox=3, finalRadio=1.",
+      "pageIndex": 1,
+      "details": {
+        "rawCandidateCount": 917,
+        "geometryFilteredCount": 16,
+        "labelFilteredCount": 4,
+        "finalCheckboxCount": 3,
+        "finalRadioCount": 1
+      }
+    },
+    {
+      "code": "token_cleanup_stats",
+      "severity": "info",
+      "message": "Page 1 token cleanup: original=110, modified=6, removed=0, split=1, checkboxArtifactsRemoved=1, underlineArtifactsRemoved=0, dictionaryCorrections=0.",
+      "pageIndex": 1,
+      "details": {
+        "tokensOriginal": 110,
+        "tokensModified": 6,
+        "tokensRemoved": 0,
+        "tokensSplit": 1,
+        "checkboxArtifactsRemoved": 1,
+        "underlineArtifactsRemoved": 0,
+        "dictionaryCorrections": 0
+      }
+    }
+  ],
+  "errors": [],
+  "documentWords": [
+    "$1,200",
+    "$12,500",
+    "$144,000",
+    "$15",
+    "$150",
+    "$16,800",
+    "$25",
+    "$289,100",
+    "$300",
+    "$54,000",
+    "$80",
+    "$9,300",
+    "1",
+    "1 e 1%",
+    "120",
+    "180",
+    "2024",
+    "210",
+    "350",
+    "500",
+    "52500",
+    "620",
+    "8.5 x 11",
+    "Appli;nces",
+    "BRI",
+    "By:",
+    "compared",
+    "Contact:",
+    "Date:",
+    "Desk",
+    "Doe",
+    "e",
+    "Electronics",
+    "February",
+    "Ffcechair",
+    "Fumitre",
+    "Hotal",
+    "I",
+    "in",
+    "inca",
+    "Increase",
+    "its",
+    "Jane",
+    "Laptop",
+    "last",
+    "LED",
+    "Maker",
+    "Monitor",
+    "month.",
+    "Monthly",
+    "Mouse",
+    "Northeast",
+    "Note:",
+    "Office",
+    "Organizer",
+    "Prepared",
+    "Price",
+    "Pro",
+    "Product",
+    "product:",
+    "Region:",
+    "Report",
+    "S 5",
+    "S 60",
+    "Sales",
+    "Sold",
+    "Suppli&?",
+    "supplies",
+    "to",
+    "Top",
+    "Total",
+    "Unit",
+    "WS",
+    "Yo",
+    "[or: 1",
+    "\\",
+    "|",
+    "¢",
+    "¥Wireless",
+    "‘",
+    "“",
+    "ﬁCoiffetre"
+  ],
+  "extensions": {
+    "tessdataPath": "C:\\Users\\MJR19\\source\\repos\\OCR\\src\\Ocr.TestHarness.Wpf\\bin\\Debug\\net10.0-windows\\tessdata",
+    "optionSnapshot": {
+      "targetDpi": 300,
+      "language": "eng",
+      "pageSegMode": null,
+      "engineMode": null,
+      "preserveInterwordSpaces": true,
+      "saveTokenOverlay": false,
+      "enableNoiseFiltering": false,
+      "enableDeskew": true,
+      "maxDeskewDegrees": 40.0,
+      "deskewAngleStep": 0.5,
+      "minDeskewConfidence": 0.15,
+      "enableDenoise": false,
+      "denoiseMethod": "median",
+      "denoiseKernel": 3,
+      "enableBinarization": false,
+      "binarizationMethod": "otsu",
+      "enableContrastEnhancement": false,
+      "contrastMethod": "clahe",
+      "saveJsonToDisk": true,
+      "outputFolder": null,
+      "saveDebugArtifacts": false,
+      "profileName": "default"
+    },
+    "pagePreprocessing": [
+      {
+        "pageIndex": 1,
+        "deskewAttempted": true,
+        "deskewApplied": false,
+        "detectedDegrees": -40.0,
+        "detectedConfidence": 0.012386317360699207,
+        "appliedDegrees": 0.0
+      }
+    ],
+    "debugArtifactPaths": [],
+    "pageNoiseDiagnostics": [
+      {
+        "pageIndex": 1,
+        "totalTokenCount": 110,
+        "lowConfidenceTokenCount": 36,
+        "tinyTokenCount": 21,
+        "symbolLikeTokenCount": 20,
+        "suspectedDecorativeNoiseCount": 2,
+        "suspectedDecorativeNoiseRatio": 0.01818181818181818
+      }
+    ],
+    "lineReconstructionDiagnostics": [
+      {
+        "pageIndex": 1,
+        "originalLineCount": 18,
+        "reconstructedLineCount": 17,
+        "tokensAssigned": 110,
+        "successful": true
+      }
+    ],
+    "tokenCleanupStats": [
+      {
+        "pageIndex": 1,
+        "tokensOriginal": 110,
+        "tokensModified": 6,
+        "tokensRemoved": 0,
+        "tokensSplit": 1,
+        "checkboxArtifactsRemoved": 1,
+        "underlineArtifactsRemoved": 0,
+        "dictionaryCorrections": 0,
+        "tokensCleaned": 110
+      }
+    ],
+    "filteredTokenIds": [],
+    "fieldExtractionDiagnostics": [
+      {
+        "pageIndex": 1,
+        "candidateCount": 7,
+        "promotedFieldCount": 4,
+        "ambiguousCandidateCount": 1
+      }
+    ],
+    "structuredFieldExtractionStats": {
+      "pagesProcessed": 1,
+      "keyValueCandidateCount": 4,
+      "promotedFieldCount": 1,
+      "checkboxDerivedFieldCount": 0
+    },
+    "pipelineStageTimings": [
+      {
+        "stageName": "Input/Load",
+        "durationMs": 4,
+        "status": "completed",
+        "note": null
+      },
+      {
+        "stageName": "Render",
+        "durationMs": 37,
+        "status": "completed",
+        "note": null
+      },
+      {
+        "stageName": "Preprocess [Page 1]",
+        "durationMs": 520,
+        "status": "completed",
+        "note": null
+      },
+      {
+        "stageName": "OCR Extraction [Page 1]",
+        "durationMs": 472,
+        "status": "completed",
+        "note": null
+      },
+      {
+        "stageName": "Layout Analysis [Page 1]",
+        "durationMs": 55,
+        "status": "completed",
+        "note": null
+      },
+      {
+        "stageName": "Token Cleanup [Page 1]",
+        "durationMs": 0,
+        "status": "completed",
+        "note": "Token cleanup is executed inside the layout analysis stage."
+      },
+      {
+        "stageName": "Line Reconstruction [Page 1]",
+        "durationMs": 0,
+        "status": "completed",
+        "note": "Line reconstruction is executed inside the layout analysis stage."
+      },
+      {
+        "stageName": "Table Detection [Page 1]",
+        "durationMs": 72,
+        "status": "completed",
+        "note": null
+      },
+      {
+        "stageName": "Region Detection [Page 1]",
+        "durationMs": 62,
+        "status": "completed",
+        "note": null
+      },
+      {
+        "stageName": "Structured Field Extraction [Page 1]",
+        "durationMs": 13,
+        "status": "completed",
+        "note": null
+      },
+      {
+        "stageName": "Structured Field Extraction",
+        "durationMs": 10,
+        "status": "completed",
+        "note": null
+      },
+      {
+        "stageName": "Structured Field Extraction (Additive)",
+        "durationMs": 18,
+        "status": "completed",
+        "note": null
+      }
+    ]
+  }
+}

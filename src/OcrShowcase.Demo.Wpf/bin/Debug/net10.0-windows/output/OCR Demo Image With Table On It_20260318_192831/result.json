@@ -1,0 +1,3777 @@
+{
+  "schema": {
+    "name": "com.yourcompany.ocr.document",
+    "version": "1.1.0",
+    "status": "draft"
+  },
+  "definitions": {
+    "coordinateSystem": {
+      "unit": "px",
+      "origin": "top-left",
+      "xDirection": "right",
+      "yDirection": "down",
+      "bboxFormat": "x,y,w,h",
+      "pageRotationAppliedToCoords": true,
+      "notes": "All bbox coordinates are relative to the final, processed page image (after render + rotation + deskew)."
+    },
+    "confidence": {
+      "scale": "0to1",
+      "lowTokenThreshold": 0.7,
+      "lowLineThreshold": 0.75,
+      "lowBlockThreshold": 0.8,
+      "lowCellThreshold": 0.75,
+      "lowTableThreshold": 0.8,
+      "lowFieldThreshold": 0.8
+    },
+    "readingOrder": {
+      "default": "top-to-bottom-left-to-right",
+      "supported": [
+        "top-to-bottom-left-to-right",
+        "top-to-bottom-right-to-left",
+        "custom"
+      ]
+    },
+    "enums": {
+      "severity": [
+        "info",
+        "warning",
+        "error",
+        "fatal"
+      ],
+      "tokenType": [
+        "word",
+        "punct",
+        "number",
+        "symbol",
+        "unknown"
+      ],
+      "blockType": [
+        "text",
+        "table",
+        "image",
+        "barcode",
+        "signature",
+        "stamp",
+        "unknown"
+      ],
+      "regionType": [
+        "checkbox",
+        "radio",
+        "signature",
+        "barcode",
+        "qr",
+        "image",
+        "stamp",
+        "unknown"
+      ],
+      "normalizedType": [
+        "string",
+        "number",
+        "date",
+        "currency",
+        "percent",
+        "boolean",
+        "unknown"
+      ],
+      "tableDetectionMethod": [
+        "lines",
+        "layout",
+        "lines+layout",
+        "model",
+        "unknown"
+      ],
+      "fieldSourceMethod": [
+        "ocr",
+        "ocr+layout",
+        "ocr+regex",
+        "table",
+        "model",
+        "human"
+      ]
+    }
+  },
+  "document": {
+    "documentId": "00000000-0000-0000-0000-000000000000",
+    "correlationId": "optional-run-id-for-tracing",
+    "createdUtc": "2026-03-18T19:28:31.3552463Z",
+    "source": {
+      "originalFileName": "OCR Demo Image With Table On It.png",
+      "fileType": "image",
+      "fileHashSha256": null,
+      "pageCount": 1,
+      "mimeType": "image/png"
+    },
+    "processing": {
+      "pipelineVersion": "ocr-pipeline-1.1.0",
+      "engine": {
+        "name": "tesseract",
+        "version": "5.x",
+        "language": [
+          "eng"
+        ],
+        "params": {
+          "psm": "optional",
+          "oem": "optional"
+        }
+      },
+      "render": {
+        "dpiOriginal": 300,
+        "dpiNormalizedTo": 300,
+        "colorMode": "grayscale",
+        "pageImageFormat": "png"
+      },
+      "preprocessing": {
+        "rotation": {
+          "attempted": false,
+          "applied": false,
+          "degrees": 0.0,
+          "confidence": 0.0
+        },
+        "deskew": {
+          "attempted": true,
+          "applied": false,
+          "degrees": 0.0,
+          "confidence": 0.0
+        },
+        "denoise": {
+          "enabled": false,
+          "method": "median"
+        },
+        "binarization": {
+          "enabled": false,
+          "method": "otsu"
+        },
+        "contrastEnhancement": {
+          "enabled": false,
+          "method": null
+        }
+      },
+      "postprocessing": {
+        "fixCommonOcrErrors": false,
+        "normalizeWhitespace": true
+      },
+      "confidencePolicy": {
+        "scale": "0to1",
+        "lowTokenThreshold": 0.7,
+        "aggregation": {
+          "lineConfidence": "mean(tokens.confidence)",
+          "blockConfidence": "mean(lines.confidence)",
+          "cellConfidence": "mean(tokenIds.confidence)",
+          "rowConfidence": "mean(cells.confidence)",
+          "tableConfidence": "mean(rows.confidence)",
+          "fieldConfidence": "mean(tokenIds.confidence)"
+        }
+      }
+    }
+  },
+  "metrics": {
+    "totalMs": 1828,
+    "documentOcrMs": 293,
+    "pagesMs": [
+      685
+    ],
+    "breakdownMs": {
+      "renderMs": 0,
+      "preprocessMs": 328,
+      "ocrMs": 293,
+      "layoutMs": 49,
+      "tableDetectMs": 229,
+      "recognitionMs": 31,
+      "postprocessMs": 15
+    }
+  },
+  "pages": [
+    {
+      "pageIndex": 1,
+      "pageId": "page-1",
+      "size": {
+        "widthPx": 1027,
+        "heightPx": 543,
+        "dpi": 300,
+        "rotationDegrees": 0.0
+      },
+      "timing": {
+        "renderMs": 0,
+        "preprocessMs": 328,
+        "ocrMs": 293,
+        "layoutMs": 49,
+        "tableDetectMs": 229,
+        "postprocessMs": 15
+      },
+      "quality": {
+        "meanTokenConfidence": 0.8949497968097065,
+        "lowConfidenceTokenCount": 3,
+        "blankPage": false
+      },
+      "text": {
+        "fullText": "N\r\nGoal\r\nBuild a new OCR library (class library DLL) targeting.NET 10 that replaces an existing.NET\r\nFramework 4.8 OCRDLL.\r\nThe library mustOCR images and PDFs, run on Windows, and output a JSON document\r\nthat matches the provided JSON skeleton exactly.\r\nTest Result\r\nThisistest#1 The result of this test\r\nShould have this and that\r\nThen here is another thing\r\nThisis test #2 We will se the results\r\nFor the second test\r\nAnd we should follow the instructions\r\nFinal Test This should complete the test",
+        "readingOrder": "top-to-bottom-left-to-right"
+      },
+      "tokens": [
+        {
+          "id": "t-001-000001",
+          "type": "word",
+          "text": "N",
+          "confidence": 0.7423614501953125,
+          "confidenceRaw": 74.23614501953125,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 188,
+            "y": 2,
+            "w": 18,
+            "h": 27
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00001",
+          "alternates": [
+            {
+              "text": "N",
+              "confidence": 0.7423614501953125
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000002",
+          "type": "word",
+          "text": "Goal",
+          "confidence": 0.915575180053711,
+          "confidenceRaw": 91.5575180053711,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 42,
+            "y": 42,
+            "w": 48,
+            "h": 16
+          },
+          "blockId": "blk-001-00005",
+          "lineId": "ln-001-00002",
+          "alternates": [
+            {
+              "text": "Goal",
+              "confidence": 0.915575180053711
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000003",
+          "type": "word",
+          "text": "Build",
+          "confidence": 0.9112570190429687,
+          "confidenceRaw": 91.12570190429688,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 43,
+            "y": 92,
+            "w": 50,
+            "h": 16
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00003",
+          "alternates": [
+            {
+              "text": "Build",
+              "confidence": 0.9112570190429687
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000004",
+          "type": "word",
+          "text": "a",
+          "confidence": 0.9137773132324218,
+          "confidenceRaw": 91.37773132324219,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 100,
+            "y": 96,
+            "w": 10,
+            "h": 12
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00003",
+          "alternates": [
+            {
+              "text": "a",
+              "confidence": 0.9137773132324218
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000005",
+          "type": "word",
+          "text": "new",
+          "confidence": 0.9229030609130859,
+          "confidenceRaw": 92.2903060913086,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 119,
+            "y": 96,
+            "w": 41,
+            "h": 12
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00003",
+          "alternates": [
+            {
+              "text": "new",
+              "confidence": 0.9229030609130859
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000006",
+          "type": "word",
+          "text": "OCR",
+          "confidence": 0.898228759765625,
+          "confidenceRaw": 89.8228759765625,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 166,
+            "y": 92,
+            "w": 47,
+            "h": 16
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00003",
+          "alternates": [
+            {
+              "text": "OCR",
+              "confidence": 0.898228759765625
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000007",
+          "type": "word",
+          "text": "library",
+          "confidence": 0.8592431640625,
+          "confidenceRaw": 85.92431640625,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 220,
+            "y": 92,
+            "w": 63,
+            "h": 20
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00003",
+          "alternates": [
+            {
+              "text": "library",
+              "confidence": 0.8592431640625
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000008",
+          "type": "word",
+          "text": "(class",
+          "confidence": 0.9270802307128906,
+          "confidenceRaw": 92.70802307128906,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 289,
+            "y": 92,
+            "w": 60,
+            "h": 20
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00003",
+          "alternates": [
+            {
+              "text": "(class",
+              "confidence": 0.9270802307128906
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000009",
+          "type": "word",
+          "text": "library",
+          "confidence": 0.9203886413574218,
+          "confidenceRaw": 92.03886413574219,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 356,
+            "y": 92,
+            "w": 63,
+            "h": 20
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00003",
+          "alternates": [
+            {
+              "text": "library",
+              "confidence": 0.9203886413574218
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000010",
+          "type": "word",
+          "text": "DLL)",
+          "confidence": 0.9290805053710938,
+          "confidenceRaw": 92.90805053710938,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 426,
+            "y": 92,
+            "w": 44,
+            "h": 20
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00003",
+          "alternates": [
+            {
+              "text": "DLL)",
+              "confidence": 0.9290805053710938
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000011",
+          "type": "word",
+          "text": "targeting",
+          "confidence": 0.9199517822265625,
+          "confidenceRaw": 91.99517822265625,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 477,
+            "y": 92,
+            "w": 90,
+            "h": 20
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00003",
+          "alternates": [
+            {
+              "text": "targeting",
+              "confidence": 0.9199517822265625
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000012",
+          "type": "word",
+          "text": ".NET",
+          "confidence": 0.929211654663086,
+          "confidenceRaw": 92.9211654663086,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 574,
+            "y": 92,
+            "w": 46,
+            "h": 16
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00003",
+          "alternates": [
+            {
+              "text": ".NET",
+              "confidence": 0.929211654663086
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000013",
+          "type": "word",
+          "text": "10",
+          "confidence": 0.9326456451416015,
+          "confidenceRaw": 93.26456451416016,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 627,
+            "y": 92,
+            "w": 23,
+            "h": 16
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00003",
+          "alternates": [
+            {
+              "text": "10",
+              "confidence": 0.9326456451416015
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000014",
+          "type": "word",
+          "text": "that",
+          "confidence": 0.8992007446289062,
+          "confidenceRaw": 89.92007446289062,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 656,
+            "y": 92,
+            "w": 40,
+            "h": 16
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00003",
+          "alternates": [
+            {
+              "text": "that",
+              "confidence": 0.8992007446289062
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000015",
+          "type": "word",
+          "text": "replaces",
+          "confidence": 0.8992007446289062,
+          "confidenceRaw": 89.92007446289062,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 704,
+            "y": 92,
+            "w": 86,
+            "h": 20
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00003",
+          "alternates": [
+            {
+              "text": "replaces",
+              "confidence": 0.8992007446289062
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000016",
+          "type": "word",
+          "text": "an",
+          "confidence": 0.9301802825927734,
+          "confidenceRaw": 93.01802825927734,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 796,
+            "y": 96,
+            "w": 26,
+            "h": 16
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00003",
+          "alternates": [
+            {
+              "text": "an",
+              "confidence": 0.9301802825927734
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000017",
+          "type": "word",
+          "text": "existing",
+          "confidence": 0.9167779541015625,
+          "confidenceRaw": 91.67779541015625,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 828,
+            "y": 92,
+            "w": 77,
+            "h": 20
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00003",
+          "alternates": [
+            {
+              "text": "existing",
+              "confidence": 0.9167779541015625
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000018",
+          "type": "word",
+          "text": ".NET",
+          "confidence": 0.9167779541015625,
+          "confidenceRaw": 91.67779541015625,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 912,
+            "y": 92,
+            "w": 47,
+            "h": 16
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00003",
+          "alternates": [
+            {
+              "text": ".NET",
+              "confidence": 0.9167779541015625
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000019",
+          "type": "word",
+          "text": "Framework",
+          "confidence": 0.924497299194336,
+          "confidenceRaw": 92.4497299194336,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 43,
+            "y": 126,
+            "w": 113,
+            "h": 16
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00004",
+          "alternates": [
+            {
+              "text": "Framework",
+              "confidence": 0.924497299194336
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000020",
+          "type": "word",
+          "text": "4.8",
+          "confidence": 0.9327671813964844,
+          "confidenceRaw": 93.27671813964844,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 162,
+            "y": 126,
+            "w": 31,
+            "h": 16
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00004",
+          "alternates": [
+            {
+              "text": "4.8",
+              "confidence": 0.9327671813964844
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000021",
+          "type": "word",
+          "text": "OCRDLL.",
+          "confidence": 0.7989112854003906,
+          "confidenceRaw": 79.89112854003906,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 200,
+            "y": 126,
+            "w": 98,
+            "h": 16
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00004",
+          "alternates": [
+            {
+              "text": "OCRDLL.",
+              "confidence": 0.7989112854003906
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000022",
+          "type": "word",
+          "text": "The",
+          "confidence": 0.9275241088867188,
+          "confidenceRaw": 92.75241088867188,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 41,
+            "y": 176,
+            "w": 36,
+            "h": 16
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00005",
+          "alternates": [
+            {
+              "text": "The",
+              "confidence": 0.9275241088867188
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000023",
+          "type": "word",
+          "text": "library",
+          "confidence": 0.9288906860351562,
+          "confidenceRaw": 92.88906860351562,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 85,
+            "y": 176,
+            "w": 63,
+            "h": 20
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00005",
+          "alternates": [
+            {
+              "text": "library",
+              "confidence": 0.9288906860351562
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000024",
+          "type": "word",
+          "text": "must",
+          "confidence": 0.8915165710449219,
+          "confidenceRaw": 89.15165710449219,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 162,
+            "y": 172,
+            "w": 47,
+            "h": 29
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00005",
+          "alternates": [
+            {
+              "text": "must",
+              "confidence": 0.8915165710449219
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000025",
+          "type": "word",
+          "text": "OCR",
+          "confidence": 0.8843246459960937,
+          "confidenceRaw": 88.43246459960938,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 212,
+            "y": 176,
+            "w": 47,
+            "h": 16
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00005",
+          "alternates": [
+            {
+              "text": "OCR",
+              "confidence": 0.8843246459960937
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000026",
+          "type": "word",
+          "text": "images",
+          "confidence": 0.8843246459960937,
+          "confidenceRaw": 88.43246459960938,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 266,
+            "y": 176,
+            "w": 72,
+            "h": 20
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00005",
+          "alternates": [
+            {
+              "text": "images",
+              "confidence": 0.8843246459960937
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000027",
+          "type": "word",
+          "text": "and",
+          "confidence": 0.9242235565185547,
+          "confidenceRaw": 92.42235565185547,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 345,
+            "y": 176,
+            "w": 37,
+            "h": 16
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00005",
+          "alternates": [
+            {
+              "text": "and",
+              "confidence": 0.9242235565185547
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000028",
+          "type": "word",
+          "text": "PDFs,",
+          "confidence": 0.9256525421142578,
+          "confidenceRaw": 92.56525421142578,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 390,
+            "y": 176,
+            "w": 57,
+            "h": 19
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00005",
+          "alternates": [
+            {
+              "text": "PDFs,",
+              "confidence": 0.9256525421142578
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000029",
+          "type": "word",
+          "text": "run",
+          "confidence": 0.9273281097412109,
+          "confidenceRaw": 92.7328109741211,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 456,
+            "y": 180,
+            "w": 31,
+            "h": 12
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00005",
+          "alternates": [
+            {
+              "text": "run",
+              "confidence": 0.9273281097412109
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000030",
+          "type": "word",
+          "text": "on",
+          "confidence": 0.9273281097412109,
+          "confidenceRaw": 92.7328109741211,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 495,
+            "y": 180,
+            "w": 23,
+            "h": 12
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00005",
+          "alternates": [
+            {
+              "text": "on",
+              "confidence": 0.9273281097412109
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000031",
+          "type": "word",
+          "text": "Windows,",
+          "confidence": 0.9193901062011719,
+          "confidenceRaw": 91.93901062011719,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 525,
+            "y": 176,
+            "w": 100,
+            "h": 19
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00005",
+          "alternates": [
+            {
+              "text": "Windows,",
+              "confidence": 0.9193901062011719
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000032",
+          "type": "word",
+          "text": "and",
+          "confidence": 0.9185162353515625,
+          "confidenceRaw": 91.85162353515625,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 633,
+            "y": 176,
+            "w": 36,
+            "h": 16
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00005",
+          "alternates": [
+            {
+              "text": "and",
+              "confidence": 0.9185162353515625
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000033",
+          "type": "word",
+          "text": "output",
+          "confidence": 0.9294862365722656,
+          "confidenceRaw": 92.94862365722656,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 677,
+            "y": 177,
+            "w": 67,
+            "h": 19
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00005",
+          "alternates": [
+            {
+              "text": "output",
+              "confidence": 0.9294862365722656
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000034",
+          "type": "word",
+          "text": "a",
+          "confidence": 0.9101204681396484,
+          "confidenceRaw": 91.01204681396484,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 751,
+            "y": 180,
+            "w": 10,
+            "h": 12
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00005",
+          "alternates": [
+            {
+              "text": "a",
+              "confidence": 0.9101204681396484
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000035",
+          "type": "word",
+          "text": "JSON",
+          "confidence": 0.9101204681396484,
+          "confidenceRaw": 91.01204681396484,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 768,
+            "y": 176,
+            "w": 53,
+            "h": 16
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00005",
+          "alternates": [
+            {
+              "text": "JSON",
+              "confidence": 0.9101204681396484
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000036",
+          "type": "word",
+          "text": "document",
+          "confidence": 0.9186527252197265,
+          "confidenceRaw": 91.86527252197266,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 829,
+            "y": 176,
+            "w": 105,
+            "h": 16
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00005",
+          "alternates": [
+            {
+              "text": "document",
+              "confidence": 0.9186527252197265
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000037",
+          "type": "word",
+          "text": "that",
+          "confidence": 0.9250305938720703,
+          "confidenceRaw": 92.50305938720703,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 41,
+            "y": 210,
+            "w": 41,
+            "h": 16
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00006",
+          "alternates": [
+            {
+              "text": "that",
+              "confidence": 0.9250305938720703
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000038",
+          "type": "word",
+          "text": "matches",
+          "confidence": 0.9179348754882812,
+          "confidenceRaw": 91.79348754882812,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 89,
+            "y": 210,
+            "w": 88,
+            "h": 16
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00006",
+          "alternates": [
+            {
+              "text": "matches",
+              "confidence": 0.9179348754882812
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000039",
+          "type": "word",
+          "text": "the",
+          "confidence": 0.9287450408935547,
+          "confidenceRaw": 92.87450408935547,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 183,
+            "y": 210,
+            "w": 32,
+            "h": 16
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00006",
+          "alternates": [
+            {
+              "text": "the",
+              "confidence": 0.9287450408935547
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000040",
+          "type": "word",
+          "text": "provided",
+          "confidence": 0.9252051544189454,
+          "confidenceRaw": 92.52051544189453,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 223,
+            "y": 210,
+            "w": 87,
+            "h": 20
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00006",
+          "alternates": [
+            {
+              "text": "provided",
+              "confidence": 0.9252051544189454
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000041",
+          "type": "word",
+          "text": "JSON",
+          "confidence": 0.9133633422851563,
+          "confidenceRaw": 91.33633422851562,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 317,
+            "y": 210,
+            "w": 54,
+            "h": 16
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00006",
+          "alternates": [
+            {
+              "text": "JSON",
+              "confidence": 0.9133633422851563
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000042",
+          "type": "word",
+          "text": "skeleton",
+          "confidence": 0.9126776885986329,
+          "confidenceRaw": 91.26776885986328,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 378,
+            "y": 210,
+            "w": 86,
+            "h": 16
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00006",
+          "alternates": [
+            {
+              "text": "skeleton",
+              "confidence": 0.9126776885986329
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000043",
+          "type": "word",
+          "text": "exactly.",
+          "confidence": 0.7459494018554688,
+          "confidenceRaw": 74.59494018554688,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 472,
+            "y": 210,
+            "w": 75,
+            "h": 20
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00006",
+          "alternates": [
+            {
+              "text": "exactly.",
+              "confidence": 0.7459494018554688
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000044",
+          "type": "word",
+          "text": "Test",
+          "confidence": 0.9070464324951172,
+          "confidenceRaw": 90.70464324951172,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 52,
+            "y": 260,
+            "w": 43,
+            "h": 16
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00007",
+          "alternates": [
+            {
+              "text": "Test",
+              "confidence": 0.9070464324951172
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000045",
+          "type": "word",
+          "text": "Result",
+          "confidence": 0.9181156921386718,
+          "confidenceRaw": 91.81156921386719,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 522,
+            "y": 260,
+            "w": 67,
+            "h": 16
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00007",
+          "alternates": [
+            {
+              "text": "Result",
+              "confidence": 0.9181156921386718
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000046",
+          "type": "word",
+          "text": "Thisistest#1",
+          "confidence": 0.8368299102783203,
+          "confidenceRaw": 83.68299102783203,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 203,
+            "y": 292,
+            "w": 140,
+            "h": 16
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00008",
+          "alternates": [
+            {
+              "text": "Thisistest#1",
+              "confidence": 0.8368299102783203
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000047",
+          "type": "word",
+          "text": "The",
+          "confidence": 0.8778842926025391,
+          "confidenceRaw": 87.7884292602539,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 520,
+            "y": 292,
+            "w": 36,
+            "h": 16
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00008",
+          "alternates": [
+            {
+              "text": "The",
+              "confidence": 0.8778842926025391
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000048",
+          "type": "word",
+          "text": "result",
+          "confidence": 0.8629231262207031,
+          "confidenceRaw": 86.29231262207031,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 564,
+            "y": 292,
+            "w": 57,
+            "h": 16
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00008",
+          "alternates": [
+            {
+              "text": "result",
+              "confidence": 0.8629231262207031
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000049",
+          "type": "word",
+          "text": "of",
+          "confidence": 0.8629231262207031,
+          "confidenceRaw": 86.29231262207031,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 627,
+            "y": 292,
+            "w": 20,
+            "h": 16
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00008",
+          "alternates": [
+            {
+              "text": "of",
+              "confidence": 0.8629231262207031
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000050",
+          "type": "word",
+          "text": "this",
+          "confidence": 0.9275822448730469,
+          "confidenceRaw": 92.75822448730469,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 652,
+            "y": 292,
+            "w": 37,
+            "h": 16
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00008",
+          "alternates": [
+            {
+              "text": "this",
+              "confidence": 0.9275822448730469
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000051",
+          "type": "word",
+          "text": "test",
+          "confidence": 0.9314118194580078,
+          "confidenceRaw": 93.14118194580078,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 695,
+            "y": 293,
+            "w": 39,
+            "h": 15
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00008",
+          "alternates": [
+            {
+              "text": "test",
+              "confidence": 0.9314118194580078
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000052",
+          "type": "word",
+          "text": "Should",
+          "confidence": 0.9284235382080078,
+          "confidenceRaw": 92.84235382080078,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 521,
+            "y": 322,
+            "w": 70,
+            "h": 16
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00009",
+          "alternates": [
+            {
+              "text": "Should",
+              "confidence": 0.9284235382080078
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000053",
+          "type": "word",
+          "text": "have",
+          "confidence": 0.9280349731445312,
+          "confidenceRaw": 92.80349731445312,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 600,
+            "y": 322,
+            "w": 46,
+            "h": 16
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00009",
+          "alternates": [
+            {
+              "text": "have",
+              "confidence": 0.9280349731445312
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000054",
+          "type": "word",
+          "text": "this",
+          "confidence": 0.9297891235351563,
+          "confidenceRaw": 92.97891235351562,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 652,
+            "y": 322,
+            "w": 37,
+            "h": 16
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00009",
+          "alternates": [
+            {
+              "text": "this",
+              "confidence": 0.9297891235351563
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000055",
+          "type": "word",
+          "text": "and",
+          "confidence": 0.9118072509765625,
+          "confidenceRaw": 91.18072509765625,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 696,
+            "y": 322,
+            "w": 37,
+            "h": 16
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00009",
+          "alternates": [
+            {
+              "text": "and",
+              "confidence": 0.9118072509765625
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000056",
+          "type": "word",
+          "text": "that",
+          "confidence": 0.9118072509765625,
+          "confidenceRaw": 91.18072509765625,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 740,
+            "y": 322,
+            "w": 40,
+            "h": 16
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00009",
+          "alternates": [
+            {
+              "text": "that",
+              "confidence": 0.9118072509765625
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000057",
+          "type": "word",
+          "text": "Then",
+          "confidence": 0.9142230224609375,
+          "confidenceRaw": 91.42230224609375,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 520,
+            "y": 351,
+            "w": 49,
+            "h": 16
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00010",
+          "alternates": [
+            {
+              "text": "Then",
+              "confidence": 0.9142230224609375
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000058",
+          "type": "word",
+          "text": "here",
+          "confidence": 0.8752267456054688,
+          "confidenceRaw": 87.52267456054688,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 577,
+            "y": 351,
+            "w": 43,
+            "h": 16
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00010",
+          "alternates": [
+            {
+              "text": "here",
+              "confidence": 0.8752267456054688
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000059",
+          "type": "word",
+          "text": "is",
+          "confidence": 0.8752267456054688,
+          "confidenceRaw": 87.52267456054688,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 628,
+            "y": 351,
+            "w": 15,
+            "h": 16
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00010",
+          "alternates": [
+            {
+              "text": "is",
+              "confidence": 0.8752267456054688
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000060",
+          "type": "word",
+          "text": "another",
+          "confidence": 0.9023915100097656,
+          "confidenceRaw": 90.23915100097656,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 650,
+            "y": 351,
+            "w": 79,
+            "h": 16
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00010",
+          "alternates": [
+            {
+              "text": "another",
+              "confidence": 0.9023915100097656
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000061",
+          "type": "word",
+          "text": "thing",
+          "confidence": 0.9023915100097656,
+          "confidenceRaw": 90.23915100097656,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 735,
+            "y": 351,
+            "w": 51,
+            "h": 20
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00010",
+          "alternates": [
+            {
+              "text": "thing",
+              "confidence": 0.9023915100097656
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000062",
+          "type": "word",
+          "text": "Thisis",
+          "confidence": 0.5661324310302734,
+          "confidenceRaw": 56.613243103027344,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 203,
+            "y": 381,
+            "w": 63,
+            "h": 16
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00011",
+          "alternates": [
+            {
+              "text": "Thisis",
+              "confidence": 0.5661324310302734
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000063",
+          "type": "word",
+          "text": "test",
+          "confidence": 0.6103766632080078,
+          "confidenceRaw": 61.03766632080078,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 272,
+            "y": 382,
+            "w": 39,
+            "h": 15
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00011",
+          "alternates": [
+            {
+              "text": "test",
+              "confidence": 0.6103766632080078
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000064",
+          "type": "word",
+          "text": "#2",
+          "confidence": 0.6103766632080078,
+          "confidenceRaw": 61.03766632080078,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 317,
+            "y": 381,
+            "w": 29,
+            "h": 16
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00011",
+          "alternates": [
+            {
+              "text": "#2",
+              "confidence": 0.6103766632080078
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000065",
+          "type": "word",
+          "text": "We",
+          "confidence": 0.9222328186035156,
+          "confidenceRaw": 92.22328186035156,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 520,
+            "y": 381,
+            "w": 32,
+            "h": 16
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00011",
+          "alternates": [
+            {
+              "text": "We",
+              "confidence": 0.9222328186035156
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000066",
+          "type": "word",
+          "text": "will",
+          "confidence": 0.87091064453125,
+          "confidenceRaw": 87.091064453125,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 558,
+            "y": 381,
+            "w": 35,
+            "h": 16
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00011",
+          "alternates": [
+            {
+              "text": "will",
+              "confidence": 0.87091064453125
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000067",
+          "type": "word",
+          "text": "se",
+          "confidence": 0.9249095153808594,
+          "confidenceRaw": 92.49095153808594,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 599,
+            "y": 385,
+            "w": 24,
+            "h": 16
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00011",
+          "alternates": [
+            {
+              "text": "se",
+              "confidence": 0.9249095153808594
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000068",
+          "type": "word",
+          "text": "the",
+          "confidence": 0.928351821899414,
+          "confidenceRaw": 92.8351821899414,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 628,
+            "y": 381,
+            "w": 32,
+            "h": 16
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00011",
+          "alternates": [
+            {
+              "text": "the",
+              "confidence": 0.928351821899414
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000069",
+          "type": "word",
+          "text": "results",
+          "confidence": 0.8707057952880859,
+          "confidenceRaw": 87.0705795288086,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 668,
+            "y": 381,
+            "w": 68,
+            "h": 16
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00011",
+          "alternates": [
+            {
+              "text": "results",
+              "confidence": 0.8707057952880859
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000070",
+          "type": "word",
+          "text": "For",
+          "confidence": 0.8697640228271485,
+          "confidenceRaw": 86.97640228271484,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 522,
+            "y": 411,
+            "w": 29,
+            "h": 16
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00012",
+          "alternates": [
+            {
+              "text": "For",
+              "confidence": 0.8697640228271485
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000071",
+          "type": "word",
+          "text": "the",
+          "confidence": 0.8697640228271485,
+          "confidenceRaw": 86.97640228271484,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 559,
+            "y": 411,
+            "w": 32,
+            "h": 16
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00012",
+          "alternates": [
+            {
+              "text": "the",
+              "confidence": 0.8697640228271485
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000072",
+          "type": "word",
+          "text": "second",
+          "confidence": 0.9177020263671875,
+          "confidenceRaw": 91.77020263671875,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 598,
+            "y": 411,
+            "w": 74,
+            "h": 16
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00012",
+          "alternates": [
+            {
+              "text": "second",
+              "confidence": 0.9177020263671875
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000073",
+          "type": "word",
+          "text": "test",
+          "confidence": 0.9197395324707032,
+          "confidenceRaw": 91.97395324707031,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 679,
+            "y": 412,
+            "w": 38,
+            "h": 15
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00012",
+          "alternates": [
+            {
+              "text": "test",
+              "confidence": 0.9197395324707032
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000074",
+          "type": "word",
+          "text": "And",
+          "confidence": 0.9186088562011718,
+          "confidenceRaw": 91.86088562011719,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 520,
+            "y": 440,
+            "w": 39,
+            "h": 16
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00013",
+          "alternates": [
+            {
+              "text": "And",
+              "confidence": 0.9186088562011718
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000075",
+          "type": "word",
+          "text": "we",
+          "confidence": 0.9069538879394531,
+          "confidenceRaw": 90.69538879394531,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 566,
+            "y": 444,
+            "w": 28,
+            "h": 12
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00013",
+          "alternates": [
+            {
+              "text": "we",
+              "confidence": 0.9069538879394531
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000076",
+          "type": "word",
+          "text": "should",
+          "confidence": 0.923389892578125,
+          "confidenceRaw": 92.3389892578125,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 602,
+            "y": 440,
+            "w": 68,
+            "h": 16
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00013",
+          "alternates": [
+            {
+              "text": "should",
+              "confidence": 0.923389892578125
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000077",
+          "type": "word",
+          "text": "follow",
+          "confidence": 0.9305760192871094,
+          "confidenceRaw": 93.05760192871094,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 677,
+            "y": 440,
+            "w": 57,
+            "h": 16
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00013",
+          "alternates": [
+            {
+              "text": "follow",
+              "confidence": 0.9305760192871094
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000078",
+          "type": "word",
+          "text": "the",
+          "confidence": 0.9256898498535157,
+          "confidenceRaw": 92.56898498535156,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 744,
+            "y": 436,
+            "w": 27,
+            "h": 30
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00013",
+          "alternates": [
+            {
+              "text": "the",
+              "confidence": 0.9256898498535157
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000079",
+          "type": "word",
+          "text": "instructions",
+          "confidence": 0.9182966613769531,
+          "confidenceRaw": 91.82966613769531,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 784,
+            "y": 440,
+            "w": 121,
+            "h": 16
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00013",
+          "alternates": [
+            {
+              "text": "instructions",
+              "confidence": 0.9182966613769531
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000080",
+          "type": "word",
+          "text": "Final",
+          "confidence": 0.9161580657958984,
+          "confidenceRaw": 91.61580657958984,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 229,
+            "y": 470,
+            "w": 48,
+            "h": 16
+          },
+          "blockId": "blk-001-00003",
+          "lineId": "ln-001-00014",
+          "alternates": [
+            {
+              "text": "Final",
+              "confidence": 0.9161580657958984
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000081",
+          "type": "word",
+          "text": "Test",
+          "confidence": 0.9161580657958984,
+          "confidenceRaw": 91.61580657958984,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 283,
+            "y": 470,
+            "w": 40,
+            "h": 16
+          },
+          "blockId": "blk-001-00003",
+          "lineId": "ln-001-00014",
+          "alternates": [
+            {
+              "text": "Test",
+              "confidence": 0.9161580657958984
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000082",
+          "type": "word",
+          "text": "This",
+          "confidence": 0.9133499908447266,
+          "confidenceRaw": 91.33499908447266,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 520,
+            "y": 470,
+            "w": 41,
+            "h": 16
+          },
+          "blockId": "blk-001-00003",
+          "lineId": "ln-001-00014",
+          "alternates": [
+            {
+              "text": "This",
+              "confidence": 0.9133499908447266
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000083",
+          "type": "word",
+          "text": "should",
+          "confidence": 0.9133499908447266,
+          "confidenceRaw": 91.33499908447266,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 568,
+            "y": 470,
+            "w": 68,
+            "h": 16
+          },
+          "blockId": "blk-001-00003",
+          "lineId": "ln-001-00014",
+          "alternates": [
+            {
+              "text": "should",
+              "confidence": 0.9133499908447266
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000084",
+          "type": "word",
+          "text": "complete",
+          "confidence": 0.9146646118164062,
+          "confidenceRaw": 91.46646118164062,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 644,
+            "y": 470,
+            "w": 97,
+            "h": 20
+          },
+          "blockId": "blk-001-00003",
+          "lineId": "ln-001-00014",
+          "alternates": [
+            {
+              "text": "complete",
+              "confidence": 0.9146646118164062
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000085",
+          "type": "word",
+          "text": "the",
+          "confidence": 0.9241378784179688,
+          "confidenceRaw": 92.41378784179688,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 747,
+            "y": 470,
+            "w": 32,
+            "h": 16
+          },
+          "blockId": "blk-001-00003",
+          "lineId": "ln-001-00014",
+          "alternates": [
+            {
+              "text": "the",
+              "confidence": 0.9241378784179688
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000086",
+          "type": "word",
+          "text": "test",
+          "confidence": 0.9230213165283203,
+          "confidenceRaw": 92.30213165283203,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 785,
+            "y": 471,
+            "w": 39,
+            "h": 15
+          },
+          "blockId": "blk-001-00003",
+          "lineId": "ln-001-00014",
+          "alternates": [
+            {
+              "text": "test",
+              "confidence": 0.9230213165283203
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        }
+      ],
+      "lines": [
+        {
+          "lineId": "ln-001-00001",
+          "bbox": {
+            "x": 188,
+            "y": 2,
+            "w": 18,
+            "h": 27
+          },
+          "tokenIds": [
+            "t-001-000001"
+          ],
+          "confidence": 0.7423614501953125,
+          "isLowConfidence": true
+        },
+        {
+          "lineId": "ln-001-00002",
+          "bbox": {
+            "x": 42,
+            "y": 42,
+            "w": 48,
+            "h": 16
+          },
+          "tokenIds": [
+            "t-001-000002"
+          ],
+          "confidence": 0.915575180053711,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00003",
+          "bbox": {
+            "x": 43,
+            "y": 92,
+            "w": 916,
+            "h": 20
+          },
+          "tokenIds": [
+            "t-001-000003",
+            "t-001-000004",
+            "t-001-000005",
+            "t-001-000006",
+            "t-001-000007",
+            "t-001-000008",
+            "t-001-000009",
+            "t-001-000010",
+            "t-001-000011",
+            "t-001-000012",
+            "t-001-000013",
+            "t-001-000014",
+            "t-001-000015",
+            "t-001-000016",
+            "t-001-000017",
+            "t-001-000018"
+          ],
+          "confidence": 0.9141190910339355,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00004",
+          "bbox": {
+            "x": 43,
+            "y": 126,
+            "w": 255,
+            "h": 16
+          },
+          "tokenIds": [
+            "t-001-000019",
+            "t-001-000020",
+            "t-001-000021"
+          ],
+          "confidence": 0.8853919219970704,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00005",
+          "bbox": {
+            "x": 41,
+            "y": 172,
+            "w": 893,
+            "h": 29
+          },
+          "tokenIds": [
+            "t-001-000022",
+            "t-001-000023",
+            "t-001-000024",
+            "t-001-000025",
+            "t-001-000026",
+            "t-001-000027",
+            "t-001-000028",
+            "t-001-000029",
+            "t-001-000030",
+            "t-001-000031",
+            "t-001-000032",
+            "t-001-000033",
+            "t-001-000034",
+            "t-001-000035",
+            "t-001-000036"
+          ],
+          "confidence": 0.9151599477132161,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00006",
+          "bbox": {
+            "x": 41,
+            "y": 210,
+            "w": 506,
+            "h": 20
+          },
+          "tokenIds": [
+            "t-001-000037",
+            "t-001-000038",
+            "t-001-000039",
+            "t-001-000040",
+            "t-001-000041",
+            "t-001-000042",
+            "t-001-000043"
+          ],
+          "confidence": 0.8955580139160155,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00007",
+          "bbox": {
+            "x": 52,
+            "y": 260,
+            "w": 537,
+            "h": 16
+          },
+          "tokenIds": [
+            "t-001-000044",
+            "t-001-000045"
+          ],
+          "confidence": 0.9125810623168945,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00008",
+          "bbox": {
+            "x": 203,
+            "y": 292,
+            "w": 531,
+            "h": 16
+          },
+          "tokenIds": [
+            "t-001-000046",
+            "t-001-000047",
+            "t-001-000048",
+            "t-001-000049",
+            "t-001-000050",
+            "t-001-000051"
+          ],
+          "confidence": 0.8832590866088866,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00009",
+          "bbox": {
+            "x": 521,
+            "y": 322,
+            "w": 259,
+            "h": 16
+          },
+          "tokenIds": [
+            "t-001-000052",
+            "t-001-000053",
+            "t-001-000054",
+            "t-001-000055",
+            "t-001-000056"
+          ],
+          "confidence": 0.921972427368164,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00010",
+          "bbox": {
+            "x": 520,
+            "y": 351,
+            "w": 266,
+            "h": 20
+          },
+          "tokenIds": [
+            "t-001-000057",
+            "t-001-000058",
+            "t-001-000059",
+            "t-001-000060",
+            "t-001-000061"
+          ],
+          "confidence": 0.8938919067382812,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00011",
+          "bbox": {
+            "x": 203,
+            "y": 381,
+            "w": 533,
+            "h": 20
+          },
+          "tokenIds": [
+            "t-001-000062",
+            "t-001-000063",
+            "t-001-000064",
+            "t-001-000065",
+            "t-001-000066",
+            "t-001-000067",
+            "t-001-000068",
+            "t-001-000069"
+          ],
+          "confidence": 0.7879995441436768,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00012",
+          "bbox": {
+            "x": 522,
+            "y": 411,
+            "w": 195,
+            "h": 16
+          },
+          "tokenIds": [
+            "t-001-000070",
+            "t-001-000071",
+            "t-001-000072",
+            "t-001-000073"
+          ],
+          "confidence": 0.894242401123047,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00013",
+          "bbox": {
+            "x": 520,
+            "y": 436,
+            "w": 385,
+            "h": 30
+          },
+          "tokenIds": [
+            "t-001-000074",
+            "t-001-000075",
+            "t-001-000076",
+            "t-001-000077",
+            "t-001-000078",
+            "t-001-000079"
+          ],
+          "confidence": 0.9205858612060546,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00014",
+          "bbox": {
+            "x": 229,
+            "y": 470,
+            "w": 595,
+            "h": 20
+          },
+          "tokenIds": [
+            "t-001-000080",
+            "t-001-000081",
+            "t-001-000082",
+            "t-001-000083",
+            "t-001-000084",
+            "t-001-000085",
+            "t-001-000086"
+          ],
+          "confidence": 0.9172628457205636,
+          "isLowConfidence": false
+        }
+      ],
+      "blocks": [
+        {
+          "blockId": "blk-001-00001",
+          "type": "text",
+          "bbox": {
+            "x": 188,
+            "y": 2,
+            "w": 18,
+            "h": 27
+          },
+          "lineIds": [
+            "ln-001-00001"
+          ],
+          "tokenIds": [
+            "t-001-000001"
+          ],
+          "confidence": 0.7423614501953125,
+          "isLowConfidence": true
+        },
+        {
+          "blockId": "blk-001-00002",
+          "type": "text",
+          "bbox": {
+            "x": 203,
+            "y": 381,
+            "w": 702,
+            "h": 85
+          },
+          "lineIds": [
+            "ln-001-00011",
+            "ln-001-00012",
+            "ln-001-00013"
+          ],
+          "tokenIds": [
+            "t-001-000062",
+            "t-001-000063",
+            "t-001-000064",
+            "t-001-000065",
+            "t-001-000066",
+            "t-001-000067",
+            "t-001-000068",
+            "t-001-000069",
+            "t-001-000070",
+            "t-001-000071",
+            "t-001-000072",
+            "t-001-000073",
+            "t-001-000074",
+            "t-001-000075",
+            "t-001-000076",
+            "t-001-000077",
+            "t-001-000078",
+            "t-001-000079"
+          ],
+          "confidence": 0.8676092688242595,
+          "isLowConfidence": false
+        },
+        {
+          "blockId": "blk-001-00003",
+          "type": "text",
+          "bbox": {
+            "x": 229,
+            "y": 470,
+            "w": 595,
+            "h": 20
+          },
+          "lineIds": [
+            "ln-001-00014"
+          ],
+          "tokenIds": [
+            "t-001-000080",
+            "t-001-000081",
+            "t-001-000082",
+            "t-001-000083",
+            "t-001-000084",
+            "t-001-000085",
+            "t-001-000086"
+          ],
+          "confidence": 0.9172628457205636,
+          "isLowConfidence": false
+        },
+        {
+          "blockId": "blk-001-00004",
+          "type": "text",
+          "bbox": {
+            "x": 41,
+            "y": 172,
+            "w": 893,
+            "h": 58
+          },
+          "lineIds": [
+            "ln-001-00005",
+            "ln-001-00006"
+          ],
+          "tokenIds": [
+            "t-001-000022",
+            "t-001-000023",
+            "t-001-000024",
+            "t-001-000025",
+            "t-001-000026",
+            "t-001-000027",
+            "t-001-000028",
+            "t-001-000029",
+            "t-001-000030",
+            "t-001-000031",
+            "t-001-000032",
+            "t-001-000033",
+            "t-001-000034",
+            "t-001-000035",
+            "t-001-000036",
+            "t-001-000037",
+            "t-001-000038",
+            "t-001-000039",
+            "t-001-000040",
+            "t-001-000041",
+            "t-001-000042",
+            "t-001-000043"
+          ],
+          "confidence": 0.9053589808146159,
+          "isLowConfidence": false
+        },
+        {
+          "blockId": "blk-001-00005",
+          "type": "text",
+          "bbox": {
+            "x": 42,
+            "y": 42,
+            "w": 48,
+            "h": 16
+          },
+          "lineIds": [
+            "ln-001-00002"
+          ],
+          "tokenIds": [
+            "t-001-000002"
+          ],
+          "confidence": 0.915575180053711,
+          "isLowConfidence": false
+        },
+        {
+          "blockId": "blk-001-00006",
+          "type": "text",
+          "bbox": {
+            "x": 43,
+            "y": 92,
+            "w": 916,
+            "h": 50
+          },
+          "lineIds": [
+            "ln-001-00003",
+            "ln-001-00004"
+          ],
+          "tokenIds": [
+            "t-001-000003",
+            "t-001-000004",
+            "t-001-000005",
+            "t-001-000006",
+            "t-001-000007",
+            "t-001-000008",
+            "t-001-000009",
+            "t-001-000010",
+            "t-001-000011",
+            "t-001-000012",
+            "t-001-000013",
+            "t-001-000014",
+            "t-001-000015",
+            "t-001-000016",
+            "t-001-000017",
+            "t-001-000018",
+            "t-001-000019",
+            "t-001-000020",
+            "t-001-000021"
+          ],
+          "confidence": 0.899755506515503,
+          "isLowConfidence": false
+        },
+        {
+          "blockId": "blk-001-00007",
+          "type": "text",
+          "bbox": {
+            "x": 52,
+            "y": 260,
+            "w": 734,
+            "h": 111
+          },
+          "lineIds": [
+            "ln-001-00007",
+            "ln-001-00008",
+            "ln-001-00009",
+            "ln-001-00010"
+          ],
+          "tokenIds": [
+            "t-001-000044",
+            "t-001-000045",
+            "t-001-000046",
+            "t-001-000047",
+            "t-001-000048",
+            "t-001-000049",
+            "t-001-000050",
+            "t-001-000051",
+            "t-001-000052",
+            "t-001-000053",
+            "t-001-000054",
+            "t-001-000055",
+            "t-001-000056",
+            "t-001-000057",
+            "t-001-000058",
+            "t-001-000059",
+            "t-001-000060",
+            "t-001-000061"
+          ],
+          "confidence": 0.9029261207580567,
+          "isLowConfidence": false
+        }
+      ],
+      "tables": [
+        {
+          "tableId": "tbl-0001",
+          "confidence": 0.9137588096883293,
+          "bbox": {
+            "x": 41,
+            "y": 253,
+            "w": 937,
+            "h": 242
+          },
+          "detection": {
+            "method": "lines",
+            "hasExplicitGridLines": true,
+            "modelName": null,
+            "modelVersion": null,
+            "notes": [
+              "Header row selected from first detected row.",
+              "No artifact rows removed."
+            ]
+          },
+          "grid": {
+            "rows": 4,
+            "cols": 2,
+            "rowBands": [
+              {
+                "rowIndex": 0,
+                "type": "header",
+                "bbox": {
+                  "x": 41,
+                  "y": 253,
+                  "w": 937,
+                  "h": 31
+                }
+              },
+              {
+                "rowIndex": 1,
+                "type": "data",
+                "bbox": {
+                  "x": 41,
+                  "y": 284,
+                  "w": 937,
+                  "h": 90
+                }
+              },
+              {
+                "rowIndex": 2,
+                "type": "data",
+                "bbox": {
+                  "x": 41,
+                  "y": 374,
+                  "w": 937,
+                  "h": 89
+                }
+              },
+              {
+                "rowIndex": 3,
+                "type": "data",
+                "bbox": {
+                  "x": 41,
+                  "y": 463,
+                  "w": 937,
+                  "h": 30
+                }
+              }
+            ],
+            "colBands": [
+              {
+                "colIndex": 0,
+                "bbox": {
+                  "x": 41,
+                  "y": 253,
+                  "w": 467,
+                  "h": 242
+                }
+              },
+              {
+                "colIndex": 1,
+                "bbox": {
+                  "x": 508,
+                  "y": 253,
+                  "w": 468,
+                  "h": 242
+                }
+              }
+            ]
+          },
+          "header": {
+            "rowIndex": 0,
+            "columns": [
+              {
+                "colIndex": 0,
+                "name": "Test",
+                "key": "test",
+                "bbox": {
+                  "x": 52,
+                  "y": 260,
+                  "w": 43,
+                  "h": 16
+                },
+                "confidence": 0.9070464324951172
+              },
+              {
+                "colIndex": 1,
+                "name": "Result",
+                "key": "result",
+                "bbox": {
+                  "x": 522,
+                  "y": 260,
+                  "w": 67,
+                  "h": 16
+                },
+                "confidence": 0.9181156921386718
+              }
+            ],
+            "cells": [
+              {
+                "rowIndex": 0,
+                "colIndex": 0,
+                "rowSpan": 1,
+                "colSpan": 1,
+                "text": "Test",
+                "confidence": 0.9070464324951172,
+                "bbox": {
+                  "x": 52,
+                  "y": 260,
+                  "w": 43,
+                  "h": 16
+                },
+                "tokenIds": [
+                  "t-001-000044"
+                ]
+              },
+              {
+                "rowIndex": 0,
+                "colIndex": 1,
+                "rowSpan": 1,
+                "colSpan": 1,
+                "text": "Result",
+                "confidence": 0.9181156921386718,
+                "bbox": {
+                  "x": 522,
+                  "y": 260,
+                  "w": 67,
+                  "h": 16
+                },
+                "tokenIds": [
+                  "t-001-000045"
+                ]
+              }
+            ]
+          },
+          "cells": [
+            {
+              "rowIndex": 1,
+              "colIndex": 0,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "Thisistest#1",
+              "normalized": {
+                "type": "string",
+                "value": "Thisistest#1",
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.8368299102783203,
+              "bbox": {
+                "x": 203,
+                "y": 292,
+                "w": 140,
+                "h": 16
+              },
+              "tokenIds": [
+                "t-001-000046"
+              ],
+              "isLowConfidence": false
+            },
+            {
+              "rowIndex": 1,
+              "colIndex": 1,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "The result of this test Should have this and that Then here is another thing",
+              "normalized": {
+                "type": "string",
+                "value": "The result of this test Should have this and that Then here is another thing",
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.9028030853271484,
+              "bbox": {
+                "x": 520,
+                "y": 292,
+                "w": 266,
+                "h": 79
+              },
+              "tokenIds": [
+                "t-001-000047",
+                "t-001-000048",
+                "t-001-000049",
+                "t-001-000050",
+                "t-001-000051",
+                "t-001-000052",
+                "t-001-000053",
+                "t-001-000054",
+                "t-001-000055",
+                "t-001-000056",
+                "t-001-000057",
+                "t-001-000058",
+                "t-001-000059",
+                "t-001-000060",
+                "t-001-000061"
+              ],
+              "isLowConfidence": false
+            },
+            {
+              "rowIndex": 2,
+              "colIndex": 0,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "Thisistest# 2",
+              "normalized": {
+                "type": "string",
+                "value": "Thisistest# 2",
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.5956285858154297,
+              "bbox": {
+                "x": 203,
+                "y": 381,
+                "w": 143,
+                "h": 16
+              },
+              "tokenIds": [
+                "t-001-000062",
+                "t-001-000064",
+                "t-001-000063"
+              ],
+              "isLowConfidence": true
+            },
+            {
+              "rowIndex": 2,
+              "colIndex": 1,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "We will se the results For the second test And we should follow the instructions",
+              "normalized": {
+                "type": "string",
+                "value": "We will se the results For the second test And we should follow the instructions",
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.9078396911621094,
+              "bbox": {
+                "x": 520,
+                "y": 381,
+                "w": 385,
+                "h": 85
+              },
+              "tokenIds": [
+                "t-001-000065",
+                "t-001-000066",
+                "t-001-000068",
+                "t-001-000069",
+                "t-001-000067",
+                "t-001-000070",
+                "t-001-000071",
+                "t-001-000072",
+                "t-001-000073",
+                "t-001-000078",
+                "t-001-000074",
+                "t-001-000076",
+                "t-001-000077",
+                "t-001-000079",
+                "t-001-000075"
+              ],
+              "isLowConfidence": false
+            },
+            {
+              "rowIndex": 3,
+              "colIndex": 0,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "Final Test",
+              "normalized": {
+                "type": "string",
+                "value": "Final Test",
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.9161580657958984,
+              "bbox": {
+                "x": 229,
+                "y": 470,
+                "w": 94,
+                "h": 16
+              },
+              "tokenIds": [
+                "t-001-000080",
+                "t-001-000081"
+              ],
+              "isLowConfidence": false
+            },
+            {
+              "rowIndex": 3,
+              "colIndex": 1,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "This should complete the test",
+              "normalized": {
+                "type": "string",
+                "value": "This should complete the test",
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.9177047576904297,
+              "bbox": {
+                "x": 520,
+                "y": 470,
+                "w": 304,
+                "h": 20
+              },
+              "tokenIds": [
+                "t-001-000082",
+                "t-001-000083",
+                "t-001-000084",
+                "t-001-000085",
+                "t-001-000086"
+              ],
+              "isLowConfidence": false
+            }
+          ],
+          "rows": [
+            {
+              "rowIndex": 1,
+              "type": "data",
+              "values": {
+                "test": "Thisistest#1",
+                "result": "The result of this test Should have this and that Then here is another thing"
+              },
+              "source": {
+                "cellRefs": [
+                  {
+                    "rowIndex": 1,
+                    "colIndex": 0
+                  },
+                  {
+                    "rowIndex": 1,
+                    "colIndex": 1
+                  }
+                ]
+              },
+              "confidence": 0.8698164978027343,
+              "isLowConfidence": false
+            },
+            {
+              "rowIndex": 2,
+              "type": "data",
+              "values": {
+                "test": "Thisistest# 2",
+                "result": "We will se the results For the second test And we should follow the instructions"
+              },
+              "source": {
+                "cellRefs": [
+                  {
+                    "rowIndex": 2,
+                    "colIndex": 0
+                  },
+                  {
+                    "rowIndex": 2,
+                    "colIndex": 1
+                  }
+                ]
+              },
+              "confidence": 0.7517341384887695,
+              "isLowConfidence": false
+            },
+            {
+              "rowIndex": 3,
+              "type": "data",
+              "values": {
+                "test": "Final Test",
+                "result": "This should complete the test"
+              },
+              "source": {
+                "cellRefs": [
+                  {
+                    "rowIndex": 3,
+                    "colIndex": 0
+                  },
+                  {
+                    "rowIndex": 3,
+                    "colIndex": 1
+                  }
+                ]
+              },
+              "confidence": 0.9169314117431641,
+              "isLowConfidence": false
+            }
+          ],
+          "tokenCoverage": {
+            "tokenCountInCells": 43,
+            "tokenCountOverlappingTableBbox": 43,
+            "coverageRatio": 1.0
+          },
+          "issues": []
+        }
+      ],
+      "keyValueCandidates": [
+        {
+          "pairId": "kv-001-00001",
+          "label": {
+            "text": "Framework",
+            "confidence": 0.924497299194336,
+            "bbox": {
+              "x": 43,
+              "y": 126,
+              "w": 113,
+              "h": 16
+            },
+            "tokenIds": [
+              "t-001-000019"
+            ]
+          },
+          "value": {
+            "text": "4.8 OCRDLL.",
+            "confidence": 0.8658392333984375,
+            "bbox": {
+              "x": 162,
+              "y": 126,
+              "w": 136,
+              "h": 16
+            },
+            "tokenIds": [
+              "t-001-000020",
+              "t-001-000021"
+            ]
+          },
+          "confidence": 0.8532017097473145,
+          "method": "ocr+layout"
+        }
+      ],
+      "regions": [],
+      "pageWords": [
+        "#2",
+        "(class",
+        ".NET",
+        "10",
+        "4.8",
+        "a",
+        "an",
+        "and",
+        "another",
+        "Build",
+        "complete",
+        "DLL)",
+        "document",
+        "exactly.",
+        "existing",
+        "Final",
+        "follow",
+        "For",
+        "Framework",
+        "Goal",
+        "have",
+        "here",
+        "images",
+        "instructions",
+        "is",
+        "JSON",
+        "library",
+        "matches",
+        "must",
+        "N",
+        "new",
+        "OCR",
+        "OCRDLL.",
+        "of",
+        "on",
+        "output",
+        "PDFs,",
+        "provided",
+        "replaces",
+        "Result",
+        "results",
+        "run",
+        "se",
+        "second",
+        "Should",
+        "skeleton",
+        "targeting",
+        "Test",
+        "that",
+        "The",
+        "Then",
+        "thing",
+        "this",
+        "Thisis",
+        "Thisistest#1",
+        "We",
+        "will",
+        "Windows,"
+      ],
+      "unassignedTokenIds": [],
+      "artifacts": {
+        "pageImageRef": "C:\\Users\\MJR19\\source\\repos\\OCR\\src\\OcrShowcase.Demo.Wpf\\bin\\Debug\\net10.0-windows\\output\\OCR Demo Image With Table On It_20260318_192831\\page_1_preprocessed.png",
+        "debugOverlayRef": null
+      }
+    }
+  ],
+  "recognition": {
+    "documentType": {
+      "name": null,
+      "version": null,
+      "confidence": 0.0
+    },
+    "anchors": {
+      "matchedAnchors": [],
+      "unmatchedAnchors": []
+    },
+    "fields": [
+      {
+        "fieldId": "framework",
+        "label": "Framework",
+        "type": "string",
+        "value": "4.8 OCRDLL.",
+        "normalized": {
+          "type": "string",
+          "value": "4.8 OCRDLL.",
+          "currency": null,
+          "unit": null
+        },
+        "confidence": 0.8532017097473145,
+        "isLowConfidence": false,
+        "source": {
+          "pageIndex": 1,
+          "bbox": {
+            "x": 43,
+            "y": 126,
+            "w": 255,
+            "h": 16
+          },
+          "tokenIds": [
+            "t-001-000019",
+            "t-001-000020",
+            "t-001-000021"
+          ],
+          "method": "ocr+layout"
+        },
+        "validation": {
+          "rulesApplied": [
+            "non_empty_value",
+            "basic_normalization",
+            "spatial_pairing"
+          ],
+          "validated": true,
+          "issues": []
+        },
+        "review": {
+          "needsReview": false,
+          "reason": null
+        }
+      }
+    ],
+    "tableMappings": []
+  },
+  "review": {
+    "required": false,
+    "reviewedBy": null,
+    "reviewedUtc": null,
+    "changes": []
+  },
+  "warnings": [
+    {
+      "code": "deskew_rejected_low_confidence",
+      "severity": "warning",
+      "message": "Page 1 detected candidate deskew angle -19.00 but confidence 0.001 was too low to apply.",
+      "pageIndex": 1,
+      "details": {
+        "detectedDegrees": -19.0,
+        "detectedConfidence": 0.0005422972626424165
+      }
+    },
+    {
+      "code": "region_detection_stats",
+      "severity": "info",
+      "message": "Page 1 region detection: raw=736, geometry=0, label=0, finalCheckbox=0, finalRadio=0.",
+      "pageIndex": 1,
+      "details": {
+        "rawCandidateCount": 736,
+        "geometryFilteredCount": 0,
+        "labelFilteredCount": 0,
+        "finalCheckboxCount": 0,
+        "finalRadioCount": 0
+      }
+    },
+    {
+      "code": "token_cleanup_stats",
+      "severity": "info",
+      "message": "Page 1 token cleanup: original=86, modified=0, removed=0, split=0, checkboxArtifactsRemoved=0, underlineArtifactsRemoved=0, dictionaryCorrections=0.",
+      "pageIndex": 1,
+      "details": {
+        "tokensOriginal": 86,
+        "tokensModified": 0,
+        "tokensRemoved": 0,
+        "tokensSplit": 0,
+        "checkboxArtifactsRemoved": 0,
+        "underlineArtifactsRemoved": 0,
+        "dictionaryCorrections": 0
+      }
+    }
+  ],
+  "errors": [],
+  "documentWords": [
+    "#2",
+    "(class",
+    ".NET",
+    "10",
+    "4.8",
+    "a",
+    "an",
+    "and",
+    "another",
+    "Build",
+    "complete",
+    "DLL)",
+    "document",
+    "exactly.",
+    "existing",
+    "Final",
+    "follow",
+    "For",
+    "Framework",
+    "Goal",
+    "have",
+    "here",
+    "images",
+    "instructions",
+    "is",
+    "JSON",
+    "library",
+    "matches",
+    "must",
+    "N",
+    "new",
+    "OCR",
+    "OCRDLL.",
+    "of",
+    "on",
+    "output",
+    "PDFs,",
+    "provided",
+    "replaces",
+    "Result",
+    "results",
+    "run",
+    "se",
+    "second",
+    "Should",
+    "skeleton",
+    "targeting",
+    "Test",
+    "that",
+    "The",
+    "Then",
+    "thing",
+    "this",
+    "Thisis",
+    "Thisistest#1",
+    "We",
+    "will",
+    "Windows,"
+  ],
+  "extensions": {
+    "tessdataPath": "C:\\Users\\MJR19\\source\\repos\\OCR\\src\\OcrShowcase.Demo.Wpf\\bin\\Debug\\net10.0-windows\\tessdata",
+    "optionSnapshot": {
+      "targetDpi": 300,
+      "language": "eng",
+      "pageSegMode": null,
+      "engineMode": null,
+      "preserveInterwordSpaces": true,
+      "saveTokenOverlay": false,
+      "enableNoiseFiltering": false,
+      "enableDeskew": true,
+      "maxDeskewDegrees": 40.0,
+      "deskewAngleStep": 0.5,
+      "minDeskewConfidence": 0.15,
+      "enableDenoise": false,
+      "denoiseMethod": "median",
+      "denoiseKernel": 3,
+      "enableBinarization": false,
+      "binarizationMethod": "otsu",
+      "enableContrastEnhancement": false,
+      "contrastMethod": "clahe",
+      "saveJsonToDisk": true,
+      "outputFolder": null,
+      "saveDebugArtifacts": true,
+      "profileName": "showcase-demo"
+    },
+    "pagePreprocessing": [
+      {
+        "pageIndex": 1,
+        "deskewAttempted": true,
+        "deskewApplied": false,
+        "detectedDegrees": -19.0,
+        "detectedConfidence": 0.0005422972626424165,
+        "appliedDegrees": 0.0
+      }
+    ],
+    "debugArtifactPaths": [
+      {
+        "pageIndex": 1,
+        "originalOrRenderPath": "C:\\Users\\MJR19\\source\\repos\\OCR\\src\\OcrShowcase.Demo.Wpf\\bin\\Debug\\net10.0-windows\\output\\OCR Demo Image With Table On It_20260318_192831\\page_1_original_or_render.png",
+        "grayPath": "C:\\Users\\MJR19\\source\\repos\\OCR\\src\\OcrShowcase.Demo.Wpf\\bin\\Debug\\net10.0-windows\\output\\OCR Demo Image With Table On It_20260318_192831\\page_1_gray.png",
+        "preprocessedPath": "C:\\Users\\MJR19\\source\\repos\\OCR\\src\\OcrShowcase.Demo.Wpf\\bin\\Debug\\net10.0-windows\\output\\OCR Demo Image With Table On It_20260318_192831\\page_1_preprocessed.png",
+        "tokenOverlayPath": null,
+        "lineOverlayPath": null,
+        "blockOverlayPath": null,
+        "tableOverlayPath": "C:\\Users\\MJR19\\source\\repos\\OCR\\src\\OcrShowcase.Demo.Wpf\\bin\\Debug\\net10.0-windows\\output\\OCR Demo Image With Table On It_20260318_192831\\page_1_table_overlay.png",
+        "regionOverlayPath": null
+      }
+    ],
+    "pageNoiseDiagnostics": [
+      {
+        "pageIndex": 1,
+        "totalTokenCount": 86,
+        "lowConfidenceTokenCount": 3,
+        "tinyTokenCount": 0,
+        "symbolLikeTokenCount": 0,
+        "suspectedDecorativeNoiseCount": 0,
+        "suspectedDecorativeNoiseRatio": 0.0
+      }
+    ],
+    "lineReconstructionDiagnostics": [
+      {
+        "pageIndex": 1,
+        "originalLineCount": 14,
+        "reconstructedLineCount": 14,
+        "tokensAssigned": 86,
+        "successful": true
+      }
+    ],
+    "tokenCleanupStats": [
+      {
+        "pageIndex": 1,
+        "tokensOriginal": 86,
+        "tokensModified": 0,
+        "tokensRemoved": 0,
+        "tokensSplit": 0,
+        "checkboxArtifactsRemoved": 0,
+        "underlineArtifactsRemoved": 0,
+        "dictionaryCorrections": 0,
+        "tokensCleaned": 86
+      }
+    ],
+    "filteredTokenIds": [],
+    "fieldExtractionDiagnostics": [
+      {
+        "pageIndex": 1,
+        "candidateCount": 1,
+        "promotedFieldCount": 1,
+        "ambiguousCandidateCount": 0
+      }
+    ],
+    "structuredFieldExtractionStats": {
+      "pagesProcessed": 1,
+      "keyValueCandidateCount": 1,
+      "promotedFieldCount": 1,
+      "checkboxDerivedFieldCount": 0
+    },
+    "pipelineStageTimings": [
+      {
+        "stageName": "Input/Load",
+        "durationMs": 4,
+        "status": "completed",
+        "note": null
+      },
+      {
+        "stageName": "Render",
+        "durationMs": 29,
+        "status": "completed",
+        "note": null
+      },
+      {
+        "stageName": "Preprocess [Page 1]",
+        "durationMs": 326,
+        "status": "completed",
+        "note": null
+      },
+      {
+        "stageName": "OCR Extraction [Page 1]",
+        "durationMs": 290,
+        "status": "completed",
+        "note": null
+      },
+      {
+        "stageName": "Layout Analysis [Page 1]",
+        "durationMs": 38,
+        "status": "completed",
+        "note": null
+      },
+      {
+        "stageName": "Token Cleanup [Page 1]",
+        "durationMs": 0,
+        "status": "completed",
+        "note": "Token cleanup is executed inside the layout analysis stage."
+      },
+      {
+        "stageName": "Line Reconstruction [Page 1]",
+        "durationMs": 0,
+        "status": "completed",
+        "note": "Line reconstruction is executed inside the layout analysis stage."
+      },
+      {
+        "stageName": "Table Detection [Page 1]",
+        "durationMs": 64,
+        "status": "completed",
+        "note": null
+      },
+      {
+        "stageName": "Region Detection [Page 1]",
+        "durationMs": 38,
+        "status": "completed",
+        "note": null
+      },
+      {
+        "stageName": "Structured Field Extraction [Page 1]",
+        "durationMs": 13,
+        "status": "completed",
+        "note": null
+      },
+      {
+        "stageName": "Structured Field Extraction",
+        "durationMs": 2,
+        "status": "completed",
+        "note": null
+      },
+      {
+        "stageName": "Structured Field Extraction (Additive)",
+        "durationMs": 21,
+        "status": "completed",
+        "note": null
+      }
+    ]
+  }
+}

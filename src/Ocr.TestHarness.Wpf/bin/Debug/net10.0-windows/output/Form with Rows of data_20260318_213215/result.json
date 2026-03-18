@@ -1,0 +1,7232 @@
+{
+  "schema": {
+    "name": "com.yourcompany.ocr.document",
+    "version": "1.1.0",
+    "status": "draft"
+  },
+  "definitions": {
+    "coordinateSystem": {
+      "unit": "px",
+      "origin": "top-left",
+      "xDirection": "right",
+      "yDirection": "down",
+      "bboxFormat": "x,y,w,h",
+      "pageRotationAppliedToCoords": true,
+      "notes": "All bbox coordinates are relative to the final, processed page image (after render + rotation + deskew)."
+    },
+    "confidence": {
+      "scale": "0to1",
+      "lowTokenThreshold": 0.7,
+      "lowLineThreshold": 0.75,
+      "lowBlockThreshold": 0.8,
+      "lowCellThreshold": 0.75,
+      "lowTableThreshold": 0.8,
+      "lowFieldThreshold": 0.8
+    },
+    "readingOrder": {
+      "default": "top-to-bottom-left-to-right",
+      "supported": [
+        "top-to-bottom-left-to-right",
+        "top-to-bottom-right-to-left",
+        "custom"
+      ]
+    },
+    "enums": {
+      "severity": [
+        "info",
+        "warning",
+        "error",
+        "fatal"
+      ],
+      "tokenType": [
+        "word",
+        "punct",
+        "number",
+        "symbol",
+        "unknown"
+      ],
+      "blockType": [
+        "text",
+        "table",
+        "image",
+        "barcode",
+        "signature",
+        "stamp",
+        "unknown"
+      ],
+      "regionType": [
+        "checkbox",
+        "radio",
+        "signature",
+        "barcode",
+        "qr",
+        "image",
+        "stamp",
+        "unknown"
+      ],
+      "normalizedType": [
+        "string",
+        "number",
+        "date",
+        "currency",
+        "percent",
+        "boolean",
+        "unknown"
+      ],
+      "tableDetectionMethod": [
+        "lines",
+        "layout",
+        "lines+layout",
+        "model",
+        "unknown"
+      ],
+      "fieldSourceMethod": [
+        "ocr",
+        "ocr+layout",
+        "ocr+regex",
+        "table",
+        "model",
+        "human"
+      ]
+    }
+  },
+  "document": {
+    "documentId": "00000000-0000-0000-0000-000000000000",
+    "correlationId": "optional-run-id-for-tracing",
+    "createdUtc": "2026-03-18T21:32:15.9827624Z",
+    "source": {
+      "originalFileName": "Form with Rows of data.png",
+      "fileType": "image",
+      "fileHashSha256": null,
+      "pageCount": 1,
+      "mimeType": "image/png"
+    },
+    "processing": {
+      "pipelineVersion": "ocr-pipeline-1.1.0",
+      "engine": {
+        "name": "tesseract",
+        "version": "5.x",
+        "language": [
+          "eng"
+        ],
+        "params": {
+          "psm": "optional",
+          "oem": "optional"
+        }
+      },
+      "render": {
+        "dpiOriginal": 300,
+        "dpiNormalizedTo": 300,
+        "colorMode": "grayscale",
+        "pageImageFormat": "png"
+      },
+      "preprocessing": {
+        "rotation": {
+          "attempted": false,
+          "applied": false,
+          "degrees": 0.0,
+          "confidence": 0.0
+        },
+        "deskew": {
+          "attempted": true,
+          "applied": false,
+          "degrees": 0.0,
+          "confidence": 0.0
+        },
+        "denoise": {
+          "enabled": false,
+          "method": "median"
+        },
+        "binarization": {
+          "enabled": false,
+          "method": "otsu"
+        },
+        "contrastEnhancement": {
+          "enabled": false,
+          "method": null
+        }
+      },
+      "postprocessing": {
+        "fixCommonOcrErrors": false,
+        "normalizeWhitespace": true
+      },
+      "confidencePolicy": {
+        "scale": "0to1",
+        "lowTokenThreshold": 0.7,
+        "aggregation": {
+          "lineConfidence": "mean(tokens.confidence)",
+          "blockConfidence": "mean(lines.confidence)",
+          "cellConfidence": "mean(tokenIds.confidence)",
+          "rowConfidence": "mean(cells.confidence)",
+          "tableConfidence": "mean(rows.confidence)",
+          "fieldConfidence": "mean(tokenIds.confidence)"
+        }
+      }
+    }
+  },
+  "metrics": {
+    "totalMs": 1651,
+    "documentOcrMs": 533,
+    "pagesMs": [
+      1101
+    ],
+    "breakdownMs": {
+      "renderMs": 0,
+      "preprocessMs": 548,
+      "ocrMs": 533,
+      "layoutMs": 18,
+      "tableDetectMs": 178,
+      "recognitionMs": 4,
+      "postprocessMs": 2
+    }
+  },
+  "pages": [
+    {
+      "pageIndex": 1,
+      "pageId": "page-1",
+      "size": {
+        "widthPx": 834,
+        "heightPx": 1220,
+        "dpi": 300,
+        "rotationDegrees": 0.0
+      },
+      "timing": {
+        "renderMs": 0,
+        "preprocessMs": 548,
+        "ocrMs": 533,
+        "layoutMs": 18,
+        "tableDetectMs": 178,
+        "postprocessMs": 2
+      },
+      "quality": {
+        "meanTokenConfidence": 0.8339599482218427,
+        "lowConfidenceTokenCount": 18,
+        "blankPage": false
+      },
+      "text": {
+        "fullText": "> ACME PURCHASE ORDER\r\nCORPORATION PO Number: 123456\r\nOrder Date: 05/30/2024\r\n123 Commerce Bivd,\r\nMetroplis, USA, 98765 Due Date: 06/07/2024\r\nPhone: (555) 123- 4567 Terms: Net 30\r\nVendor;hlp To:.\r\nSupplier Inc. John Smith\r\n789 Industrial Rd Acme Corporation\r\nSpringfiled, USA, 54321 123 Commerce Blvd, Suite 456\r\nMegkt:inssuppliier.com Metrroplis, USA, 98765\r\nRequester\r\nMichael Sherwood\r\nmsherwood@acme.com\r\nPhone: (555) 987- 6543\r\nItems: Qty UnitPrice Total\r\nSKU Description Qty Pnait Ttom\r\nABC- 100 Office DeskAdjustable Height: 1 10 $250.00 $2,500.00\r\nDEF- 200 Ergonomic Office Chair 15 11 $150.00 $2,250.00\r\nXYZ- 300 Laptop Docking Station 5} 5 $100.00 $500.00\r\nSubtotal: $5,250.00\r\nTax Rate: 00% $900.00\r\nTax: $420.00\r\nGrand Total: $5,670.00\r\nNotes / instructions:\r\nDeliver goods to the shipping address by the due date. Include packing slip with shipment.\r\nMichael Sherwood Jane Doe\r\nRequester Procurement Manager",
+        "readingOrder": "top-to-bottom-left-to-right"
+      },
+      "tokens": [
+        {
+          "id": "t-001-000001",
+          "type": "word",
+          "text": ">",
+          "confidence": 0.5972625350952149,
+          "confidenceRaw": 59.726253509521484,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 8,
+            "y": 36,
+            "w": 18,
+            "h": 27
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00001",
+          "alternates": [
+            {
+              "text": ">",
+              "confidence": 0.5972625350952149
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000002",
+          "type": "word",
+          "text": "ACME",
+          "confidence": 0.890576171875,
+          "confidenceRaw": 89.0576171875,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 37,
+            "y": 38,
+            "w": 171,
+            "h": 41
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00001",
+          "alternates": [
+            {
+              "text": "ACME",
+              "confidence": 0.890576171875
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000003",
+          "type": "word",
+          "text": "PURCHASE",
+          "confidence": 0.9189818572998046,
+          "confidenceRaw": 91.89818572998047,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 486,
+            "y": 39,
+            "w": 183,
+            "h": 25
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00001",
+          "alternates": [
+            {
+              "text": "PURCHASE",
+              "confidence": 0.9189818572998046
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000004",
+          "type": "word",
+          "text": "ORDER",
+          "confidence": 0.9177767944335937,
+          "confidenceRaw": 91.77767944335938,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 680,
+            "y": 39,
+            "w": 119,
+            "h": 25
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00001",
+          "alternates": [
+            {
+              "text": "ORDER",
+              "confidence": 0.9177767944335937
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000005",
+          "type": "word",
+          "text": "CORPORATION",
+          "confidence": 0.7671261596679687,
+          "confidenceRaw": 76.71261596679688,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 39,
+            "y": 95,
+            "w": 295,
+            "h": 29
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00002",
+          "alternates": [
+            {
+              "text": "CORPORATION",
+              "confidence": 0.7671261596679687
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000006",
+          "type": "word",
+          "text": "PO",
+          "confidence": 0.9222662353515625,
+          "confidenceRaw": 92.22662353515625,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 560,
+            "y": 115,
+            "w": 27,
+            "h": 16
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00002",
+          "alternates": [
+            {
+              "text": "PO",
+              "confidence": 0.9222662353515625
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000007",
+          "type": "word",
+          "text": "Number:",
+          "confidence": 0.8939280700683594,
+          "confidenceRaw": 89.39280700683594,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 595,
+            "y": 114,
+            "w": 82,
+            "h": 17
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00002",
+          "alternates": [
+            {
+              "text": "Number:",
+              "confidence": 0.8939280700683594
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000008",
+          "type": "word",
+          "text": "123456",
+          "confidence": 0.3423996734619141,
+          "confidenceRaw": 34.239967346191406,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 717,
+            "y": 115,
+            "w": 75,
+            "h": 16
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00002",
+          "alternates": [
+            {
+              "text": "123456",
+              "confidence": 0.3423996734619141
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000012",
+          "type": "word",
+          "text": "Order",
+          "confidence": 0.9175258636474609,
+          "confidenceRaw": 91.7525863647461,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 564,
+            "y": 148,
+            "w": 54,
+            "h": 16
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00003",
+          "alternates": [
+            {
+              "text": "Order",
+              "confidence": 0.9175258636474609
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000013",
+          "type": "word",
+          "text": "Date:",
+          "confidence": 0.3885823822021484,
+          "confidenceRaw": 38.858238220214844,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 625,
+            "y": 149,
+            "w": 47,
+            "h": 15
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00003",
+          "alternates": [
+            {
+              "text": "Date:",
+              "confidence": 0.3885823822021484
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000014",
+          "type": "word",
+          "text": "05/30/2024",
+          "confidence": 0.3885823822021484,
+          "confidenceRaw": 38.858238220214844,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 702,
+            "y": 149,
+            "w": 103,
+            "h": 16
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00003",
+          "alternates": [
+            {
+              "text": "05/30/2024",
+              "confidence": 0.3885823822021484
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000009",
+          "type": "word",
+          "text": "123",
+          "confidence": 0.9329792785644532,
+          "confidenceRaw": 93.29792785644531,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 40,
+            "y": 163,
+            "w": 29,
+            "h": 14
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00004",
+          "alternates": [
+            {
+              "text": "123",
+              "confidence": 0.9329792785644532
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000010",
+          "type": "word",
+          "text": "Commerce",
+          "confidence": 0.9002961730957031,
+          "confidenceRaw": 90.02961730957031,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 76,
+            "y": 163,
+            "w": 93,
+            "h": 14
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00004",
+          "alternates": [
+            {
+              "text": "Commerce",
+              "confidence": 0.9002961730957031
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000011",
+          "type": "word",
+          "text": "Bivd,",
+          "confidence": 0.7733380889892578,
+          "confidenceRaw": 77.33380889892578,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 176,
+            "y": 163,
+            "w": 41,
+            "h": 17
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00004",
+          "alternates": [
+            {
+              "text": "Bivd,",
+              "confidence": 0.7733380889892578
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000015",
+          "type": "word",
+          "text": "Metroplis,",
+          "confidence": 0.9225434112548828,
+          "confidenceRaw": 92.25434112548828,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 39,
+            "y": 186,
+            "w": 90,
+            "h": 19
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00005",
+          "alternates": [
+            {
+              "text": "Metroplis,",
+              "confidence": 0.9225434112548828
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000016",
+          "type": "word",
+          "text": "USA,",
+          "confidence": 0.9291729736328125,
+          "confidenceRaw": 92.91729736328125,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 137,
+            "y": 187,
+            "w": 43,
+            "h": 17
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00005",
+          "alternates": [
+            {
+              "text": "USA,",
+              "confidence": 0.9291729736328125
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000017",
+          "type": "word",
+          "text": "98765",
+          "confidence": 0.9685501098632813,
+          "confidenceRaw": 96.85501098632812,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 187,
+            "y": 187,
+            "w": 54,
+            "h": 15
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00005",
+          "alternates": [
+            {
+              "text": "98765",
+              "confidence": 0.9685501098632813
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000018",
+          "type": "word",
+          "text": "Due",
+          "confidence": 0.9155318450927734,
+          "confidenceRaw": 91.55318450927734,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 571,
+            "y": 183,
+            "w": 38,
+            "h": 15
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00005",
+          "alternates": [
+            {
+              "text": "Due",
+              "confidence": 0.9155318450927734
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000019",
+          "type": "word",
+          "text": "Date:",
+          "confidence": 0.9184359741210938,
+          "confidenceRaw": 91.84359741210938,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 617,
+            "y": 183,
+            "w": 48,
+            "h": 15
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00005",
+          "alternates": [
+            {
+              "text": "Date:",
+              "confidence": 0.9184359741210938
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000020",
+          "type": "word",
+          "text": "06/07/2024",
+          "confidence": 0.9098145294189454,
+          "confidenceRaw": 90.98145294189453,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 702,
+            "y": 182,
+            "w": 103,
+            "h": 16
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00005",
+          "alternates": [
+            {
+              "text": "06/07/2024",
+              "confidence": 0.9098145294189454
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000021",
+          "type": "word",
+          "text": "Phone:",
+          "confidence": 0.7479756927490234,
+          "confidenceRaw": 74.79756927490234,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 40,
+            "y": 210,
+            "w": 58,
+            "h": 15
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00006",
+          "alternates": [
+            {
+              "text": "Phone:",
+              "confidence": 0.7479756927490234
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000022",
+          "type": "word",
+          "text": "(555)",
+          "confidence": 0.8530690002441407,
+          "confidenceRaw": 85.30690002441406,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 104,
+            "y": 210,
+            "w": 43,
+            "h": 18
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00006",
+          "alternates": [
+            {
+              "text": "(555)",
+              "confidence": 0.8530690002441407
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000023",
+          "type": "word",
+          "text": "123- 4567",
+          "confidence": 0.9300729370117188,
+          "confidenceRaw": 93.00729370117188,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 154,
+            "y": 211,
+            "w": 80,
+            "h": 15
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00006",
+          "alternates": [
+            {
+              "text": "123-4567",
+              "confidence": 0.9300729370117188
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000024",
+          "type": "word",
+          "text": "Terms:",
+          "confidence": 0.9106325531005859,
+          "confidenceRaw": 91.0632553100586,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 585,
+            "y": 201,
+            "w": 65,
+            "h": 34
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00006",
+          "alternates": [
+            {
+              "text": "Terms:",
+              "confidence": 0.9106325531005859
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000025",
+          "type": "word",
+          "text": "Net",
+          "confidence": 0.9288047790527344,
+          "confidenceRaw": 92.88047790527344,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 730,
+            "y": 215,
+            "w": 30,
+            "h": 14
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00006",
+          "alternates": [
+            {
+              "text": "Net",
+              "confidence": 0.9288047790527344
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000026",
+          "type": "word",
+          "text": "30",
+          "confidence": 0.9693806457519532,
+          "confidenceRaw": 96.93806457519531,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 766,
+            "y": 215,
+            "w": 21,
+            "h": 14
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00006",
+          "alternates": [
+            {
+              "text": "30",
+              "confidence": 0.9693806457519532
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000027",
+          "type": "word",
+          "text": "Vendor",
+          "confidence": 0.9145730590820312,
+          "confidenceRaw": 91.45730590820312,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 29,
+            "y": 275,
+            "w": 80,
+            "h": 17
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00007",
+          "alternates": [
+            {
+              "text": "Vendor",
+              "confidence": 0.9145730590820312
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000028",
+          "type": "word",
+          "text": ";hlp",
+          "confidence": 0.5816078567504883,
+          "confidenceRaw": 58.16078567504883,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 429,
+            "y": 266,
+            "w": 55,
+            "h": 31
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00007",
+          "alternates": [
+            {
+              "text": ";hlp",
+              "confidence": 0.5816078567504883
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000029",
+          "type": "word",
+          "text": "To:",
+          "confidence": 0.9123812866210937,
+          "confidenceRaw": 91.23812866210938,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 489,
+            "y": 277,
+            "w": 31,
+            "h": 16
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00007",
+          "alternates": [
+            {
+              "text": "To:",
+              "confidence": 0.9123812866210937
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000030",
+          "type": "word",
+          "text": ".",
+          "confidence": 0.027249984741210938,
+          "confidenceRaw": 2.7249984741210938,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 645,
+            "y": 266,
+            "w": 5,
+            "h": 1
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00007",
+          "alternates": [
+            {
+              "text": ".",
+              "confidence": 0.027249984741210938
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000031",
+          "type": "word",
+          "text": "Supplier",
+          "confidence": 0.9179725646972656,
+          "confidenceRaw": 91.79725646972656,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 31,
+            "y": 320,
+            "w": 80,
+            "h": 20
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00008",
+          "alternates": [
+            {
+              "text": "Supplier",
+              "confidence": 0.9179725646972656
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000032",
+          "type": "word",
+          "text": "Inc.",
+          "confidence": 0.9042970275878907,
+          "confidenceRaw": 90.42970275878906,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 118,
+            "y": 321,
+            "w": 32,
+            "h": 15
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00008",
+          "alternates": [
+            {
+              "text": "Inc.",
+              "confidence": 0.9042970275878907
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000033",
+          "type": "word",
+          "text": "John",
+          "confidence": 0.9211856079101562,
+          "confidenceRaw": 92.11856079101562,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 435,
+            "y": 321,
+            "w": 41,
+            "h": 15
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00008",
+          "alternates": [
+            {
+              "text": "John",
+              "confidence": 0.9211856079101562
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000034",
+          "type": "word",
+          "text": "Smith",
+          "confidence": 0.9278939819335937,
+          "confidenceRaw": 92.78939819335938,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 483,
+            "y": 321,
+            "w": 52,
+            "h": 15
+          },
+          "blockId": "blk-001-00010",
+          "lineId": "ln-001-00008",
+          "alternates": [
+            {
+              "text": "Smith",
+              "confidence": 0.9278939819335937
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000035",
+          "type": "word",
+          "text": "789",
+          "confidence": 0.9325258636474609,
+          "confidenceRaw": 93.2525863647461,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 31,
+            "y": 350,
+            "w": 31,
+            "h": 15
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00009",
+          "alternates": [
+            {
+              "text": "789",
+              "confidence": 0.9325258636474609
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000036",
+          "type": "word",
+          "text": "Industrial",
+          "confidence": 0.9255928802490234,
+          "confidenceRaw": 92.55928802490234,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 70,
+            "y": 350,
+            "w": 81,
+            "h": 15
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00009",
+          "alternates": [
+            {
+              "text": "Industrial",
+              "confidence": 0.9255928802490234
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000037",
+          "type": "word",
+          "text": "Rd",
+          "confidence": 0.9290477752685546,
+          "confidenceRaw": 92.90477752685547,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 160,
+            "y": 350,
+            "w": 21,
+            "h": 15
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00009",
+          "alternates": [
+            {
+              "text": "Rd",
+              "confidence": 0.9290477752685546
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000038",
+          "type": "word",
+          "text": "Acme",
+          "confidence": 0.9133707427978516,
+          "confidenceRaw": 91.33707427978516,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 435,
+            "y": 351,
+            "w": 51,
+            "h": 14
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00009",
+          "alternates": [
+            {
+              "text": "Acme",
+              "confidence": 0.9133707427978516
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000039",
+          "type": "word",
+          "text": "Corporation",
+          "confidence": 0.9271504974365234,
+          "confidenceRaw": 92.71504974365234,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 494,
+            "y": 351,
+            "w": 109,
+            "h": 18
+          },
+          "blockId": "blk-001-00006",
+          "lineId": "ln-001-00009",
+          "alternates": [
+            {
+              "text": "Corporation",
+              "confidence": 0.9271504974365234
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000040",
+          "type": "word",
+          "text": "Springfiled,",
+          "confidence": 0.8819866943359375,
+          "confidenceRaw": 88.19866943359375,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 31,
+            "y": 378,
+            "w": 102,
+            "h": 20
+          },
+          "blockId": "blk-001-00008",
+          "lineId": "ln-001-00010",
+          "alternates": [
+            {
+              "text": "Springfiled,",
+              "confidence": 0.8819866943359375
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000041",
+          "type": "word",
+          "text": "USA,",
+          "confidence": 0.9257103729248047,
+          "confidenceRaw": 92.57103729248047,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 140,
+            "y": 379,
+            "w": 43,
+            "h": 17
+          },
+          "blockId": "blk-001-00008",
+          "lineId": "ln-001-00010",
+          "alternates": [
+            {
+              "text": "USA,",
+              "confidence": 0.9257103729248047
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000042",
+          "type": "word",
+          "text": "54321",
+          "confidence": 0.9693446350097656,
+          "confidenceRaw": 96.93446350097656,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 190,
+            "y": 379,
+            "w": 50,
+            "h": 15
+          },
+          "blockId": "blk-001-00008",
+          "lineId": "ln-001-00010",
+          "alternates": [
+            {
+              "text": "54321",
+              "confidence": 0.9693446350097656
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000043",
+          "type": "word",
+          "text": "123",
+          "confidence": 0.9329421997070313,
+          "confidenceRaw": 93.29421997070312,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 436,
+            "y": 379,
+            "w": 30,
+            "h": 15
+          },
+          "blockId": "blk-001-00008",
+          "lineId": "ln-001-00010",
+          "alternates": [
+            {
+              "text": "123",
+              "confidence": 0.9329421997070313
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000044",
+          "type": "word",
+          "text": "Commerce",
+          "confidence": 0.9001939392089844,
+          "confidenceRaw": 90.01939392089844,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 474,
+            "y": 379,
+            "w": 94,
+            "h": 15
+          },
+          "blockId": "blk-001-00008",
+          "lineId": "ln-001-00010",
+          "alternates": [
+            {
+              "text": "Commerce",
+              "confidence": 0.9001939392089844
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000045",
+          "type": "word",
+          "text": "Blvd,",
+          "confidence": 0.9285648345947266,
+          "confidenceRaw": 92.85648345947266,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 576,
+            "y": 379,
+            "w": 41,
+            "h": 17
+          },
+          "blockId": "blk-001-00008",
+          "lineId": "ln-001-00010",
+          "alternates": [
+            {
+              "text": "Blvd,",
+              "confidence": 0.9285648345947266
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000046",
+          "type": "word",
+          "text": "Suite",
+          "confidence": 0.9309046936035156,
+          "confidenceRaw": 93.09046936035156,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 625,
+            "y": 379,
+            "w": 45,
+            "h": 15
+          },
+          "blockId": "blk-001-00008",
+          "lineId": "ln-001-00010",
+          "alternates": [
+            {
+              "text": "Suite",
+              "confidence": 0.9309046936035156
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000047",
+          "type": "word",
+          "text": "456",
+          "confidence": 0.9699337768554688,
+          "confidenceRaw": 96.99337768554688,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 676,
+            "y": 379,
+            "w": 34,
+            "h": 14
+          },
+          "blockId": "blk-001-00008",
+          "lineId": "ln-001-00010",
+          "alternates": [
+            {
+              "text": "456",
+              "confidence": 0.9699337768554688
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000048",
+          "type": "word",
+          "text": "Megkt:inssuppliier.com",
+          "confidence": 0.0,
+          "confidenceRaw": 0.0,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 31,
+            "y": 407,
+            "w": 209,
+            "h": 19
+          },
+          "blockId": "blk-001-00008",
+          "lineId": "ln-001-00011",
+          "alternates": [
+            {
+              "text": "Megkt:inssuppliier.com",
+              "confidence": 0.0
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000049",
+          "type": "word",
+          "text": "Metrroplis,",
+          "confidence": 0.8560557556152344,
+          "confidenceRaw": 85.60557556152344,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 436,
+            "y": 407,
+            "w": 96,
+            "h": 19
+          },
+          "blockId": "blk-001-00008",
+          "lineId": "ln-001-00011",
+          "alternates": [
+            {
+              "text": "Metrroplis,",
+              "confidence": 0.8560557556152344
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000050",
+          "type": "word",
+          "text": "USA,",
+          "confidence": 0.9290664672851563,
+          "confidenceRaw": 92.90664672851562,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 540,
+            "y": 408,
+            "w": 43,
+            "h": 17
+          },
+          "blockId": "blk-001-00008",
+          "lineId": "ln-001-00011",
+          "alternates": [
+            {
+              "text": "USA,",
+              "confidence": 0.9290664672851563
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000051",
+          "type": "word",
+          "text": "98765",
+          "confidence": 0.9688214111328125,
+          "confidenceRaw": 96.88214111328125,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 590,
+            "y": 408,
+            "w": 55,
+            "h": 14
+          },
+          "blockId": "blk-001-00008",
+          "lineId": "ln-001-00011",
+          "alternates": [
+            {
+              "text": "98765",
+              "confidence": 0.9688214111328125
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000052",
+          "type": "word",
+          "text": "Requester",
+          "confidence": 0.9090437316894531,
+          "confidenceRaw": 90.90437316894531,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 30,
+            "y": 459,
+            "w": 109,
+            "h": 21
+          },
+          "blockId": "blk-001-00005",
+          "lineId": "ln-001-00012",
+          "alternates": [
+            {
+              "text": "Requester",
+              "confidence": 0.9090437316894531
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000053",
+          "type": "word",
+          "text": "Michael",
+          "confidence": 0.9287059020996093,
+          "confidenceRaw": 92.87059020996094,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 31,
+            "y": 508,
+            "w": 68,
+            "h": 15
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00013",
+          "alternates": [
+            {
+              "text": "Michael",
+              "confidence": 0.9287059020996093
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000054",
+          "type": "word",
+          "text": "Sherwood",
+          "confidence": 0.9142810821533203,
+          "confidenceRaw": 91.42810821533203,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 107,
+            "y": 508,
+            "w": 90,
+            "h": 15
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00013",
+          "alternates": [
+            {
+              "text": "Sherwood",
+              "confidence": 0.9142810821533203
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000055",
+          "type": "word",
+          "text": "msherwood@acme.com",
+          "confidence": 0.907269287109375,
+          "confidenceRaw": 90.7269287109375,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 31,
+            "y": 536,
+            "w": 215,
+            "h": 17
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00014",
+          "alternates": [
+            {
+              "text": "msherwood@acme.com",
+              "confidence": 0.907269287109375
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000056",
+          "type": "word",
+          "text": "Phone:",
+          "confidence": 0.9014429473876953,
+          "confidenceRaw": 90.14429473876953,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 31,
+            "y": 565,
+            "w": 59,
+            "h": 15
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00015",
+          "alternates": [
+            {
+              "text": "Phone:",
+              "confidence": 0.9014429473876953
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000057",
+          "type": "word",
+          "text": "(555)",
+          "confidence": 0.9014429473876953,
+          "confidenceRaw": 90.14429473876953,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 96,
+            "y": 565,
+            "w": 42,
+            "h": 18
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00015",
+          "alternates": [
+            {
+              "text": "(555)",
+              "confidence": 0.9014429473876953
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000058",
+          "type": "word",
+          "text": "987- 6543",
+          "confidence": 0.9313521575927735,
+          "confidenceRaw": 93.13521575927734,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 145,
+            "y": 565,
+            "w": 81,
+            "h": 15
+          },
+          "blockId": "blk-001-00007",
+          "lineId": "ln-001-00015",
+          "alternates": [
+            {
+              "text": "987-6543",
+              "confidence": 0.9313521575927735
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000059",
+          "type": "word",
+          "text": "Items:",
+          "confidence": 0.9091234588623047,
+          "confidenceRaw": 90.91234588623047,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 30,
+            "y": 608,
+            "w": 63,
+            "h": 27
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00016",
+          "alternates": [
+            {
+              "text": "Items:",
+              "confidence": 0.9091234588623047
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000060",
+          "type": "word",
+          "text": "Qty",
+          "confidence": 0.8221907043457031,
+          "confidenceRaw": 82.21907043457031,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 549,
+            "y": 612,
+            "w": 37,
+            "h": 20
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00016",
+          "alternates": [
+            {
+              "text": "Qty",
+              "confidence": 0.8221907043457031
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000061",
+          "type": "word",
+          "text": "UnitPrice",
+          "confidence": 0.8221907043457031,
+          "confidenceRaw": 82.21907043457031,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 614,
+            "y": 611,
+            "w": 101,
+            "h": 16
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00016",
+          "alternates": [
+            {
+              "text": "UnitPrice",
+              "confidence": 0.8221907043457031
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000062",
+          "type": "word",
+          "text": "Total",
+          "confidence": 0.8634680938720704,
+          "confidenceRaw": 86.34680938720703,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 747,
+            "y": 611,
+            "w": 53,
+            "h": 16
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00016",
+          "alternates": [
+            {
+              "text": "Total",
+              "confidence": 0.8634680938720704
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000063",
+          "type": "word",
+          "text": "SKU",
+          "confidence": 0.8895671081542968,
+          "confidenceRaw": 88.95671081542969,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 29,
+            "y": 655,
+            "w": 38,
+            "h": 15
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00017",
+          "alternates": [
+            {
+              "text": "SKU",
+              "confidence": 0.8895671081542968
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000064",
+          "type": "word",
+          "text": "Description",
+          "confidence": 0.591206169128418,
+          "confidenceRaw": 59.1206169128418,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 98,
+            "y": 655,
+            "w": 110,
+            "h": 19
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00017",
+          "alternates": [
+            {
+              "text": "Description",
+              "confidence": 0.591206169128418
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000065",
+          "type": "word",
+          "text": "Qty",
+          "confidence": 0.8712638092041015,
+          "confidenceRaw": 87.12638092041016,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 484,
+            "y": 655,
+            "w": 34,
+            "h": 19
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00017",
+          "alternates": [
+            {
+              "text": "Qty",
+              "confidence": 0.8712638092041015
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000066",
+          "type": "word",
+          "text": "Pnait",
+          "confidence": 0.9252644348144531,
+          "confidenceRaw": 92.52644348144531,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 640,
+            "y": 655,
+            "w": 45,
+            "h": 14
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00017",
+          "alternates": [
+            {
+              "text": "Pnait",
+              "confidence": 0.9252644348144531
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000067",
+          "type": "word",
+          "text": "Ttom",
+          "confidence": 0.17504737854003907,
+          "confidenceRaw": 17.504737854003906,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 691,
+            "y": 655,
+            "w": 47,
+            "h": 14
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00017",
+          "alternates": [
+            {
+              "text": "Ttom",
+              "confidence": 0.17504737854003907
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000068",
+          "type": "word",
+          "text": "ABC- 100",
+          "confidence": 0.9022373199462891,
+          "confidenceRaw": 90.2237319946289,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 29,
+            "y": 695,
+            "w": 77,
+            "h": 16
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00018",
+          "alternates": [
+            {
+              "text": "ABC-100",
+              "confidence": 0.9022373199462891
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000069",
+          "type": "word",
+          "text": "Office",
+          "confidence": 0.8100788879394532,
+          "confidenceRaw": 81.00788879394531,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 129,
+            "y": 695,
+            "w": 51,
+            "h": 15
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00018",
+          "alternates": [
+            {
+              "text": "Office",
+              "confidence": 0.8100788879394532
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000070",
+          "type": "word",
+          "text": "Desk",
+          "confidence": 0.9324185943603516,
+          "confidenceRaw": 93.24185943603516,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 187,
+            "y": 695,
+            "w": 154,
+            "h": 20
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00018",
+          "alternates": [
+            {
+              "text": "Desk",
+              "confidence": 0.9324185943603516
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000071",
+          "type": "word",
+          "text": "-",
+          "confidence": 0.9303452301025391,
+          "confidenceRaw": 93.0345230102539,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 235,
+            "y": 691,
+            "w": 8,
+            "h": 29
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00018",
+          "alternates": [
+            {
+              "text": "-",
+              "confidence": 0.9303452301025391
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000072",
+          "type": "word",
+          "text": "Adjustable",
+          "confidence": 0.9156900787353516,
+          "confidenceRaw": 91.56900787353516,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 249,
+            "y": 695,
+            "w": 91,
+            "h": 20
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00018",
+          "alternates": [
+            {
+              "text": "Adjustable",
+              "confidence": 0.9156900787353516
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000073",
+          "type": "word",
+          "text": "Height:",
+          "confidence": 0.9156900787353516,
+          "confidenceRaw": 91.56900787353516,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 349,
+            "y": 695,
+            "w": 65,
+            "h": 19
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00018",
+          "alternates": [
+            {
+              "text": "Height:",
+              "confidence": 0.9156900787353516
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000074",
+          "type": "word",
+          "text": "1",
+          "confidence": 0.9692818450927735,
+          "confidenceRaw": 96.92818450927734,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 507,
+            "y": 696,
+            "w": 5,
+            "h": 14
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00018",
+          "alternates": [
+            {
+              "text": "1",
+              "confidence": 0.9692818450927735
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000075",
+          "type": "word",
+          "text": "10",
+          "confidence": 0.5498152923583984,
+          "confidenceRaw": 54.981529235839844,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 566,
+            "y": 695,
+            "w": 19,
+            "h": 15
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00018",
+          "alternates": [
+            {
+              "text": "10",
+              "confidence": 0.5498152923583984
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000076",
+          "type": "word",
+          "text": "$250.00",
+          "confidence": 0.6474876403808594,
+          "confidenceRaw": 64.74876403808594,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 614,
+            "y": 696,
+            "w": 66,
+            "h": 15
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00018",
+          "alternates": [
+            {
+              "text": "$250.00",
+              "confidence": 0.6474876403808594
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000077",
+          "type": "word",
+          "text": "$2,500.00",
+          "confidence": 0.28766090393066407,
+          "confidenceRaw": 28.766090393066406,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 714,
+            "y": 694,
+            "w": 87,
+            "h": 19
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00018",
+          "alternates": [
+            {
+              "text": "$2,500.00",
+              "confidence": 0.28766090393066407
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000078",
+          "type": "word",
+          "text": "DEF- 200",
+          "confidence": 0.8314016723632812,
+          "confidenceRaw": 83.14016723632812,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 30,
+            "y": 734,
+            "w": 76,
+            "h": 15
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00019",
+          "alternates": [
+            {
+              "text": "DEF-200",
+              "confidence": 0.8314016723632812
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000079",
+          "type": "word",
+          "text": "Ergonomic",
+          "confidence": 0.8314016723632812,
+          "confidenceRaw": 83.14016723632812,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 129,
+            "y": 734,
+            "w": 99,
+            "h": 19
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00019",
+          "alternates": [
+            {
+              "text": "Ergonomic",
+              "confidence": 0.8314016723632812
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000080",
+          "type": "word",
+          "text": "Office",
+          "confidence": 0.9320124053955078,
+          "confidenceRaw": 93.20124053955078,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 235,
+            "y": 733,
+            "w": 53,
+            "h": 16
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00019",
+          "alternates": [
+            {
+              "text": "Office",
+              "confidence": 0.9320124053955078
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000081",
+          "type": "word",
+          "text": "Chair",
+          "confidence": 0.904699935913086,
+          "confidenceRaw": 90.4699935913086,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 295,
+            "y": 733,
+            "w": 49,
+            "h": 15
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00019",
+          "alternates": [
+            {
+              "text": "Chair",
+              "confidence": 0.904699935913086
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000082",
+          "type": "word",
+          "text": "15",
+          "confidence": 0.9669010925292969,
+          "confidenceRaw": 96.69010925292969,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 496,
+            "y": 734,
+            "w": 19,
+            "h": 14
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00019",
+          "alternates": [
+            {
+              "text": "15",
+              "confidence": 0.9669010925292969
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000083",
+          "type": "word",
+          "text": "11",
+          "confidence": 0.6343207550048828,
+          "confidenceRaw": 63.43207550048828,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 566,
+            "y": 734,
+            "w": 16,
+            "h": 14
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00019",
+          "alternates": [
+            {
+              "text": "11",
+              "confidence": 0.6343207550048828
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000084",
+          "type": "word",
+          "text": "$150.00",
+          "confidence": 0.644044189453125,
+          "confidenceRaw": 64.4044189453125,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 615,
+            "y": 734,
+            "w": 65,
+            "h": 15
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00019",
+          "alternates": [
+            {
+              "text": "$150.00",
+              "confidence": 0.644044189453125
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000085",
+          "type": "word",
+          "text": "$2,250.00",
+          "confidence": 0.3254483032226563,
+          "confidenceRaw": 32.544830322265625,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 714,
+            "y": 733,
+            "w": 87,
+            "h": 18
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00019",
+          "alternates": [
+            {
+              "text": "$2,250.00",
+              "confidence": 0.3254483032226563
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000086",
+          "type": "word",
+          "text": "XYZ- 300",
+          "confidence": 0.8985695648193359,
+          "confidenceRaw": 89.8569564819336,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 29,
+            "y": 773,
+            "w": 76,
+            "h": 15
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00020",
+          "alternates": [
+            {
+              "text": "XYZ-300",
+              "confidence": 0.8985695648193359
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000087",
+          "type": "word",
+          "text": "Laptop",
+          "confidence": 0.8949227905273438,
+          "confidenceRaw": 89.49227905273438,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 129,
+            "y": 773,
+            "w": 63,
+            "h": 18
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00020",
+          "alternates": [
+            {
+              "text": "Laptop",
+              "confidence": 0.8949227905273438
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000088",
+          "type": "word",
+          "text": "Docking",
+          "confidence": 0.9259734344482422,
+          "confidenceRaw": 92.59734344482422,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 200,
+            "y": 772,
+            "w": 73,
+            "h": 20
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00020",
+          "alternates": [
+            {
+              "text": "Docking",
+              "confidence": 0.9259734344482422
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000089",
+          "type": "word",
+          "text": "Station",
+          "confidence": 0.9176266479492188,
+          "confidenceRaw": 91.76266479492188,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 280,
+            "y": 772,
+            "w": 64,
+            "h": 15
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00020",
+          "alternates": [
+            {
+              "text": "Station",
+              "confidence": 0.9176266479492188
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000090",
+          "type": "word",
+          "text": "5}",
+          "confidence": 0.536689453125,
+          "confidenceRaw": 53.6689453125,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 505,
+            "y": 768,
+            "w": 14,
+            "h": 27
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00020",
+          "alternates": [
+            {
+              "text": "5}",
+              "confidence": 0.536689453125
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000091",
+          "type": "word",
+          "text": "5",
+          "confidence": 0.7043862915039063,
+          "confidenceRaw": 70.43862915039062,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 569,
+            "y": 773,
+            "w": 9,
+            "h": 14
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00020",
+          "alternates": [
+            {
+              "text": "5",
+              "confidence": 0.7043862915039063
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000092",
+          "type": "word",
+          "text": "$100.00",
+          "confidence": 0.37242156982421876,
+          "confidenceRaw": 37.242156982421875,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 614,
+            "y": 773,
+            "w": 66,
+            "h": 15
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00020",
+          "alternates": [
+            {
+              "text": "$100.00",
+              "confidence": 0.37242156982421876
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000093",
+          "type": "word",
+          "text": "$500.00",
+          "confidence": 0.9294032287597657,
+          "confidenceRaw": 92.94032287597656,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 730,
+            "y": 772,
+            "w": 71,
+            "h": 17
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00020",
+          "alternates": [
+            {
+              "text": "$500.00",
+              "confidence": 0.9294032287597657
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000094",
+          "type": "word",
+          "text": "Subtotal:",
+          "confidence": 0.9090862274169922,
+          "confidenceRaw": 90.90862274169922,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 571,
+            "y": 837,
+            "w": 82,
+            "h": 28
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00021",
+          "alternates": [
+            {
+              "text": "Subtotal:",
+              "confidence": 0.9090862274169922
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000095",
+          "type": "word",
+          "text": "$5,250.00",
+          "confidence": 0.9201856231689454,
+          "confidenceRaw": 92.01856231689453,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 711,
+            "y": 841,
+            "w": 90,
+            "h": 18
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00021",
+          "alternates": [
+            {
+              "text": "$5,250.00",
+              "confidence": 0.9201856231689454
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000096",
+          "type": "word",
+          "text": "Tax",
+          "confidence": 0.9211355590820313,
+          "confidenceRaw": 92.11355590820312,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 532,
+            "y": 879,
+            "w": 31,
+            "h": 15
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00022",
+          "alternates": [
+            {
+              "text": "Tax",
+              "confidence": 0.9211355590820313
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000097",
+          "type": "word",
+          "text": "Rate:",
+          "confidence": 0.07347183227539063,
+          "confidenceRaw": 7.3471832275390625,
+          "isLowConfidence": true,
+          "bbox": {
+            "x": 571,
+            "y": 880,
+            "w": 43,
+            "h": 14
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00022",
+          "alternates": [
+            {
+              "text": "Rate:",
+              "confidence": 0.07347183227539063
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000098",
+          "type": "word",
+          "text": "00%",
+          "confidence": 0.8427751159667969,
+          "confidenceRaw": 84.27751159667969,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 619,
+            "y": 880,
+            "w": 34,
+            "h": 14
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00022",
+          "alternates": [
+            {
+              "text": "00%",
+              "confidence": 0.8427751159667969
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000099",
+          "type": "word",
+          "text": "$900.00",
+          "confidence": 0.846385498046875,
+          "confidenceRaw": 84.6385498046875,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 730,
+            "y": 880,
+            "w": 71,
+            "h": 15
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00022",
+          "alternates": [
+            {
+              "text": "$900.00",
+              "confidence": 0.846385498046875
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000100",
+          "type": "word",
+          "text": "Tax:",
+          "confidence": 0.9042860412597656,
+          "confidenceRaw": 90.42860412597656,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 618,
+            "y": 917,
+            "w": 35,
+            "h": 15
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00023",
+          "alternates": [
+            {
+              "text": "Tax:",
+              "confidence": 0.9042860412597656
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000101",
+          "type": "word",
+          "text": "$420.00",
+          "confidence": 0.9252348327636719,
+          "confidenceRaw": 92.52348327636719,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 729,
+            "y": 916,
+            "w": 73,
+            "h": 17
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00023",
+          "alternates": [
+            {
+              "text": "$420.00",
+              "confidence": 0.9252348327636719
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000102",
+          "type": "word",
+          "text": "Grand",
+          "confidence": 0.9024385833740234,
+          "confidenceRaw": 90.24385833740234,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 537,
+            "y": 956,
+            "w": 60,
+            "h": 16
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00024",
+          "alternates": [
+            {
+              "text": "Grand",
+              "confidence": 0.9024385833740234
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000103",
+          "type": "word",
+          "text": "Total:",
+          "confidence": 0.8631016540527344,
+          "confidenceRaw": 86.31016540527344,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 604,
+            "y": 957,
+            "w": 53,
+            "h": 15
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00024",
+          "alternates": [
+            {
+              "text": "Total:",
+              "confidence": 0.8631016540527344
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000104",
+          "type": "word",
+          "text": "$5,670.00",
+          "confidence": 0.9317073059082032,
+          "confidenceRaw": 93.17073059082031,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 711,
+            "y": 957,
+            "w": 91,
+            "h": 18
+          },
+          "blockId": "blk-001-00004",
+          "lineId": "ln-001-00024",
+          "alternates": [
+            {
+              "text": "$5,670.00",
+              "confidence": 0.9317073059082032
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000105",
+          "type": "word",
+          "text": "Notes",
+          "confidence": 0.8544480133056641,
+          "confidenceRaw": 85.4448013305664,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 23,
+            "y": 1012,
+            "w": 55,
+            "h": 15
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00025",
+          "alternates": [
+            {
+              "text": "Notes",
+              "confidence": 0.8544480133056641
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000106",
+          "type": "word",
+          "text": "/",
+          "confidence": 0.8544480133056641,
+          "confidenceRaw": 85.4448013305664,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 84,
+            "y": 1011,
+            "w": 8,
+            "h": 16
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00025",
+          "alternates": [
+            {
+              "text": "/",
+              "confidence": 0.8544480133056641
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000107",
+          "type": "word",
+          "text": "instructions:",
+          "confidence": 0.9083460998535157,
+          "confidenceRaw": 90.83460998535156,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 98,
+            "y": 1010,
+            "w": 118,
+            "h": 17
+          },
+          "blockId": "blk-001-00001",
+          "lineId": "ln-001-00025",
+          "alternates": [
+            {
+              "text": "instructions:",
+              "confidence": 0.9083460998535157
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000108",
+          "type": "word",
+          "text": "Deliver",
+          "confidence": 0.9294213104248047,
+          "confidenceRaw": 92.94213104248047,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 23,
+            "y": 1057,
+            "w": 58,
+            "h": 16
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00026",
+          "alternates": [
+            {
+              "text": "Deliver",
+              "confidence": 0.9294213104248047
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000109",
+          "type": "word",
+          "text": "goods",
+          "confidence": 0.9041433715820313,
+          "confidenceRaw": 90.41433715820312,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 86,
+            "y": 1057,
+            "w": 55,
+            "h": 20
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00026",
+          "alternates": [
+            {
+              "text": "goods",
+              "confidence": 0.9041433715820313
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000110",
+          "type": "word",
+          "text": "to",
+          "confidence": 0.9289013671875,
+          "confidenceRaw": 92.89013671875,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 147,
+            "y": 1059,
+            "w": 17,
+            "h": 13
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00026",
+          "alternates": [
+            {
+              "text": "to",
+              "confidence": 0.9289013671875
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000111",
+          "type": "word",
+          "text": "the",
+          "confidence": 0.9302629852294921,
+          "confidenceRaw": 93.02629852294922,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 170,
+            "y": 1057,
+            "w": 29,
+            "h": 15
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00026",
+          "alternates": [
+            {
+              "text": "the",
+              "confidence": 0.9302629852294921
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000112",
+          "type": "word",
+          "text": "shipping",
+          "confidence": 0.9285555267333985,
+          "confidenceRaw": 92.85555267333984,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 205,
+            "y": 1056,
+            "w": 78,
+            "h": 19
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00026",
+          "alternates": [
+            {
+              "text": "shipping",
+              "confidence": 0.9285555267333985
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000113",
+          "type": "word",
+          "text": "address",
+          "confidence": 0.9233237457275391,
+          "confidenceRaw": 92.3323745727539,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 289,
+            "y": 1056,
+            "w": 69,
+            "h": 15
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00026",
+          "alternates": [
+            {
+              "text": "address",
+              "confidence": 0.9233237457275391
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000114",
+          "type": "word",
+          "text": "by",
+          "confidence": 0.9330433654785156,
+          "confidenceRaw": 93.30433654785156,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 365,
+            "y": 1056,
+            "w": 20,
+            "h": 19
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00026",
+          "alternates": [
+            {
+              "text": "by",
+              "confidence": 0.9330433654785156
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000115",
+          "type": "word",
+          "text": "the",
+          "confidence": 0.9323601531982422,
+          "confidenceRaw": 93.23601531982422,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 390,
+            "y": 1056,
+            "w": 28,
+            "h": 15
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00026",
+          "alternates": [
+            {
+              "text": "the",
+              "confidence": 0.9323601531982422
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000116",
+          "type": "word",
+          "text": "due",
+          "confidence": 0.9050863647460937,
+          "confidenceRaw": 90.50863647460938,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 424,
+            "y": 1057,
+            "w": 32,
+            "h": 14
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00026",
+          "alternates": [
+            {
+              "text": "due",
+              "confidence": 0.9050863647460937
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000117",
+          "type": "word",
+          "text": "date.",
+          "confidence": 0.9050863647460937,
+          "confidenceRaw": 90.50863647460938,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 462,
+            "y": 1057,
+            "w": 41,
+            "h": 14
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00026",
+          "alternates": [
+            {
+              "text": "date.",
+              "confidence": 0.9050863647460937
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000118",
+          "type": "word",
+          "text": "Include",
+          "confidence": 0.9254753112792968,
+          "confidenceRaw": 92.54753112792969,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 510,
+            "y": 1056,
+            "w": 62,
+            "h": 15
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00026",
+          "alternates": [
+            {
+              "text": "Include",
+              "confidence": 0.9254753112792968
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000119",
+          "type": "word",
+          "text": "packing",
+          "confidence": 0.9123175048828125,
+          "confidenceRaw": 91.23175048828125,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 579,
+            "y": 1056,
+            "w": 64,
+            "h": 19
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00026",
+          "alternates": [
+            {
+              "text": "packing",
+              "confidence": 0.9123175048828125
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000120",
+          "type": "word",
+          "text": "slip",
+          "confidence": 0.9306144714355469,
+          "confidenceRaw": 93.06144714355469,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 649,
+            "y": 1056,
+            "w": 28,
+            "h": 18
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00026",
+          "alternates": [
+            {
+              "text": "slip",
+              "confidence": 0.9306144714355469
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000121",
+          "type": "word",
+          "text": "with",
+          "confidence": 0.928360595703125,
+          "confidenceRaw": 92.8360595703125,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 683,
+            "y": 1057,
+            "w": 35,
+            "h": 14
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00026",
+          "alternates": [
+            {
+              "text": "with",
+              "confidence": 0.928360595703125
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000122",
+          "type": "word",
+          "text": "shipment.",
+          "confidence": 0.9216061401367187,
+          "confidenceRaw": 92.16061401367188,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 725,
+            "y": 1057,
+            "w": 83,
+            "h": 18
+          },
+          "blockId": "blk-001-00002",
+          "lineId": "ln-001-00026",
+          "alternates": [
+            {
+              "text": "shipment.",
+              "confidence": 0.9216061401367187
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000123",
+          "type": "word",
+          "text": "Michael",
+          "confidence": 0.9165426635742188,
+          "confidenceRaw": 91.65426635742188,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 24,
+            "y": 1147,
+            "w": 85,
+            "h": 18
+          },
+          "blockId": "blk-001-00003",
+          "lineId": "ln-001-00027",
+          "alternates": [
+            {
+              "text": "Michael",
+              "confidence": 0.9165426635742188
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000124",
+          "type": "word",
+          "text": "Sherwood",
+          "confidence": 0.9065767669677735,
+          "confidenceRaw": 90.65767669677734,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 118,
+            "y": 1147,
+            "w": 114,
+            "h": 18
+          },
+          "blockId": "blk-001-00003",
+          "lineId": "ln-001-00027",
+          "alternates": [
+            {
+              "text": "Sherwood",
+              "confidence": 0.9065767669677735
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000125",
+          "type": "word",
+          "text": "Jane",
+          "confidence": 0.9196258544921875,
+          "confidenceRaw": 91.96258544921875,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 443,
+            "y": 1148,
+            "w": 50,
+            "h": 21
+          },
+          "blockId": "blk-001-00003",
+          "lineId": "ln-001-00027",
+          "alternates": [
+            {
+              "text": "Jane",
+              "confidence": 0.9196258544921875
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000126",
+          "type": "word",
+          "text": "Doe",
+          "confidence": 0.8962975311279296,
+          "confidenceRaw": 89.62975311279297,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 502,
+            "y": 1148,
+            "w": 42,
+            "h": 17
+          },
+          "blockId": "blk-001-00003",
+          "lineId": "ln-001-00027",
+          "alternates": [
+            {
+              "text": "Doe",
+              "confidence": 0.8962975311279296
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000129",
+          "type": "word",
+          "text": "Requester",
+          "confidence": 0.8492127990722657,
+          "confidenceRaw": 84.92127990722656,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 23,
+            "y": 1185,
+            "w": 95,
+            "h": 19
+          },
+          "blockId": "blk-001-00009",
+          "lineId": "ln-001-00028",
+          "alternates": [
+            {
+              "text": "Requester",
+              "confidence": 0.8492127990722657
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000127",
+          "type": "word",
+          "text": "Procurement",
+          "confidence": 0.9152329254150391,
+          "confidenceRaw": 91.5232925415039,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 446,
+            "y": 1184,
+            "w": 122,
+            "h": 15
+          },
+          "blockId": "blk-001-00009",
+          "lineId": "ln-001-00028",
+          "alternates": [
+            {
+              "text": "Procurement",
+              "confidence": 0.9152329254150391
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        },
+        {
+          "id": "t-001-000128",
+          "type": "word",
+          "text": "Manager",
+          "confidence": 0.9239669799804687,
+          "confidenceRaw": 92.39669799804688,
+          "isLowConfidence": false,
+          "bbox": {
+            "x": 575,
+            "y": 1184,
+            "w": 81,
+            "h": 20
+          },
+          "blockId": "blk-001-00009",
+          "lineId": "ln-001-00028",
+          "alternates": [
+            {
+              "text": "Manager",
+              "confidence": 0.9239669799804687
+            }
+          ],
+          "source": {
+            "engine": "tesseract",
+            "level": "word"
+          }
+        }
+      ],
+      "lines": [
+        {
+          "lineId": "ln-001-00001",
+          "bbox": {
+            "x": 8,
+            "y": 36,
+            "w": 791,
+            "h": 43
+          },
+          "tokenIds": [
+            "t-001-000001",
+            "t-001-000002",
+            "t-001-000003",
+            "t-001-000004"
+          ],
+          "confidence": 0.8311493396759033,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00002",
+          "bbox": {
+            "x": 39,
+            "y": 95,
+            "w": 753,
+            "h": 36
+          },
+          "tokenIds": [
+            "t-001-000005",
+            "t-001-000006",
+            "t-001-000007",
+            "t-001-000008"
+          ],
+          "confidence": 0.7314300346374512,
+          "isLowConfidence": true
+        },
+        {
+          "lineId": "ln-001-00003",
+          "bbox": {
+            "x": 564,
+            "y": 148,
+            "w": 241,
+            "h": 17
+          },
+          "tokenIds": [
+            "t-001-000012",
+            "t-001-000013",
+            "t-001-000014"
+          ],
+          "confidence": 0.5648968760172526,
+          "isLowConfidence": true
+        },
+        {
+          "lineId": "ln-001-00004",
+          "bbox": {
+            "x": 40,
+            "y": 163,
+            "w": 177,
+            "h": 17
+          },
+          "tokenIds": [
+            "t-001-000009",
+            "t-001-000010",
+            "t-001-000011"
+          ],
+          "confidence": 0.8688711802164715,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00005",
+          "bbox": {
+            "x": 39,
+            "y": 182,
+            "w": 766,
+            "h": 23
+          },
+          "tokenIds": [
+            "t-001-000015",
+            "t-001-000016",
+            "t-001-000017",
+            "t-001-000018",
+            "t-001-000019",
+            "t-001-000020"
+          ],
+          "confidence": 0.927341473897298,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00006",
+          "bbox": {
+            "x": 40,
+            "y": 201,
+            "w": 747,
+            "h": 34
+          },
+          "tokenIds": [
+            "t-001-000021",
+            "t-001-000022",
+            "t-001-000023",
+            "t-001-000024",
+            "t-001-000025",
+            "t-001-000026"
+          ],
+          "confidence": 0.8899892679850261,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00007",
+          "bbox": {
+            "x": 29,
+            "y": 266,
+            "w": 621,
+            "h": 31
+          },
+          "tokenIds": [
+            "t-001-000027",
+            "t-001-000028",
+            "t-001-000029",
+            "t-001-000030"
+          ],
+          "confidence": 0.6089530467987061,
+          "isLowConfidence": true
+        },
+        {
+          "lineId": "ln-001-00008",
+          "bbox": {
+            "x": 31,
+            "y": 320,
+            "w": 504,
+            "h": 20
+          },
+          "tokenIds": [
+            "t-001-000031",
+            "t-001-000032",
+            "t-001-000033",
+            "t-001-000034"
+          ],
+          "confidence": 0.9178372955322266,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00009",
+          "bbox": {
+            "x": 31,
+            "y": 350,
+            "w": 572,
+            "h": 19
+          },
+          "tokenIds": [
+            "t-001-000035",
+            "t-001-000036",
+            "t-001-000037",
+            "t-001-000038",
+            "t-001-000039"
+          ],
+          "confidence": 0.9255375518798828,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00010",
+          "bbox": {
+            "x": 31,
+            "y": 378,
+            "w": 679,
+            "h": 20
+          },
+          "tokenIds": [
+            "t-001-000040",
+            "t-001-000041",
+            "t-001-000042",
+            "t-001-000043",
+            "t-001-000044",
+            "t-001-000045",
+            "t-001-000046",
+            "t-001-000047"
+          ],
+          "confidence": 0.9299476432800293,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00011",
+          "bbox": {
+            "x": 31,
+            "y": 407,
+            "w": 614,
+            "h": 19
+          },
+          "tokenIds": [
+            "t-001-000048",
+            "t-001-000049",
+            "t-001-000050",
+            "t-001-000051"
+          ],
+          "confidence": 0.6884859085083008,
+          "isLowConfidence": true
+        },
+        {
+          "lineId": "ln-001-00012",
+          "bbox": {
+            "x": 30,
+            "y": 459,
+            "w": 109,
+            "h": 21
+          },
+          "tokenIds": [
+            "t-001-000052"
+          ],
+          "confidence": 0.9090437316894531,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00013",
+          "bbox": {
+            "x": 31,
+            "y": 508,
+            "w": 166,
+            "h": 15
+          },
+          "tokenIds": [
+            "t-001-000053",
+            "t-001-000054"
+          ],
+          "confidence": 0.9214934921264648,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00014",
+          "bbox": {
+            "x": 31,
+            "y": 536,
+            "w": 215,
+            "h": 17
+          },
+          "tokenIds": [
+            "t-001-000055"
+          ],
+          "confidence": 0.907269287109375,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00015",
+          "bbox": {
+            "x": 31,
+            "y": 565,
+            "w": 195,
+            "h": 18
+          },
+          "tokenIds": [
+            "t-001-000056",
+            "t-001-000057",
+            "t-001-000058"
+          ],
+          "confidence": 0.9114126841227214,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00016",
+          "bbox": {
+            "x": 30,
+            "y": 608,
+            "w": 770,
+            "h": 27
+          },
+          "tokenIds": [
+            "t-001-000059",
+            "t-001-000060",
+            "t-001-000061",
+            "t-001-000062"
+          ],
+          "confidence": 0.8542432403564453,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00017",
+          "bbox": {
+            "x": 29,
+            "y": 655,
+            "w": 709,
+            "h": 19
+          },
+          "tokenIds": [
+            "t-001-000063",
+            "t-001-000064",
+            "t-001-000065",
+            "t-001-000066",
+            "t-001-000067"
+          ],
+          "confidence": 0.6904697799682616,
+          "isLowConfidence": true
+        },
+        {
+          "lineId": "ln-001-00018",
+          "bbox": {
+            "x": 29,
+            "y": 691,
+            "w": 772,
+            "h": 29
+          },
+          "tokenIds": [
+            "t-001-000068",
+            "t-001-000069",
+            "t-001-000070",
+            "t-001-000071",
+            "t-001-000072",
+            "t-001-000073",
+            "t-001-000074",
+            "t-001-000075",
+            "t-001-000076",
+            "t-001-000077"
+          ],
+          "confidence": 0.7860705871582032,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00019",
+          "bbox": {
+            "x": 30,
+            "y": 733,
+            "w": 771,
+            "h": 20
+          },
+          "tokenIds": [
+            "t-001-000078",
+            "t-001-000079",
+            "t-001-000080",
+            "t-001-000081",
+            "t-001-000082",
+            "t-001-000083",
+            "t-001-000084",
+            "t-001-000085"
+          ],
+          "confidence": 0.7587787532806398,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00020",
+          "bbox": {
+            "x": 29,
+            "y": 768,
+            "w": 772,
+            "h": 27
+          },
+          "tokenIds": [
+            "t-001-000086",
+            "t-001-000087",
+            "t-001-000088",
+            "t-001-000089",
+            "t-001-000090",
+            "t-001-000091",
+            "t-001-000092",
+            "t-001-000093"
+          ],
+          "confidence": 0.7724991226196289,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00021",
+          "bbox": {
+            "x": 571,
+            "y": 837,
+            "w": 230,
+            "h": 28
+          },
+          "tokenIds": [
+            "t-001-000094",
+            "t-001-000095"
+          ],
+          "confidence": 0.9146359252929688,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00022",
+          "bbox": {
+            "x": 532,
+            "y": 879,
+            "w": 269,
+            "h": 16
+          },
+          "tokenIds": [
+            "t-001-000096",
+            "t-001-000097",
+            "t-001-000098",
+            "t-001-000099"
+          ],
+          "confidence": 0.6709420013427735,
+          "isLowConfidence": true
+        },
+        {
+          "lineId": "ln-001-00023",
+          "bbox": {
+            "x": 618,
+            "y": 916,
+            "w": 184,
+            "h": 17
+          },
+          "tokenIds": [
+            "t-001-000100",
+            "t-001-000101"
+          ],
+          "confidence": 0.9147604370117188,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00024",
+          "bbox": {
+            "x": 537,
+            "y": 956,
+            "w": 265,
+            "h": 19
+          },
+          "tokenIds": [
+            "t-001-000102",
+            "t-001-000103",
+            "t-001-000104"
+          ],
+          "confidence": 0.899082514444987,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00025",
+          "bbox": {
+            "x": 23,
+            "y": 1010,
+            "w": 193,
+            "h": 17
+          },
+          "tokenIds": [
+            "t-001-000105",
+            "t-001-000106",
+            "t-001-000107"
+          ],
+          "confidence": 0.872414042154948,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00026",
+          "bbox": {
+            "x": 23,
+            "y": 1056,
+            "w": 785,
+            "h": 21
+          },
+          "tokenIds": [
+            "t-001-000108",
+            "t-001-000109",
+            "t-001-000110",
+            "t-001-000111",
+            "t-001-000112",
+            "t-001-000113",
+            "t-001-000114",
+            "t-001-000115",
+            "t-001-000116",
+            "t-001-000117",
+            "t-001-000118",
+            "t-001-000119",
+            "t-001-000120",
+            "t-001-000121",
+            "t-001-000122"
+          ],
+          "confidence": 0.922570571899414,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00027",
+          "bbox": {
+            "x": 24,
+            "y": 1147,
+            "w": 520,
+            "h": 22
+          },
+          "tokenIds": [
+            "t-001-000123",
+            "t-001-000124",
+            "t-001-000125",
+            "t-001-000126"
+          ],
+          "confidence": 0.9097607040405273,
+          "isLowConfidence": false
+        },
+        {
+          "lineId": "ln-001-00028",
+          "bbox": {
+            "x": 23,
+            "y": 1184,
+            "w": 633,
+            "h": 20
+          },
+          "tokenIds": [
+            "t-001-000129",
+            "t-001-000127",
+            "t-001-000128"
+          ],
+          "confidence": 0.8961375681559245,
+          "isLowConfidence": false
+        }
+      ],
+      "blocks": [
+        {
+          "blockId": "blk-001-00001",
+          "type": "text",
+          "bbox": {
+            "x": 23,
+            "y": 1010,
+            "w": 193,
+            "h": 17
+          },
+          "lineIds": [
+            "ln-001-00025"
+          ],
+          "tokenIds": [
+            "t-001-000105",
+            "t-001-000106",
+            "t-001-000107"
+          ],
+          "confidence": 0.872414042154948,
+          "isLowConfidence": false
+        },
+        {
+          "blockId": "blk-001-00002",
+          "type": "text",
+          "bbox": {
+            "x": 23,
+            "y": 1056,
+            "w": 785,
+            "h": 21
+          },
+          "lineIds": [
+            "ln-001-00026"
+          ],
+          "tokenIds": [
+            "t-001-000108",
+            "t-001-000109",
+            "t-001-000110",
+            "t-001-000111",
+            "t-001-000112",
+            "t-001-000113",
+            "t-001-000114",
+            "t-001-000115",
+            "t-001-000116",
+            "t-001-000117",
+            "t-001-000118",
+            "t-001-000119",
+            "t-001-000120",
+            "t-001-000121",
+            "t-001-000122"
+          ],
+          "confidence": 0.922570571899414,
+          "isLowConfidence": false
+        },
+        {
+          "blockId": "blk-001-00003",
+          "type": "text",
+          "bbox": {
+            "x": 24,
+            "y": 1147,
+            "w": 520,
+            "h": 22
+          },
+          "lineIds": [
+            "ln-001-00027"
+          ],
+          "tokenIds": [
+            "t-001-000123",
+            "t-001-000124",
+            "t-001-000125",
+            "t-001-000126"
+          ],
+          "confidence": 0.9097607040405273,
+          "isLowConfidence": false
+        },
+        {
+          "blockId": "blk-001-00004",
+          "type": "text",
+          "bbox": {
+            "x": 29,
+            "y": 608,
+            "w": 773,
+            "h": 367
+          },
+          "lineIds": [
+            "ln-001-00016",
+            "ln-001-00017",
+            "ln-001-00018",
+            "ln-001-00019",
+            "ln-001-00020",
+            "ln-001-00021",
+            "ln-001-00022",
+            "ln-001-00023",
+            "ln-001-00024"
+          ],
+          "tokenIds": [
+            "t-001-000059",
+            "t-001-000060",
+            "t-001-000061",
+            "t-001-000062",
+            "t-001-000063",
+            "t-001-000064",
+            "t-001-000065",
+            "t-001-000066",
+            "t-001-000067",
+            "t-001-000068",
+            "t-001-000069",
+            "t-001-000070",
+            "t-001-000071",
+            "t-001-000072",
+            "t-001-000073",
+            "t-001-000074",
+            "t-001-000075",
+            "t-001-000076",
+            "t-001-000077",
+            "t-001-000078",
+            "t-001-000079",
+            "t-001-000080",
+            "t-001-000081",
+            "t-001-000082",
+            "t-001-000083",
+            "t-001-000084",
+            "t-001-000085",
+            "t-001-000086",
+            "t-001-000087",
+            "t-001-000088",
+            "t-001-000089",
+            "t-001-000090",
+            "t-001-000091",
+            "t-001-000092",
+            "t-001-000093",
+            "t-001-000094",
+            "t-001-000095",
+            "t-001-000096",
+            "t-001-000097",
+            "t-001-000098",
+            "t-001-000099",
+            "t-001-000100",
+            "t-001-000101",
+            "t-001-000102",
+            "t-001-000103",
+            "t-001-000104"
+          ],
+          "confidence": 0.806831373497292,
+          "isLowConfidence": false
+        },
+        {
+          "blockId": "blk-001-00005",
+          "type": "text",
+          "bbox": {
+            "x": 30,
+            "y": 459,
+            "w": 109,
+            "h": 21
+          },
+          "lineIds": [
+            "ln-001-00012"
+          ],
+          "tokenIds": [
+            "t-001-000052"
+          ],
+          "confidence": 0.9090437316894531,
+          "isLowConfidence": false
+        },
+        {
+          "blockId": "blk-001-00006",
+          "type": "text",
+          "bbox": {
+            "x": 31,
+            "y": 350,
+            "w": 572,
+            "h": 19
+          },
+          "lineIds": [
+            "ln-001-00009"
+          ],
+          "tokenIds": [
+            "t-001-000035",
+            "t-001-000036",
+            "t-001-000037",
+            "t-001-000038",
+            "t-001-000039"
+          ],
+          "confidence": 0.9255375518798828,
+          "isLowConfidence": false
+        },
+        {
+          "blockId": "blk-001-00007",
+          "type": "text",
+          "bbox": {
+            "x": 31,
+            "y": 508,
+            "w": 215,
+            "h": 75
+          },
+          "lineIds": [
+            "ln-001-00013",
+            "ln-001-00014",
+            "ln-001-00015"
+          ],
+          "tokenIds": [
+            "t-001-000053",
+            "t-001-000054",
+            "t-001-000055",
+            "t-001-000056",
+            "t-001-000057",
+            "t-001-000058"
+          ],
+          "confidence": 0.9133918211195203,
+          "isLowConfidence": false
+        },
+        {
+          "blockId": "blk-001-00008",
+          "type": "text",
+          "bbox": {
+            "x": 31,
+            "y": 378,
+            "w": 679,
+            "h": 48
+          },
+          "lineIds": [
+            "ln-001-00010",
+            "ln-001-00011"
+          ],
+          "tokenIds": [
+            "t-001-000040",
+            "t-001-000041",
+            "t-001-000042",
+            "t-001-000043",
+            "t-001-000044",
+            "t-001-000045",
+            "t-001-000046",
+            "t-001-000047",
+            "t-001-000048",
+            "t-001-000049",
+            "t-001-000050",
+            "t-001-000051"
+          ],
+          "confidence": 0.8092167758941651,
+          "isLowConfidence": false
+        },
+        {
+          "blockId": "blk-001-00009",
+          "type": "text",
+          "bbox": {
+            "x": 23,
+            "y": 1184,
+            "w": 633,
+            "h": 20
+          },
+          "lineIds": [
+            "ln-001-00028"
+          ],
+          "tokenIds": [
+            "t-001-000129",
+            "t-001-000127",
+            "t-001-000128"
+          ],
+          "confidence": 0.8961375681559245,
+          "isLowConfidence": false
+        },
+        {
+          "blockId": "blk-001-00010",
+          "type": "text",
+          "bbox": {
+            "x": 8,
+            "y": 36,
+            "w": 797,
+            "h": 304
+          },
+          "lineIds": [
+            "ln-001-00001",
+            "ln-001-00002",
+            "ln-001-00003",
+            "ln-001-00004",
+            "ln-001-00005",
+            "ln-001-00006",
+            "ln-001-00007",
+            "ln-001-00008"
+          ],
+          "tokenIds": [
+            "t-001-000001",
+            "t-001-000002",
+            "t-001-000003",
+            "t-001-000004",
+            "t-001-000005",
+            "t-001-000006",
+            "t-001-000007",
+            "t-001-000008",
+            "t-001-000012",
+            "t-001-000013",
+            "t-001-000014",
+            "t-001-000009",
+            "t-001-000010",
+            "t-001-000011",
+            "t-001-000015",
+            "t-001-000016",
+            "t-001-000017",
+            "t-001-000018",
+            "t-001-000019",
+            "t-001-000020",
+            "t-001-000021",
+            "t-001-000022",
+            "t-001-000023",
+            "t-001-000024",
+            "t-001-000025",
+            "t-001-000026",
+            "t-001-000027",
+            "t-001-000028",
+            "t-001-000029",
+            "t-001-000030",
+            "t-001-000031",
+            "t-001-000032",
+            "t-001-000033",
+            "t-001-000034"
+          ],
+          "confidence": 0.7925585643450419,
+          "isLowConfidence": true
+        }
+      ],
+      "tables": [
+        {
+          "tableId": "tbl-0001",
+          "confidence": 0.8879509870660314,
+          "bbox": {
+            "x": 20,
+            "y": 264,
+            "w": 791,
+            "h": 186
+          },
+          "detection": {
+            "method": "lines",
+            "hasExplicitGridLines": true,
+            "modelName": null,
+            "modelVersion": null,
+            "notes": [
+              "Header row selected from first detected row.",
+              "No artifact rows removed."
+            ]
+          },
+          "grid": {
+            "rows": 2,
+            "cols": 2,
+            "rowBands": [
+              {
+                "rowIndex": 0,
+                "type": "header",
+                "bbox": {
+                  "x": 20,
+                  "y": 266,
+                  "w": 791,
+                  "h": 34
+                }
+              },
+              {
+                "rowIndex": 1,
+                "type": "data",
+                "bbox": {
+                  "x": 20,
+                  "y": 300,
+                  "w": 791,
+                  "h": 148
+                }
+              }
+            ],
+            "colBands": [
+              {
+                "colIndex": 0,
+                "bbox": {
+                  "x": 20,
+                  "y": 264,
+                  "w": 401,
+                  "h": 186
+                }
+              },
+              {
+                "colIndex": 1,
+                "bbox": {
+                  "x": 421,
+                  "y": 264,
+                  "w": 390,
+                  "h": 186
+                }
+              }
+            ]
+          },
+          "header": {
+            "rowIndex": 0,
+            "columns": [
+              {
+                "colIndex": 0,
+                "name": "Vendor",
+                "key": "vendor",
+                "bbox": {
+                  "x": 29,
+                  "y": 275,
+                  "w": 80,
+                  "h": 17
+                },
+                "confidence": 0.9145730590820312
+              },
+              {
+                "colIndex": 1,
+                "name": "hlp To",
+                "key": "hlp_to",
+                "bbox": {
+                  "x": 429,
+                  "y": 266,
+                  "w": 221,
+                  "h": 31
+                },
+                "confidence": 0.507079709370931
+              }
+            ],
+            "cells": [
+              {
+                "rowIndex": 0,
+                "colIndex": 0,
+                "rowSpan": 1,
+                "colSpan": 1,
+                "text": "Vendor",
+                "confidence": 0.9145730590820312,
+                "bbox": {
+                  "x": 29,
+                  "y": 275,
+                  "w": 80,
+                  "h": 17
+                },
+                "tokenIds": [
+                  "t-001-000027"
+                ]
+              },
+              {
+                "rowIndex": 0,
+                "colIndex": 1,
+                "rowSpan": 1,
+                "colSpan": 1,
+                "text": "hlp To",
+                "confidence": 0.507079709370931,
+                "bbox": {
+                  "x": 429,
+                  "y": 266,
+                  "w": 221,
+                  "h": 31
+                },
+                "tokenIds": [
+                  "t-001-000028",
+                  "t-001-000030",
+                  "t-001-000029"
+                ]
+              }
+            ]
+          },
+          "cells": [
+            {
+              "rowIndex": 1,
+              "colIndex": 0,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "Supplier Inc\r\n789 Industrial Rd\r\nSpringfiled USA 54321\r\nMegkt:inssuppliier.com",
+              "normalized": {
+                "type": "string",
+                "value": "Supplier Inc\r\n789 Industrial Rd\r\nSpringfiled USA 54321\r\nMegkt:inssuppliier.com",
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.820719757080078,
+              "bbox": {
+                "x": 31,
+                "y": 320,
+                "w": 209,
+                "h": 106
+              },
+              "tokenIds": [
+                "t-001-000031",
+                "t-001-000032",
+                "t-001-000035",
+                "t-001-000036",
+                "t-001-000037",
+                "t-001-000040",
+                "t-001-000041",
+                "t-001-000042",
+                "t-001-000048"
+              ],
+              "isLowConfidence": false
+            },
+            {
+              "rowIndex": 1,
+              "colIndex": 1,
+              "rowSpan": 1,
+              "colSpan": 1,
+              "text": "John Smith\r\nAcme Corporation\r\n123 Commerce Blvd Suite 456\r\nMetrroplis USA 98765",
+              "normalized": {
+                "type": "string",
+                "value": "John Smith\r\nAcme Corporation\r\n123 Commerce Blvd Suite 456\r\nMetrroplis USA 98765",
+                "currency": null,
+                "unit": null
+              },
+              "confidence": 0.9255069923400879,
+              "bbox": {
+                "x": 435,
+                "y": 321,
+                "w": 275,
+                "h": 105
+              },
+              "tokenIds": [
+                "t-001-000033",
+                "t-001-000034",
+                "t-001-000038",
+                "t-001-000039",
+                "t-001-000043",
+                "t-001-000044",
+                "t-001-000045",
+                "t-001-000046",
+                "t-001-000047",
+                "t-001-000049",
+                "t-001-000050",
+                "t-001-000051"
+              ],
+              "isLowConfidence": false
+            }
+          ],
+          "rows": [
+            {
+              "rowIndex": 1,
+              "type": "data",
+              "values": {
+                "vendor": "Supplier Inc\r\n789 Industrial Rd\r\nSpringfiled USA 54321\r\nMegkt:inssuppliier.com",
+                "hlp_to": "John Smith\r\nAcme Corporation\r\n123 Commerce Blvd Suite 456\r\nMetrroplis USA 98765"
+              },
+              "source": {
+                "cellRefs": [
+                  {
+                    "rowIndex": 1,
+                    "colIndex": 0
+                  },
+                  {
+                    "rowIndex": 1,
+                    "colIndex": 1
+                  }
+                ]
+              },
+              "confidence": 0.873113374710083,
+              "isLowConfidence": false
+            }
+          ],
+          "tokenCoverage": {
+            "tokenCountInCells": 25,
+            "tokenCountOverlappingTableBbox": 25,
+            "coverageRatio": 1.0
+          },
+          "issues": []
+        }
+      ],
+      "keyValueCandidates": [
+        {
+          "pairId": "kv-001-00001",
+          "label": {
+            "text": "ACME",
+            "confidence": 0.7439193534851074,
+            "bbox": {
+              "x": 8,
+              "y": 36,
+              "w": 200,
+              "h": 43
+            },
+            "tokenIds": [
+              "t-001-000001",
+              "t-001-000002"
+            ]
+          },
+          "value": {
+            "text": "PURCHASE ORDER",
+            "confidence": 0.9183793258666992,
+            "bbox": {
+              "x": 486,
+              "y": 39,
+              "w": 313,
+              "h": 25
+            },
+            "tokenIds": [
+              "t-001-000003",
+              "t-001-000004"
+            ]
+          },
+          "confidence": 0.8256424703598023,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00002",
+          "label": {
+            "text": "CORPORATION PO Number",
+            "confidence": 0.8611068216959635,
+            "bbox": {
+              "x": 39,
+              "y": 95,
+              "w": 638,
+              "h": 36
+            },
+            "tokenIds": [
+              "t-001-000005",
+              "t-001-000006",
+              "t-001-000007"
+            ]
+          },
+          "value": {
+            "text": "123456",
+            "confidence": 0.3423996734619141,
+            "bbox": {
+              "x": 717,
+              "y": 115,
+              "w": 75,
+              "h": 16
+            },
+            "tokenIds": [
+              "t-001-000008"
+            ]
+          },
+          "confidence": 0.6354672406514487,
+          "method": "ocr+regex"
+        },
+        {
+          "pairId": "kv-001-00003",
+          "label": {
+            "text": "CORPORATION PO Number",
+            "confidence": 0.8611068216959635,
+            "bbox": {
+              "x": 39,
+              "y": 95,
+              "w": 638,
+              "h": 36
+            },
+            "tokenIds": [
+              "t-001-000005",
+              "t-001-000006",
+              "t-001-000007"
+            ]
+          },
+          "value": {
+            "text": "123456",
+            "confidence": 0.3423996734619141,
+            "bbox": {
+              "x": 717,
+              "y": 115,
+              "w": 75,
+              "h": 16
+            },
+            "tokenIds": [
+              "t-001-000008"
+            ]
+          },
+          "confidence": 0.6234672406514487,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00004",
+          "label": {
+            "text": "Order Date",
+            "confidence": 0.6530541229248047,
+            "bbox": {
+              "x": 564,
+              "y": 148,
+              "w": 108,
+              "h": 16
+            },
+            "tokenIds": [
+              "t-001-000012",
+              "t-001-000013"
+            ]
+          },
+          "value": {
+            "text": "05/30/2024",
+            "confidence": 0.3885823822021484,
+            "bbox": {
+              "x": 702,
+              "y": 149,
+              "w": 103,
+              "h": 16
+            },
+            "tokenIds": [
+              "t-001-000014"
+            ]
+          },
+          "confidence": 0.5834310150146484,
+          "method": "ocr+regex"
+        },
+        {
+          "pairId": "kv-001-00005",
+          "label": {
+            "text": "Order Date",
+            "confidence": 0.6530541229248047,
+            "bbox": {
+              "x": 564,
+              "y": 148,
+              "w": 108,
+              "h": 16
+            },
+            "tokenIds": [
+              "t-001-000012",
+              "t-001-000013"
+            ]
+          },
+          "value": {
+            "text": "05/30/2024",
+            "confidence": 0.3885823822021484,
+            "bbox": {
+              "x": 702,
+              "y": 149,
+              "w": 103,
+              "h": 16
+            },
+            "tokenIds": [
+              "t-001-000014"
+            ]
+          },
+          "confidence": 0.5714310150146484,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00006",
+          "label": {
+            "text": "123 Commerce Bivd",
+            "confidence": 0.8688711802164715,
+            "bbox": {
+              "x": 40,
+              "y": 163,
+              "w": 177,
+              "h": 17
+            },
+            "tokenIds": [
+              "t-001-000009",
+              "t-001-000010",
+              "t-001-000011"
+            ]
+          },
+          "value": {
+            "text": "Metroplis, USA, 98765 Due Date: 06/07/2024",
+            "confidence": 0.927341473897298,
+            "bbox": {
+              "x": 39,
+              "y": 182,
+              "w": 766,
+              "h": 23
+            },
+            "tokenIds": [
+              "t-001-000015",
+              "t-001-000016",
+              "t-001-000017",
+              "t-001-000018",
+              "t-001-000019",
+              "t-001-000020"
+            ]
+          },
+          "confidence": 0.8574085763295491,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00007",
+          "label": {
+            "text": "Metroplis USA 98765 Due Date",
+            "confidence": 0.9308468627929687,
+            "bbox": {
+              "x": 39,
+              "y": 183,
+              "w": 626,
+              "h": 22
+            },
+            "tokenIds": [
+              "t-001-000015",
+              "t-001-000016",
+              "t-001-000017",
+              "t-001-000018",
+              "t-001-000019"
+            ]
+          },
+          "value": {
+            "text": "06/07/2024",
+            "confidence": 0.9098145294189454,
+            "bbox": {
+              "x": 702,
+              "y": 182,
+              "w": 103,
+              "h": 16
+            },
+            "tokenIds": [
+              "t-001-000020"
+            ]
+          },
+          "confidence": 0.9032129402160645,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00008",
+          "label": {
+            "text": "Phone",
+            "confidence": 0.7479756927490234,
+            "bbox": {
+              "x": 40,
+              "y": 210,
+              "w": 58,
+              "h": 15
+            },
+            "tokenIds": [
+              "t-001-000021"
+            ]
+          },
+          "value": {
+            "text": "(555) 123- 4567 Terms: Net 30",
+            "confidence": 0.9183919830322266,
+            "bbox": {
+              "x": 104,
+              "y": 201,
+              "w": 683,
+              "h": 34
+            },
+            "tokenIds": [
+              "t-001-000022",
+              "t-001-000023",
+              "t-001-000024",
+              "t-001-000025",
+              "t-001-000026"
+            ]
+          },
+          "confidence": 0.8430678848266602,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00009",
+          "label": {
+            "text": "Michael Sherwood",
+            "confidence": 0.9214934921264648,
+            "bbox": {
+              "x": 31,
+              "y": 508,
+              "w": 166,
+              "h": 15
+            },
+            "tokenIds": [
+              "t-001-000053",
+              "t-001-000054"
+            ]
+          },
+          "value": {
+            "text": "msherwood@acme.com",
+            "confidence": 0.907269287109375,
+            "bbox": {
+              "x": 31,
+              "y": 536,
+              "w": 215,
+              "h": 17
+            },
+            "tokenIds": [
+              "t-001-000055"
+            ]
+          },
+          "confidence": 0.8667939014434815,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00010",
+          "label": {
+            "text": "Phone",
+            "confidence": 0.9014429473876953,
+            "bbox": {
+              "x": 31,
+              "y": 565,
+              "w": 59,
+              "h": 15
+            },
+            "tokenIds": [
+              "t-001-000056"
+            ]
+          },
+          "value": {
+            "text": "(555) 987- 6543",
+            "confidence": 0.9163975524902344,
+            "bbox": {
+              "x": 96,
+              "y": 565,
+              "w": 130,
+              "h": 18
+            },
+            "tokenIds": [
+              "t-001-000057",
+              "t-001-000058"
+            ]
+          },
+          "confidence": 0.8958839302062988,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00011",
+          "label": {
+            "text": "Phone",
+            "confidence": 0.9014429473876953,
+            "bbox": {
+              "x": 31,
+              "y": 565,
+              "w": 59,
+              "h": 15
+            },
+            "tokenIds": [
+              "t-001-000056"
+            ]
+          },
+          "value": {
+            "text": "(555) 987- 6543",
+            "confidence": 0.9163975524902344,
+            "bbox": {
+              "x": 96,
+              "y": 565,
+              "w": 130,
+              "h": 18
+            },
+            "tokenIds": [
+              "t-001-000057",
+              "t-001-000058"
+            ]
+          },
+          "confidence": 0.8718839302062987,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00012",
+          "label": {
+            "text": "Items",
+            "confidence": 0.9091234588623047,
+            "bbox": {
+              "x": 30,
+              "y": 608,
+              "w": 63,
+              "h": 27
+            },
+            "tokenIds": [
+              "t-001-000059"
+            ]
+          },
+          "value": {
+            "text": "Qty UnitPrice Total",
+            "confidence": 0.8359498341878254,
+            "bbox": {
+              "x": 549,
+              "y": 611,
+              "w": 251,
+              "h": 21
+            },
+            "tokenIds": [
+              "t-001-000060",
+              "t-001-000061",
+              "t-001-000062"
+            ]
+          },
+          "confidence": 0.862370635986328,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00013",
+          "label": {
+            "text": "SKU Description",
+            "confidence": 0.853466588785368,
+            "bbox": {
+              "x": 437,
+              "y": 650,
+              "w": 81,
+              "h": 24
+            },
+            "tokenIds": [
+              "t-001-000065"
+            ]
+          },
+          "value": {
+            "text": "Qty, Qty",
+            "confidence": 0.853466588785368,
+            "bbox": {
+              "x": 437,
+              "y": 650,
+              "w": 81,
+              "h": 24
+            },
+            "tokenIds": [
+              "t-001-000065"
+            ]
+          },
+          "confidence": 0.853466588785368,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00014",
+          "label": {
+            "text": "SKU",
+            "confidence": 0.7253971333162808,
+            "bbox": {
+              "x": 79,
+              "y": 654,
+              "w": 129,
+              "h": 20
+            },
+            "tokenIds": [
+              "t-001-000064"
+            ]
+          },
+          "value": {
+            "text": "Description",
+            "confidence": 0.7253971333162808,
+            "bbox": {
+              "x": 79,
+              "y": 654,
+              "w": 129,
+              "h": 20
+            },
+            "tokenIds": [
+              "t-001-000064"
+            ]
+          },
+          "confidence": 0.7253971333162808,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00015",
+          "label": {
+            "text": "SKU Description",
+            "confidence": 0.7403866386413573,
+            "bbox": {
+              "x": 29,
+              "y": 655,
+              "w": 179,
+              "h": 19
+            },
+            "tokenIds": [
+              "t-001-000063",
+              "t-001-000064"
+            ]
+          },
+          "value": {
+            "text": "Qty Pnait Ttom",
+            "confidence": 0.6571918741861978,
+            "bbox": {
+              "x": 484,
+              "y": 655,
+              "w": 254,
+              "h": 19
+            },
+            "tokenIds": [
+              "t-001-000065",
+              "t-001-000066",
+              "t-001-000067"
+            ]
+          },
+          "confidence": 0.7068716669082641,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00016",
+          "label": {
+            "text": "DEF 200 Ergonomic Office Chair",
+            "confidence": 0.859658766895641,
+            "bbox": {
+              "x": 369,
+              "y": 730,
+              "w": 213,
+              "h": 23
+            },
+            "tokenIds": [
+              "t-001-000082",
+              "t-001-000083"
+            ]
+          },
+          "value": {
+            "text": "15 11, 15",
+            "confidence": 0.859658766895641,
+            "bbox": {
+              "x": 369,
+              "y": 730,
+              "w": 213,
+              "h": 23
+            },
+            "tokenIds": [
+              "t-001-000082",
+              "t-001-000083"
+            ]
+          },
+          "confidence": 0.859658766895641,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00017",
+          "label": {
+            "text": "DEF 200 Ergonomic Office Chair",
+            "confidence": 0.8748789215087891,
+            "bbox": {
+              "x": 30,
+              "y": 733,
+              "w": 314,
+              "h": 20
+            },
+            "tokenIds": [
+              "t-001-000078",
+              "t-001-000079",
+              "t-001-000080",
+              "t-001-000081"
+            ]
+          },
+          "value": {
+            "text": "15 11 $150.00 $2,250.00",
+            "confidence": 0.6426785850524903,
+            "bbox": {
+              "x": 496,
+              "y": 733,
+              "w": 305,
+              "h": 18
+            },
+            "tokenIds": [
+              "t-001-000082",
+              "t-001-000083",
+              "t-001-000084",
+              "t-001-000085"
+            ]
+          },
+          "confidence": 0.7474129858016968,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00018",
+          "label": {
+            "text": "XYZ 300 Laptop Docking Station",
+            "confidence": 0.7927343182629376,
+            "bbox": {
+              "x": 438,
+              "y": 768,
+              "w": 140,
+              "h": 27
+            },
+            "tokenIds": [
+              "t-001-000090",
+              "t-001-000091"
+            ]
+          },
+          "value": {
+            "text": "5} 5, 5} 5",
+            "confidence": 0.7927343182629376,
+            "bbox": {
+              "x": 438,
+              "y": 768,
+              "w": 140,
+              "h": 27
+            },
+            "tokenIds": [
+              "t-001-000090",
+              "t-001-000091"
+            ]
+          },
+          "confidence": 0.7927343182629376,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00019",
+          "label": {
+            "text": "XYZ 300 Laptop Docking Station 5",
+            "confidence": 0.7408633904474432,
+            "bbox": {
+              "x": 525,
+              "y": 769,
+              "w": 155,
+              "h": 19
+            },
+            "tokenIds": [
+              "t-001-000091",
+              "t-001-000092"
+            ]
+          },
+          "value": {
+            "text": "5 $100.00",
+            "confidence": 0.7408633904474432,
+            "bbox": {
+              "x": 525,
+              "y": 769,
+              "w": 155,
+              "h": 19
+            },
+            "tokenIds": [
+              "t-001-000091",
+              "t-001-000092"
+            ]
+          },
+          "confidence": 0.7408633904474432,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00020",
+          "label": {
+            "text": "XYZ 300 Laptop Docking Station",
+            "confidence": 0.9092731094360351,
+            "bbox": {
+              "x": 29,
+              "y": 772,
+              "w": 315,
+              "h": 20
+            },
+            "tokenIds": [
+              "t-001-000086",
+              "t-001-000087",
+              "t-001-000088",
+              "t-001-000089"
+            ]
+          },
+          "value": {
+            "text": "5} 5 $100.00 $500.00",
+            "confidence": 0.6357251358032228,
+            "bbox": {
+              "x": 505,
+              "y": 768,
+              "w": 296,
+              "h": 27
+            },
+            "tokenIds": [
+              "t-001-000090",
+              "t-001-000091",
+              "t-001-000092",
+              "t-001-000093"
+            ]
+          },
+          "confidence": 0.7563218994140626,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00021",
+          "label": {
+            "text": "Subtotal",
+            "confidence": 0.9090862274169922,
+            "bbox": {
+              "x": 571,
+              "y": 837,
+              "w": 82,
+              "h": 28
+            },
+            "tokenIds": [
+              "t-001-000094"
+            ]
+          },
+          "value": {
+            "text": "$5,250.00",
+            "confidence": 0.9201856231689454,
+            "bbox": {
+              "x": 711,
+              "y": 841,
+              "w": 90,
+              "h": 18
+            },
+            "tokenIds": [
+              "t-001-000095"
+            ]
+          },
+          "confidence": 0.9002637100219727,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00022",
+          "label": {
+            "text": "Subtotal",
+            "confidence": 0.9090862274169922,
+            "bbox": {
+              "x": 571,
+              "y": 837,
+              "w": 82,
+              "h": 28
+            },
+            "tokenIds": [
+              "t-001-000094"
+            ]
+          },
+          "value": {
+            "text": "$5,250.00",
+            "confidence": 0.9201856231689454,
+            "bbox": {
+              "x": 711,
+              "y": 841,
+              "w": 90,
+              "h": 18
+            },
+            "tokenIds": [
+              "t-001-000095"
+            ]
+          },
+          "confidence": 0.8762637100219727,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00023",
+          "label": {
+            "text": "Tax Rate",
+            "confidence": 0.49730369567871097,
+            "bbox": {
+              "x": 532,
+              "y": 879,
+              "w": 82,
+              "h": 15
+            },
+            "tokenIds": [
+              "t-001-000096",
+              "t-001-000097"
+            ]
+          },
+          "value": {
+            "text": "00% $900.00",
+            "confidence": 0.844580307006836,
+            "bbox": {
+              "x": 619,
+              "y": 880,
+              "w": 182,
+              "h": 15
+            },
+            "tokenIds": [
+              "t-001-000098",
+              "t-001-000099"
+            ]
+          },
+          "confidence": 0.722117431640625,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00024",
+          "label": {
+            "text": "Tax",
+            "confidence": 0.8638360110275467,
+            "bbox": {
+              "x": 708,
+              "y": 906,
+              "w": 94,
+              "h": 27
+            },
+            "tokenIds": [
+              "t-001-000101"
+            ]
+          },
+          "value": {
+            "text": "$420.00",
+            "confidence": 0.8638360110275467,
+            "bbox": {
+              "x": 708,
+              "y": 906,
+              "w": 94,
+              "h": 27
+            },
+            "tokenIds": [
+              "t-001-000101"
+            ]
+          },
+          "confidence": 0.8638360110275467,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00025",
+          "label": {
+            "text": "Tax",
+            "confidence": 0.9042860412597656,
+            "bbox": {
+              "x": 618,
+              "y": 917,
+              "w": 35,
+              "h": 15
+            },
+            "tokenIds": [
+              "t-001-000100"
+            ]
+          },
+          "value": {
+            "text": "$420.00",
+            "confidence": 0.9252348327636719,
+            "bbox": {
+              "x": 729,
+              "y": 916,
+              "w": 73,
+              "h": 17
+            },
+            "tokenIds": [
+              "t-001-000101"
+            ]
+          },
+          "confidence": 0.9008557891845704,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00026",
+          "label": {
+            "text": "Grand Total",
+            "confidence": 0.882770118713379,
+            "bbox": {
+              "x": 537,
+              "y": 956,
+              "w": 120,
+              "h": 16
+            },
+            "tokenIds": [
+              "t-001-000102",
+              "t-001-000103"
+            ]
+          },
+          "value": {
+            "text": "$5,670.00",
+            "confidence": 0.9317073059082032,
+            "bbox": {
+              "x": 711,
+              "y": 957,
+              "w": 91,
+              "h": 18
+            },
+            "tokenIds": [
+              "t-001-000104"
+            ]
+          },
+          "confidence": 0.908237829208374,
+          "method": "ocr+regex"
+        },
+        {
+          "pairId": "kv-001-00027",
+          "label": {
+            "text": "Grand Total",
+            "confidence": 0.882770118713379,
+            "bbox": {
+              "x": 537,
+              "y": 956,
+              "w": 120,
+              "h": 16
+            },
+            "tokenIds": [
+              "t-001-000102",
+              "t-001-000103"
+            ]
+          },
+          "value": {
+            "text": "$5,670.00",
+            "confidence": 0.9317073059082032,
+            "bbox": {
+              "x": 711,
+              "y": 957,
+              "w": 91,
+              "h": 18
+            },
+            "tokenIds": [
+              "t-001-000104"
+            ]
+          },
+          "confidence": 0.896237829208374,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00028",
+          "label": {
+            "text": "Deliver goods to the shipping address by the due date Include packing slip with shipment",
+            "confidence": 0.8157152833709118,
+            "bbox": {
+              "x": 698,
+              "y": 1057,
+              "w": 110,
+              "h": 40
+            },
+            "tokenIds": [
+              "t-001-000122"
+            ]
+          },
+          "value": {
+            "text": "shipment.",
+            "confidence": 0.8157152833709118,
+            "bbox": {
+              "x": 698,
+              "y": 1057,
+              "w": 110,
+              "h": 40
+            },
+            "tokenIds": [
+              "t-001-000122"
+            ]
+          },
+          "confidence": 0.8157152833709118,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00029",
+          "label": {
+            "text": "Michael Sherwood",
+            "confidence": 0.9115597152709961,
+            "bbox": {
+              "x": 24,
+              "y": 1147,
+              "w": 208,
+              "h": 18
+            },
+            "tokenIds": [
+              "t-001-000123",
+              "t-001-000124"
+            ]
+          },
+          "value": {
+            "text": "Jane Doe",
+            "confidence": 0.9079616928100586,
+            "bbox": {
+              "x": 443,
+              "y": 1148,
+              "w": 101,
+              "h": 21
+            },
+            "tokenIds": [
+              "t-001-000125",
+              "t-001-000126"
+            ]
+          },
+          "confidence": 0.8796286621093751,
+          "method": "ocr+layout"
+        },
+        {
+          "pairId": "kv-001-00030",
+          "label": {
+            "text": "Michael Sherwood",
+            "confidence": 0.8764597406839454,
+            "bbox": {
+              "x": 372,
+              "y": 1148,
+              "w": 172,
+              "h": 28
+            },
+            "tokenIds": [
+              "t-001-000125",
+              "t-001-000126"
+            ]
+          },
+          "value": {
+            "text": "Jane Doe, Jane Doe",
+            "confidence": 0.8764597406839454,
+            "bbox": {
+              "x": 372,
+              "y": 1148,
+              "w": 172,
+              "h": 28
+            },
+            "tokenIds": [
+              "t-001-000125",
+              "t-001-000126"
+            ]
+          },
+          "confidence": 0.8764597406839454,
+          "method": "ocr+layout"
+        }
+      ],
+      "regions": [
+        {
+          "regionId": "chk-001-0001",
+          "type": "checkbox",
+          "bbox": {
+            "x": 328,
+            "y": 276,
+            "w": 25,
+            "h": 19
+          },
+          "confidence": 0.6806210526315789,
+          "value": true,
+          "labelTokenIds": [
+            "t-001-000028"
+          ],
+          "notes": [
+            "strong_label_match"
+          ]
+        },
+        {
+          "regionId": "chk-001-0002",
+          "type": "checkbox",
+          "bbox": {
+            "x": 574,
+            "y": 277,
+            "w": 22,
+            "h": 18
+          },
+          "confidence": 0.7497987144168962,
+          "value": true,
+          "labelTokenIds": [
+            "t-001-000030"
+          ],
+          "notes": [
+            "strong_label_match"
+          ]
+        },
+        {
+          "regionId": "chk-001-0003",
+          "type": "checkbox",
+          "bbox": {
+            "x": 307,
+            "y": 279,
+            "w": 13,
+            "h": 14
+          },
+          "confidence": 0.8335623876123875,
+          "value": true,
+          "labelTokenIds": [
+            "t-001-000028"
+          ],
+          "notes": [
+            "strong_label_match"
+          ]
+        },
+        {
+          "regionId": "chk-001-0004",
+          "type": "checkbox",
+          "bbox": {
+            "x": 330,
+            "y": 350,
+            "w": 14,
+            "h": 18
+          },
+          "confidence": 0.7809085137085138,
+          "value": true,
+          "labelTokenIds": [
+            "t-001-000038"
+          ],
+          "notes": [
+            "strong_label_match"
+          ]
+        },
+        {
+          "regionId": "chk-001-0005",
+          "type": "checkbox",
+          "bbox": {
+            "x": 358,
+            "y": 402,
+            "w": 11,
+            "h": 12
+          },
+          "confidence": 0.8017902203856749,
+          "value": true,
+          "labelTokenIds": [
+            "t-001-000049"
+          ],
+          "notes": [
+            "strong_label_match"
+          ]
+        },
+        {
+          "regionId": "chk-001-0006",
+          "type": "checkbox",
+          "bbox": {
+            "x": 355,
+            "y": 421,
+            "w": 14,
+            "h": 16
+          },
+          "confidence": 0.8393428571428572,
+          "value": true,
+          "labelTokenIds": [
+            "t-001-000049"
+          ],
+          "notes": [
+            "strong_label_match"
+          ]
+        },
+        {
+          "regionId": "chk-001-0007",
+          "type": "checkbox",
+          "bbox": {
+            "x": 463,
+            "y": 650,
+            "w": 14,
+            "h": 14
+          },
+          "confidence": 0.8568196660482374,
+          "value": true,
+          "labelTokenIds": [
+            "t-001-000065"
+          ],
+          "notes": [
+            "strong_label_match"
+          ]
+        },
+        {
+          "regionId": "chk-001-0008",
+          "type": "checkbox",
+          "bbox": {
+            "x": 79,
+            "y": 654,
+            "w": 11,
+            "h": 11
+          },
+          "confidence": 0.8148577761081893,
+          "value": true,
+          "labelTokenIds": [
+            "t-001-000064"
+          ],
+          "notes": [
+            "strong_label_match"
+          ]
+        },
+        {
+          "regionId": "chk-001-0009",
+          "type": "checkbox",
+          "bbox": {
+            "x": 437,
+            "y": 658,
+            "w": 10,
+            "h": 11
+          },
+          "confidence": 0.8263838842975206,
+          "value": true,
+          "labelTokenIds": [
+            "t-001-000065"
+          ],
+          "notes": [
+            "strong_label_match"
+          ]
+        },
+        {
+          "regionId": "chk-001-0010",
+          "type": "checkbox",
+          "bbox": {
+            "x": 438,
+            "y": 730,
+            "w": 16,
+            "h": 15
+          },
+          "confidence": 0.8582833333333333,
+          "value": true,
+          "labelTokenIds": [
+            "t-001-000082",
+            "t-001-000083"
+          ],
+          "notes": [
+            "strong_label_match"
+          ]
+        },
+        {
+          "regionId": "chk-001-0011",
+          "type": "checkbox",
+          "bbox": {
+            "x": 369,
+            "y": 734,
+            "w": 20,
+            "h": 19
+          },
+          "confidence": 0.8289045454545455,
+          "value": true,
+          "labelTokenIds": [
+            "t-001-000082"
+          ],
+          "notes": [
+            "strong_label_match"
+          ]
+        },
+        {
+          "regionId": "chk-001-0012",
+          "type": "checkbox",
+          "bbox": {
+            "x": 438,
+            "y": 769,
+            "w": 14,
+            "h": 14
+          },
+          "confidence": 0.9291758812615956,
+          "value": true,
+          "labelTokenIds": [
+            "t-001-000090",
+            "t-001-000091"
+          ],
+          "notes": [
+            "strong_label_match"
+          ]
+        },
+        {
+          "regionId": "chk-001-0013",
+          "type": "checkbox",
+          "bbox": {
+            "x": 525,
+            "y": 769,
+            "w": 10,
+            "h": 10
+          },
+          "confidence": 0.8758363636363636,
+          "value": true,
+          "labelTokenIds": [
+            "t-001-000091",
+            "t-001-000092"
+          ],
+          "notes": [
+            "strong_label_match"
+          ]
+        },
+        {
+          "regionId": "chk-001-0014",
+          "type": "checkbox",
+          "bbox": {
+            "x": 455,
+            "y": 777,
+            "w": 10,
+            "h": 11
+          },
+          "confidence": 0.8858880165289256,
+          "value": true,
+          "labelTokenIds": [
+            "t-001-000090",
+            "t-001-000091"
+          ],
+          "notes": [
+            "strong_label_match"
+          ]
+        },
+        {
+          "regionId": "chk-001-0015",
+          "type": "checkbox",
+          "bbox": {
+            "x": 553,
+            "y": 857,
+            "w": 12,
+            "h": 10
+          },
+          "confidence": 0.8385181818181818,
+          "value": true,
+          "labelTokenIds": [
+            "t-001-000094"
+          ],
+          "notes": [
+            "strong_label_match"
+          ]
+        },
+        {
+          "regionId": "chk-001-0016",
+          "type": "checkbox",
+          "bbox": {
+            "x": 476,
+            "y": 875,
+            "w": 15,
+            "h": 14
+          },
+          "confidence": 0.8480603896103897,
+          "value": true,
+          "labelTokenIds": [
+            "t-001-000096",
+            "t-001-000097",
+            "t-001-000098"
+          ],
+          "notes": [
+            "strong_label_match"
+          ]
+        },
+        {
+          "regionId": "chk-001-0017",
+          "type": "checkbox",
+          "bbox": {
+            "x": 454,
+            "y": 881,
+            "w": 20,
+            "h": 17
+          },
+          "confidence": 0.7954152406417112,
+          "value": true,
+          "labelTokenIds": [
+            "t-001-000096",
+            "t-001-000097"
+          ],
+          "notes": [
+            "strong_label_match"
+          ]
+        },
+        {
+          "regionId": "chk-001-0018",
+          "type": "checkbox",
+          "bbox": {
+            "x": 516,
+            "y": 900,
+            "w": 15,
+            "h": 17
+          },
+          "confidence": 0.8798203208556149,
+          "value": true,
+          "labelTokenIds": [
+            "t-001-000100"
+          ],
+          "notes": [
+            "strong_label_match"
+          ]
+        },
+        {
+          "regionId": "chk-001-0019",
+          "type": "checkbox",
+          "bbox": {
+            "x": 502,
+            "y": 905,
+            "w": 12,
+            "h": 16
+          },
+          "confidence": 0.7851545454545454,
+          "value": true,
+          "labelTokenIds": [
+            "t-001-000100"
+          ],
+          "notes": [
+            "strong_label_match"
+          ]
+        },
+        {
+          "regionId": "chk-001-0020",
+          "type": "checkbox",
+          "bbox": {
+            "x": 708,
+            "y": 906,
+            "w": 14,
+            "h": 12
+          },
+          "confidence": 0.8229034632034632,
+          "value": true,
+          "labelTokenIds": [
+            "t-001-000101"
+          ],
+          "notes": [
+            "strong_label_match"
+          ]
+        },
+        {
+          "regionId": "chk-001-0021",
+          "type": "checkbox",
+          "bbox": {
+            "x": 494,
+            "y": 972,
+            "w": 15,
+            "h": 16
+          },
+          "confidence": 0.8369727272727273,
+          "value": true,
+          "labelTokenIds": [
+            "t-001-000102"
+          ],
+          "notes": [
+            "strong_label_match"
+          ]
+        },
+        {
+          "regionId": "chk-001-0022",
+          "type": "checkbox",
+          "bbox": {
+            "x": 698,
+            "y": 1078,
+            "w": 22,
+            "h": 19
+          },
+          "confidence": 0.745121378860374,
+          "value": true,
+          "labelTokenIds": [
+            "t-001-000122"
+          ],
+          "notes": [
+            "strong_label_match"
+          ]
+        },
+        {
+          "regionId": "chk-001-0023",
+          "type": "checkbox",
+          "bbox": {
+            "x": 372,
+            "y": 1154,
+            "w": 13,
+            "h": 13
+          },
+          "confidence": 0.8852567509413664,
+          "value": true,
+          "labelTokenIds": [
+            "t-001-000125",
+            "t-001-000126"
+          ],
+          "notes": [
+            "strong_label_match"
+          ]
+        },
+        {
+          "regionId": "chk-001-0024",
+          "type": "checkbox",
+          "bbox": {
+            "x": 384,
+            "y": 1161,
+            "w": 19,
+            "h": 15
+          },
+          "confidence": 0.8256601275917066,
+          "value": true,
+          "labelTokenIds": [
+            "t-001-000125",
+            "t-001-000126"
+          ],
+          "notes": [
+            "strong_label_match"
+          ]
+        }
+      ],
+      "pageWords": [
+        "$100.00",
+        "$150.00",
+        "$2,250.00",
+        "$2,500.00",
+        "$250.00",
+        "$420.00",
+        "$5,250.00",
+        "$5,670.00",
+        "$500.00",
+        "$900.00",
+        "(555)",
+        "-",
+        ".",
+        "/",
+        "00%",
+        "05/30/2024",
+        "06/07/2024",
+        "1",
+        "10",
+        "11",
+        "123",
+        "123- 4567",
+        "123456",
+        "15",
+        "30",
+        "456",
+        "5",
+        "54321",
+        "5}",
+        "789",
+        "987- 6543",
+        "98765",
+        ";hlp",
+        ">",
+        "ABC- 100",
+        "ACME",
+        "address",
+        "Adjustable",
+        "Bivd,",
+        "Blvd,",
+        "by",
+        "Chair",
+        "Commerce",
+        "CORPORATION",
+        "date.",
+        "Date:",
+        "DEF- 200",
+        "Deliver",
+        "Description",
+        "Desk",
+        "Docking",
+        "Doe",
+        "Due",
+        "Ergonomic",
+        "goods",
+        "Grand",
+        "Height:",
+        "Inc.",
+        "Include",
+        "Industrial",
+        "instructions:",
+        "Items:",
+        "Jane",
+        "John",
+        "Laptop",
+        "Manager",
+        "Megkt:inssuppliier.com",
+        "Metroplis,",
+        "Metrroplis,",
+        "Michael",
+        "msherwood@acme.com",
+        "Net",
+        "Notes",
+        "Number:",
+        "Office",
+        "ORDER",
+        "packing",
+        "Phone:",
+        "Pnait",
+        "PO",
+        "Procurement",
+        "PURCHASE",
+        "Qty",
+        "Rate:",
+        "Rd",
+        "Requester",
+        "Sherwood",
+        "shipment.",
+        "shipping",
+        "SKU",
+        "slip",
+        "Smith",
+        "Springfiled,",
+        "Station",
+        "Subtotal:",
+        "Suite",
+        "Supplier",
+        "Tax",
+        "Tax:",
+        "Terms:",
+        "the",
+        "to",
+        "To:",
+        "Total",
+        "Total:",
+        "Ttom",
+        "UnitPrice",
+        "USA,",
+        "Vendor",
+        "with",
+        "XYZ- 300"
+      ],
+      "unassignedTokenIds": [],
+      "artifacts": {
+        "pageImageRef": "C:\\Users\\MJR19\\source\\repos\\OCR\\src\\Ocr.TestHarness.Wpf\\bin\\Debug\\net10.0-windows\\output\\Form with Rows of data_20260318_213215\\page_1_preprocessed.png",
+        "debugOverlayRef": "C:\\Users\\MJR19\\source\\repos\\OCR\\src\\Ocr.TestHarness.Wpf\\bin\\Debug\\net10.0-windows\\output\\Form with Rows of data_20260318_213215\\page_1_tokens_overlay.png"
+      }
+    }
+  ],
+  "recognition": {
+    "documentType": {
+      "name": null,
+      "version": null,
+      "confidence": 0.0
+    },
+    "anchors": {
+      "matchedAnchors": [],
+      "unmatchedAnchors": []
+    },
+    "fields": [
+      {
+        "fieldId": "123_commerce_bivd",
+        "label": "123 Commerce Bivd",
+        "type": "string",
+        "value": "Metroplis, USA, 98765 Due Date: 06/07/2024",
+        "normalized": {
+          "type": "string",
+          "value": "Metroplis, USA, 98765 Due Date: 06/07/2024",
+          "currency": null,
+          "unit": null
+        },
+        "confidence": 0.8574085763295491,
+        "isLowConfidence": false,
+        "source": {
+          "pageIndex": 1,
+          "bbox": {
+            "x": 39,
+            "y": 163,
+            "w": 766,
+            "h": 42
+          },
+          "tokenIds": [
+            "t-001-000009",
+            "t-001-000010",
+            "t-001-000011",
+            "t-001-000015",
+            "t-001-000016",
+            "t-001-000017",
+            "t-001-000018",
+            "t-001-000019",
+            "t-001-000020"
+          ],
+          "method": "ocr+layout"
+        },
+        "validation": {
+          "rulesApplied": [
+            "non_empty_value",
+            "basic_normalization",
+            "spatial_pairing"
+          ],
+          "validated": true,
+          "issues": []
+        },
+        "review": {
+          "needsReview": false,
+          "reason": null
+        }
+      },
+      {
+        "fieldId": "acme",
+        "label": "ACME",
+        "type": "string",
+        "value": "PURCHASE ORDER",
+        "normalized": {
+          "type": "string",
+          "value": "PURCHASE ORDER",
+          "currency": null,
+          "unit": null
+        },
+        "confidence": 0.8256424703598023,
+        "isLowConfidence": false,
+        "source": {
+          "pageIndex": 1,
+          "bbox": {
+            "x": 8,
+            "y": 36,
+            "w": 791,
+            "h": 43
+          },
+          "tokenIds": [
+            "t-001-000001",
+            "t-001-000002",
+            "t-001-000003",
+            "t-001-000004"
+          ],
+          "method": "ocr+layout"
+        },
+        "validation": {
+          "rulesApplied": [
+            "non_empty_value",
+            "basic_normalization",
+            "spatial_pairing"
+          ],
+          "validated": true,
+          "issues": []
+        },
+        "review": {
+          "needsReview": false,
+          "reason": null
+        }
+      },
+      {
+        "fieldId": "def_200_ergonomic_office_chair",
+        "label": "DEF 200 Ergonomic Office Chair",
+        "type": "string",
+        "value": "15 11, 15",
+        "normalized": {
+          "type": "string",
+          "value": "15 11, 15",
+          "currency": null,
+          "unit": null
+        },
+        "confidence": 0.859658766895641,
+        "isLowConfidence": false,
+        "source": {
+          "pageIndex": 1,
+          "bbox": {
+            "x": 369,
+            "y": 730,
+            "w": 213,
+            "h": 23
+          },
+          "tokenIds": [
+            "t-001-000082",
+            "t-001-000083"
+          ],
+          "method": "ocr+layout"
+        },
+        "validation": {
+          "rulesApplied": [
+            "region_grouping",
+            "checked_option_selection",
+            "basic_normalization"
+          ],
+          "validated": true,
+          "issues": []
+        },
+        "review": {
+          "needsReview": false,
+          "reason": null
+        }
+      },
+      {
+        "fieldId": "deliver_goods_to_the_shipping_address_by_the_due_date_include_packing_slip_with_shipment",
+        "label": "Deliver goods to the shipping address by the due date Include packing slip with shipment",
+        "type": "string",
+        "value": "shipment.",
+        "normalized": {
+          "type": "string",
+          "value": "shipment.",
+          "currency": null,
+          "unit": null
+        },
+        "confidence": 0.8157152833709118,
+        "isLowConfidence": false,
+        "source": {
+          "pageIndex": 1,
+          "bbox": {
+            "x": 698,
+            "y": 1057,
+            "w": 110,
+            "h": 40
+          },
+          "tokenIds": [
+            "t-001-000122"
+          ],
+          "method": "ocr+layout"
+        },
+        "validation": {
+          "rulesApplied": [
+            "region_grouping",
+            "checked_option_selection",
+            "basic_normalization"
+          ],
+          "validated": true,
+          "issues": []
+        },
+        "review": {
+          "needsReview": false,
+          "reason": null
+        }
+      },
+      {
+        "fieldId": "grand_total",
+        "label": "Grand Total",
+        "type": "currency",
+        "value": 5670.00,
+        "normalized": {
+          "type": "currency",
+          "value": 5670.00,
+          "currency": "$",
+          "unit": null
+        },
+        "confidence": 0.908237829208374,
+        "isLowConfidence": false,
+        "source": {
+          "pageIndex": 1,
+          "bbox": {
+            "x": 537,
+            "y": 956,
+            "w": 265,
+            "h": 19
+          },
+          "tokenIds": [
+            "t-001-000102",
+            "t-001-000103",
+            "t-001-000104"
+          ],
+          "method": "ocr+regex"
+        },
+        "validation": {
+          "rulesApplied": [
+            "non_empty_value",
+            "basic_normalization",
+            "confidence_threshold"
+          ],
+          "validated": true,
+          "issues": []
+        },
+        "review": {
+          "needsReview": false,
+          "reason": null
+        }
+      },
+      {
+        "fieldId": "items",
+        "label": "Items",
+        "type": "string",
+        "value": "Qty UnitPrice Total",
+        "normalized": {
+          "type": "string",
+          "value": "Qty UnitPrice Total",
+          "currency": null,
+          "unit": null
+        },
+        "confidence": 0.862370635986328,
+        "isLowConfidence": false,
+        "source": {
+          "pageIndex": 1,
+          "bbox": {
+            "x": 30,
+            "y": 608,
+            "w": 770,
+            "h": 27
+          },
+          "tokenIds": [
+            "t-001-000059",
+            "t-001-000060",
+            "t-001-000061",
+            "t-001-000062"
+          ],
+          "method": "ocr+layout"
+        },
+        "validation": {
+          "rulesApplied": [
+            "non_empty_value",
+            "basic_normalization",
+            "spatial_pairing"
+          ],
+          "validated": true,
+          "issues": []
+        },
+        "review": {
+          "needsReview": false,
+          "reason": null
+        }
+      },
+      {
+        "fieldId": "metroplis_usa_98765_due_date",
+        "label": "Metroplis USA 98765 Due Date",
+        "type": "date",
+        "value": "06/07/2024",
+        "normalized": {
+          "type": "date",
+          "value": "2024-06-07",
+          "currency": null,
+          "unit": null
+        },
+        "confidence": 0.9032129402160645,
+        "isLowConfidence": false,
+        "source": {
+          "pageIndex": 1,
+          "bbox": {
+            "x": 39,
+            "y": 182,
+            "w": 766,
+            "h": 23
+          },
+          "tokenIds": [
+            "t-001-000015",
+            "t-001-000016",
+            "t-001-000017",
+            "t-001-000018",
+            "t-001-000019",
+            "t-001-000020"
+          ],
+          "method": "ocr+layout"
+        },
+        "validation": {
+          "rulesApplied": [
+            "non_empty_value",
+            "basic_normalization",
+            "spatial_pairing"
+          ],
+          "validated": true,
+          "issues": []
+        },
+        "review": {
+          "needsReview": false,
+          "reason": null
+        }
+      },
+      {
+        "fieldId": "michael_sherwood",
+        "label": "Michael Sherwood",
+        "type": "string",
+        "value": "Jane Doe, Jane Doe",
+        "normalized": {
+          "type": "string",
+          "value": "Jane Doe, Jane Doe",
+          "currency": null,
+          "unit": null
+        },
+        "confidence": 0.8764597406839454,
+        "isLowConfidence": false,
+        "source": {
+          "pageIndex": 1,
+          "bbox": {
+            "x": 372,
+            "y": 1148,
+            "w": 172,
+            "h": 28
+          },
+          "tokenIds": [
+            "t-001-000125",
+            "t-001-000126"
+          ],
+          "method": "ocr+layout"
+        },
+        "validation": {
+          "rulesApplied": [
+            "region_grouping",
+            "checked_option_selection",
+            "basic_normalization"
+          ],
+          "validated": true,
+          "issues": []
+        },
+        "review": {
+          "needsReview": false,
+          "reason": null
+        }
+      },
+      {
+        "fieldId": "phone",
+        "label": "Phone",
+        "type": "string",
+        "value": "(555) 987- 6543",
+        "normalized": {
+          "type": "string",
+          "value": "(555) 987- 6543",
+          "currency": null,
+          "unit": null
+        },
+        "confidence": 0.8718839302062987,
+        "isLowConfidence": false,
+        "source": {
+          "pageIndex": 1,
+          "bbox": {
+            "x": 31,
+            "y": 565,
+            "w": 195,
+            "h": 18
+          },
+          "tokenIds": [
+            "t-001-000056",
+            "t-001-000057",
+            "t-001-000058"
+          ],
+          "method": "ocr+layout"
+        },
+        "validation": {
+          "rulesApplied": [
+            "non_empty_value",
+            "basic_normalization",
+            "confidence_threshold"
+          ],
+          "validated": true,
+          "issues": []
+        },
+        "review": {
+          "needsReview": false,
+          "reason": null
+        }
+      },
+      {
+        "fieldId": "sku",
+        "label": "SKU",
+        "type": "string",
+        "value": "Description",
+        "normalized": {
+          "type": "string",
+          "value": "Description",
+          "currency": null,
+          "unit": null
+        },
+        "confidence": 0.7253971333162808,
+        "isLowConfidence": true,
+        "source": {
+          "pageIndex": 1,
+          "bbox": {
+            "x": 79,
+            "y": 654,
+            "w": 129,
+            "h": 20
+          },
+          "tokenIds": [
+            "t-001-000064"
+          ],
+          "method": "ocr+layout"
+        },
+        "validation": {
+          "rulesApplied": [
+            "region_grouping",
+            "checked_option_selection",
+            "basic_normalization"
+          ],
+          "validated": true,
+          "issues": []
+        },
+        "review": {
+          "needsReview": true,
+          "reason": "low_confidence"
+        }
+      },
+      {
+        "fieldId": "sku_description",
+        "label": "SKU Description",
+        "type": "string",
+        "value": "Qty, Qty",
+        "normalized": {
+          "type": "string",
+          "value": "Qty, Qty",
+          "currency": null,
+          "unit": null
+        },
+        "confidence": 0.8534665887853681,
+        "isLowConfidence": false,
+        "source": {
+          "pageIndex": 1,
+          "bbox": {
+            "x": 437,
+            "y": 650,
+            "w": 81,
+            "h": 24
+          },
+          "tokenIds": [
+            "t-001-000065"
+          ],
+          "method": "ocr+layout"
+        },
+        "validation": {
+          "rulesApplied": [
+            "region_grouping",
+            "checked_option_selection",
+            "basic_normalization"
+          ],
+          "validated": true,
+          "issues": []
+        },
+        "review": {
+          "needsReview": false,
+          "reason": null
+        }
+      },
+      {
+        "fieldId": "subtotal",
+        "label": "Subtotal",
+        "type": "currency",
+        "value": 5250.00,
+        "normalized": {
+          "type": "currency",
+          "value": 5250.00,
+          "currency": "$",
+          "unit": null
+        },
+        "confidence": 0.8762637100219727,
+        "isLowConfidence": false,
+        "source": {
+          "pageIndex": 1,
+          "bbox": {
+            "x": 571,
+            "y": 837,
+            "w": 230,
+            "h": 28
+          },
+          "tokenIds": [
+            "t-001-000094",
+            "t-001-000095"
+          ],
+          "method": "ocr+layout"
+        },
+        "validation": {
+          "rulesApplied": [
+            "non_empty_value",
+            "basic_normalization",
+            "confidence_threshold"
+          ],
+          "validated": true,
+          "issues": []
+        },
+        "review": {
+          "needsReview": false,
+          "reason": null
+        }
+      },
+      {
+        "fieldId": "tax",
+        "label": "Tax",
+        "type": "currency",
+        "value": "$420.00",
+        "normalized": {
+          "type": "currency",
+          "value": 420.00,
+          "currency": "$",
+          "unit": null
+        },
+        "confidence": 0.8638360110275467,
+        "isLowConfidence": false,
+        "source": {
+          "pageIndex": 1,
+          "bbox": {
+            "x": 708,
+            "y": 906,
+            "w": 94,
+            "h": 27
+          },
+          "tokenIds": [
+            "t-001-000101"
+          ],
+          "method": "ocr+layout"
+        },
+        "validation": {
+          "rulesApplied": [
+            "region_grouping",
+            "checked_option_selection",
+            "basic_normalization"
+          ],
+          "validated": true,
+          "issues": []
+        },
+        "review": {
+          "needsReview": false,
+          "reason": null
+        }
+      },
+      {
+        "fieldId": "tax_rate",
+        "label": "Tax Rate",
+        "type": "string",
+        "value": "00% $900.00",
+        "normalized": {
+          "type": "string",
+          "value": "00% $900.00",
+          "currency": null,
+          "unit": null
+        },
+        "confidence": 0.722117431640625,
+        "isLowConfidence": true,
+        "source": {
+          "pageIndex": 1,
+          "bbox": {
+            "x": 532,
+            "y": 879,
+            "w": 269,
+            "h": 16
+          },
+          "tokenIds": [
+            "t-001-000096",
+            "t-001-000097",
+            "t-001-000098",
+            "t-001-000099"
+          ],
+          "method": "ocr+layout"
+        },
+        "validation": {
+          "rulesApplied": [
+            "non_empty_value",
+            "basic_normalization",
+            "spatial_pairing"
+          ],
+          "validated": true,
+          "issues": []
+        },
+        "review": {
+          "needsReview": true,
+          "reason": "low_confidence"
+        }
+      },
+      {
+        "fieldId": "xyz_300_laptop_docking_station",
+        "label": "XYZ 300 Laptop Docking Station",
+        "type": "string",
+        "value": "5} 5, 5} 5",
+        "normalized": {
+          "type": "string",
+          "value": "5} 5, 5} 5",
+          "currency": null,
+          "unit": null
+        },
+        "confidence": 0.7927343182629376,
+        "isLowConfidence": true,
+        "source": {
+          "pageIndex": 1,
+          "bbox": {
+            "x": 438,
+            "y": 768,
+            "w": 140,
+            "h": 27
+          },
+          "tokenIds": [
+            "t-001-000090",
+            "t-001-000091"
+          ],
+          "method": "ocr+layout"
+        },
+        "validation": {
+          "rulesApplied": [
+            "region_grouping",
+            "checked_option_selection",
+            "basic_normalization"
+          ],
+          "validated": true,
+          "issues": []
+        },
+        "review": {
+          "needsReview": false,
+          "reason": null
+        }
+      },
+      {
+        "fieldId": "xyz_300_laptop_docking_station_5",
+        "label": "XYZ 300 Laptop Docking Station 5",
+        "type": "string",
+        "value": "5 $100.00",
+        "normalized": {
+          "type": "string",
+          "value": "5 $100.00",
+          "currency": null,
+          "unit": null
+        },
+        "confidence": 0.7408633904474432,
+        "isLowConfidence": true,
+        "source": {
+          "pageIndex": 1,
+          "bbox": {
+            "x": 525,
+            "y": 769,
+            "w": 155,
+            "h": 19
+          },
+          "tokenIds": [
+            "t-001-000091",
+            "t-001-000092"
+          ],
+          "method": "ocr+layout"
+        },
+        "validation": {
+          "rulesApplied": [
+            "region_grouping",
+            "checked_option_selection",
+            "basic_normalization"
+          ],
+          "validated": true,
+          "issues": []
+        },
+        "review": {
+          "needsReview": true,
+          "reason": "low_confidence"
+        }
+      }
+    ],
+    "tableMappings": []
+  },
+  "review": {
+    "required": false,
+    "reviewedBy": null,
+    "reviewedUtc": null,
+    "changes": []
+  },
+  "warnings": [
+    {
+      "code": "ambiguous_label_value_pairing",
+      "severity": "warning",
+      "message": "Page 1 had 8 overlapping key-value candidates; strongest retained.",
+      "pageIndex": 1,
+      "details": {}
+    },
+    {
+      "code": "deskew_rejected_low_confidence",
+      "severity": "warning",
+      "message": "Page 1 detected candidate deskew angle -40.00 but confidence 0.013 was too low to apply.",
+      "pageIndex": 1,
+      "details": {
+        "detectedDegrees": -40.0,
+        "detectedConfidence": 0.01291035171151065
+      }
+    },
+    {
+      "code": "region_detection_stats",
+      "severity": "info",
+      "message": "Page 1 region detection: raw=1743, geometry=135, label=24, finalCheckbox=24, finalRadio=0.",
+      "pageIndex": 1,
+      "details": {
+        "rawCandidateCount": 1743,
+        "geometryFilteredCount": 135,
+        "labelFilteredCount": 24,
+        "finalCheckboxCount": 24,
+        "finalRadioCount": 0
+      }
+    },
+    {
+      "code": "token_cleanup_stats",
+      "severity": "info",
+      "message": "Page 1 token cleanup: original=129, modified=5, removed=0, split=0, checkboxArtifactsRemoved=0, underlineArtifactsRemoved=0, dictionaryCorrections=0.",
+      "pageIndex": 1,
+      "details": {
+        "tokensOriginal": 129,
+        "tokensModified": 5,
+        "tokensRemoved": 0,
+        "tokensSplit": 0,
+        "checkboxArtifactsRemoved": 0,
+        "underlineArtifactsRemoved": 0,
+        "dictionaryCorrections": 0
+      }
+    },
+    {
+      "code": "ambiguous_region_label_association",
+      "severity": "warning",
+      "message": "Page 1 region chk-001-0015 had ambiguous group label.",
+      "pageIndex": 1,
+      "details": {}
+    },
+    {
+      "code": "ambiguous_region_label_association",
+      "severity": "warning",
+      "message": "Page 1 region chk-001-0016 had ambiguous group label.",
+      "pageIndex": 1,
+      "details": {}
+    },
+    {
+      "code": "ambiguous_region_label_association",
+      "severity": "warning",
+      "message": "Page 1 region chk-001-0017 had ambiguous group label.",
+      "pageIndex": 1,
+      "details": {}
+    },
+    {
+      "code": "ambiguous_region_label_association",
+      "severity": "warning",
+      "message": "Page 1 region chk-001-0018 had ambiguous group label.",
+      "pageIndex": 1,
+      "details": {}
+    },
+    {
+      "code": "ambiguous_region_label_association",
+      "severity": "warning",
+      "message": "Page 1 region chk-001-0019 had ambiguous group label.",
+      "pageIndex": 1,
+      "details": {}
+    },
+    {
+      "code": "ambiguous_region_label_association",
+      "severity": "warning",
+      "message": "Page 1 region chk-001-0021 had ambiguous group label.",
+      "pageIndex": 1,
+      "details": {}
+    }
+  ],
+  "errors": [],
+  "documentWords": [
+    "$100.00",
+    "$150.00",
+    "$2,250.00",
+    "$2,500.00",
+    "$250.00",
+    "$420.00",
+    "$5,250.00",
+    "$5,670.00",
+    "$500.00",
+    "$900.00",
+    "(555)",
+    "-",
+    ".",
+    "/",
+    "00%",
+    "05/30/2024",
+    "06/07/2024",
+    "1",
+    "10",
+    "11",
+    "123",
+    "123- 4567",
+    "123456",
+    "15",
+    "30",
+    "456",
+    "5",
+    "54321",
+    "5}",
+    "789",
+    "987- 6543",
+    "98765",
+    ";hlp",
+    ">",
+    "ABC- 100",
+    "ACME",
+    "address",
+    "Adjustable",
+    "Bivd,",
+    "Blvd,",
+    "by",
+    "Chair",
+    "Commerce",
+    "CORPORATION",
+    "date.",
+    "Date:",
+    "DEF- 200",
+    "Deliver",
+    "Description",
+    "Desk",
+    "Docking",
+    "Doe",
+    "Due",
+    "Ergonomic",
+    "goods",
+    "Grand",
+    "Height:",
+    "Inc.",
+    "Include",
+    "Industrial",
+    "instructions:",
+    "Items:",
+    "Jane",
+    "John",
+    "Laptop",
+    "Manager",
+    "Megkt:inssuppliier.com",
+    "Metroplis,",
+    "Metrroplis,",
+    "Michael",
+    "msherwood@acme.com",
+    "Net",
+    "Notes",
+    "Number:",
+    "Office",
+    "ORDER",
+    "packing",
+    "Phone:",
+    "Pnait",
+    "PO",
+    "Procurement",
+    "PURCHASE",
+    "Qty",
+    "Rate:",
+    "Rd",
+    "Requester",
+    "Sherwood",
+    "shipment.",
+    "shipping",
+    "SKU",
+    "slip",
+    "Smith",
+    "Springfiled,",
+    "Station",
+    "Subtotal:",
+    "Suite",
+    "Supplier",
+    "Tax",
+    "Tax:",
+    "Terms:",
+    "the",
+    "to",
+    "To:",
+    "Total",
+    "Total:",
+    "Ttom",
+    "UnitPrice",
+    "USA,",
+    "Vendor",
+    "with",
+    "XYZ- 300"
+  ],
+  "extensions": {
+    "tessdataPath": "C:\\Users\\MJR19\\source\\repos\\OCR\\src\\Ocr.TestHarness.Wpf\\bin\\Debug\\net10.0-windows\\tessdata",
+    "optionSnapshot": {
+      "targetDpi": 300,
+      "language": "eng",
+      "pageSegMode": null,
+      "engineMode": null,
+      "preserveInterwordSpaces": true,
+      "saveTokenOverlay": true,
+      "enableNoiseFiltering": false,
+      "enableDeskew": true,
+      "maxDeskewDegrees": 40.0,
+      "deskewAngleStep": 0.5,
+      "minDeskewConfidence": 0.15,
+      "enableDenoise": false,
+      "denoiseMethod": "median",
+      "denoiseKernel": 3,
+      "enableBinarization": false,
+      "binarizationMethod": "otsu",
+      "enableContrastEnhancement": false,
+      "contrastMethod": "clahe",
+      "saveJsonToDisk": true,
+      "outputFolder": null,
+      "saveDebugArtifacts": true,
+      "profileName": "default"
+    },
+    "pagePreprocessing": [
+      {
+        "pageIndex": 1,
+        "deskewAttempted": true,
+        "deskewApplied": false,
+        "detectedDegrees": -40.0,
+        "detectedConfidence": 0.01291035171151065,
+        "appliedDegrees": 0.0
+      }
+    ],
+    "debugArtifactPaths": [
+      {
+        "pageIndex": 1,
+        "originalOrRenderPath": "C:\\Users\\MJR19\\source\\repos\\OCR\\src\\Ocr.TestHarness.Wpf\\bin\\Debug\\net10.0-windows\\output\\Form with Rows of data_20260318_213215\\page_1_original_or_render.png",
+        "grayPath": "C:\\Users\\MJR19\\source\\repos\\OCR\\src\\Ocr.TestHarness.Wpf\\bin\\Debug\\net10.0-windows\\output\\Form with Rows of data_20260318_213215\\page_1_gray.png",
+        "preprocessedPath": "C:\\Users\\MJR19\\source\\repos\\OCR\\src\\Ocr.TestHarness.Wpf\\bin\\Debug\\net10.0-windows\\output\\Form with Rows of data_20260318_213215\\page_1_preprocessed.png",
+        "tokenOverlayPath": "C:\\Users\\MJR19\\source\\repos\\OCR\\src\\Ocr.TestHarness.Wpf\\bin\\Debug\\net10.0-windows\\output\\Form with Rows of data_20260318_213215\\page_1_tokens_overlay.png",
+        "lineOverlayPath": "C:\\Users\\MJR19\\source\\repos\\OCR\\src\\Ocr.TestHarness.Wpf\\bin\\Debug\\net10.0-windows\\output\\Form with Rows of data_20260318_213215\\page_1_lines_overlay.png",
+        "blockOverlayPath": "C:\\Users\\MJR19\\source\\repos\\OCR\\src\\Ocr.TestHarness.Wpf\\bin\\Debug\\net10.0-windows\\output\\Form with Rows of data_20260318_213215\\page_1_blocks_overlay.png",
+        "tableOverlayPath": "C:\\Users\\MJR19\\source\\repos\\OCR\\src\\Ocr.TestHarness.Wpf\\bin\\Debug\\net10.0-windows\\output\\Form with Rows of data_20260318_213215\\page_1_table_overlay.png",
+        "regionOverlayPath": "C:\\Users\\MJR19\\source\\repos\\OCR\\src\\Ocr.TestHarness.Wpf\\bin\\Debug\\net10.0-windows\\output\\Form with Rows of data_20260318_213215\\page_1_regions_overlay.png"
+      }
+    ],
+    "pageNoiseDiagnostics": [
+      {
+        "pageIndex": 1,
+        "totalTokenCount": 129,
+        "lowConfidenceTokenCount": 18,
+        "tinyTokenCount": 2,
+        "symbolLikeTokenCount": 4,
+        "suspectedDecorativeNoiseCount": 0,
+        "suspectedDecorativeNoiseRatio": 0.0
+      }
+    ],
+    "lineReconstructionDiagnostics": [
+      {
+        "pageIndex": 1,
+        "originalLineCount": 32,
+        "reconstructedLineCount": 28,
+        "tokensAssigned": 129,
+        "successful": true
+      }
+    ],
+    "tokenCleanupStats": [
+      {
+        "pageIndex": 1,
+        "tokensOriginal": 129,
+        "tokensModified": 5,
+        "tokensRemoved": 0,
+        "tokensSplit": 0,
+        "checkboxArtifactsRemoved": 0,
+        "underlineArtifactsRemoved": 0,
+        "dictionaryCorrections": 0,
+        "tokensCleaned": 129
+      }
+    ],
+    "filteredTokenIds": [],
+    "fieldExtractionDiagnostics": [
+      {
+        "pageIndex": 1,
+        "candidateCount": 30,
+        "promotedFieldCount": 16,
+        "ambiguousCandidateCount": 8
+      }
+    ],
+    "structuredFieldExtractionStats": {
+      "pagesProcessed": 1,
+      "keyValueCandidateCount": 25,
+      "promotedFieldCount": 13,
+      "checkboxDerivedFieldCount": 8
+    },
+    "pipelineStageTimings": [
+      {
+        "stageName": "Input/Load",
+        "durationMs": 1,
+        "status": "completed",
+        "note": null
+      },
+      {
+        "stageName": "Render",
+        "durationMs": 57,
+        "status": "completed",
+        "note": null
+      },
+      {
+        "stageName": "Preprocess [Page 1]",
+        "durationMs": 546,
+        "status": "completed",
+        "note": null
+      },
+      {
+        "stageName": "OCR Extraction [Page 1]",
+        "durationMs": 531,
+        "status": "completed",
+        "note": null
+      },
+      {
+        "stageName": "Layout Analysis [Page 1]",
+        "durationMs": 12,
+        "status": "completed",
+        "note": null
+      },
+      {
+        "stageName": "Token Cleanup [Page 1]",
+        "durationMs": 0,
+        "status": "completed",
+        "note": "Token cleanup is executed inside the layout analysis stage."
+      },
+      {
+        "stageName": "Line Reconstruction [Page 1]",
+        "durationMs": 0,
+        "status": "completed",
+        "note": "Line reconstruction is executed inside the layout analysis stage."
+      },
+      {
+        "stageName": "Table Detection [Page 1]",
+        "durationMs": 10,
+        "status": "completed",
+        "note": null
+      },
+      {
+        "stageName": "Region Detection [Page 1]",
+        "durationMs": 71,
+        "status": "completed",
+        "note": null
+      },
+      {
+        "stageName": "Structured Field Extraction [Page 1]",
+        "durationMs": 1,
+        "status": "completed",
+        "note": null
+      },
+      {
+        "stageName": "Structured Field Extraction",
+        "durationMs": 0,
+        "status": "completed",
+        "note": null
+      },
+      {
+        "stageName": "Structured Field Extraction (Additive)",
+        "durationMs": 1,
+        "status": "completed",
+        "note": null
+      }
+    ]
+  }
+}
