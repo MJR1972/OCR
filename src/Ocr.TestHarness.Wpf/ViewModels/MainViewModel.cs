@@ -83,7 +83,7 @@ public sealed class MainViewModel : ViewModelBase
     private int? _pageSegMode;
     private int? _engineMode;
     private bool _preserveInterwordSpaces = true;
-    private bool _saveTokenOverlay;
+    private bool _saveTokenOverlay = true;
     private bool _enableDeskew = true;
     private double _maxDeskewDegrees = 40.0;
     private double _deskewAngleStep = 0.5;
@@ -97,7 +97,7 @@ public sealed class MainViewModel : ViewModelBase
     private string _contrastMethod = "clahe";
     private bool _saveJsonToDisk = true;
     private string _outputFolder = string.Empty;
-    private bool _saveDebugArtifacts;
+    private bool _saveDebugArtifacts = true;
     private bool _enableNoiseFiltering;
     private string _profileName = "default";
     private readonly Dictionary<int, PageArtifactSet> _previewArtifactsByPage = [];
@@ -1896,6 +1896,7 @@ public sealed class MainViewModel : ViewModelBase
     private void PopulatePreviewArtifacts(string json)
     {
         _previewArtifactsByPage.Clear();
+        SelectedPreviewPage = 0;
         PreviewPages.Clear();
         PreviewImage = null;
         VisiblePreviewOverlayItems.Clear();
@@ -1989,6 +1990,10 @@ public sealed class MainViewModel : ViewModelBase
             {
                 SelectedPreviewPage = PreviewPages[0];
                 UpdatePreviewImage();
+            }
+            else
+            {
+                SelectedPreviewPage = 0;
             }
         }
         catch
