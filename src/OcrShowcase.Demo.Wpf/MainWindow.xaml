@@ -386,42 +386,91 @@
                                        Foreground="{StaticResource TextSecondaryBrush}" />
                         </StackPanel>
 
-                        <StackPanel Grid.Column="1"
-                                    Orientation="Horizontal"
-                                    VerticalAlignment="Center">
-                            <CheckBox Content="Show Words"
-                                      IsChecked="{Binding ShowWordOverlays}"
-                                      Style="{StaticResource PreviewToggleStyle}" />
-                            <CheckBox Content="Show Fields"
-                                      IsChecked="{Binding ShowFieldOverlays}"
-                                      Style="{StaticResource PreviewToggleStyle}" />
-                            <CheckBox Content="Show Tables"
-                                      IsChecked="{Binding ShowTableOverlays}"
-                                      Style="{StaticResource PreviewToggleStyle}" />
-                            <Button Content="-"
-                                    Command="{Binding ZoomOutCommand}"
-                                    Style="{StaticResource SecondaryToolbarButtonStyle}"
-                                    MinWidth="36"
-                                    Padding="8,6"
-                                    Margin="6,0,8,0" />
-                            <TextBlock Text="{Binding PreviewZoomText}"
+                        <Grid Grid.Column="1"
+                              VerticalAlignment="Center">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Grid.Row="0"
+                                        Orientation="Horizontal"
+                                        HorizontalAlignment="Right"
+                                        Margin="0,0,0,8">
+                                <TextBlock Text="Page"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,8,0"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextSecondaryBrush}" />
+                                <Button Content="&#x2039;"
+                                        Command="{Binding PreviousPreviewPageCommand}"
+                                        Style="{StaticResource SecondaryToolbarButtonStyle}"
+                                        MinWidth="34"
+                                        Padding="7,6"
+                                        Margin="0,0,6,0" />
+                                <ComboBox Width="88"
+                                          ItemsSource="{Binding PreviewPageNumbers}"
+                                          SelectedValuePath="."
+                                          SelectedValue="{Binding SelectedPreviewPageNumber}"
+                                          Margin="0,0,8,0"
+                                          Padding="6,4"
+                                          IsReadOnly="True"
+                                          IsEditable="False"
+                                          VerticalContentAlignment="Center" />
+                                <TextBlock Text="{Binding PreviewPageIndicator}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,8,0"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextSecondaryBrush}" />
+                                <Button Content="&#x203A;"
+                                        Command="{Binding NextPreviewPageCommand}"
+                                        Style="{StaticResource SecondaryToolbarButtonStyle}"
+                                        MinWidth="34"
+                                        Padding="7,6"
+                                        Margin="0" />
+                            </StackPanel>
+
+                            <WrapPanel Grid.Row="1"
+                                       HorizontalAlignment="Right"
                                        VerticalAlignment="Center"
-                                       FontSize="11"
-                                       FontWeight="SemiBold"
-                                       Foreground="{StaticResource TextSecondaryBrush}" />
-                            <Button Content="+"
-                                    Command="{Binding ZoomInCommand}"
-                                    Style="{StaticResource SecondaryToolbarButtonStyle}"
-                                    MinWidth="36"
-                                    Padding="8,6"
-                                    Margin="8,0,8,0" />
-                            <Button Content="Fit"
-                                    Command="{Binding FitPreviewCommand}"
-                                    Style="{StaticResource SecondaryToolbarButtonStyle}"
-                                    MinWidth="50"
-                                    Padding="10,6"
-                                    Margin="0" />
-                        </StackPanel>
+                                       ItemHeight="32">
+                                <CheckBox Content="Show Words"
+                                          IsChecked="{Binding ShowWordOverlays}"
+                                          Style="{StaticResource PreviewToggleStyle}" />
+                                <CheckBox Content="Show Fields"
+                                          IsChecked="{Binding ShowFieldOverlays}"
+                                          Style="{StaticResource PreviewToggleStyle}" />
+                                <CheckBox Content="Show Tables"
+                                          IsChecked="{Binding ShowTableOverlays}"
+                                          Style="{StaticResource PreviewToggleStyle}" />
+                                <Button Content="-"
+                                        Command="{Binding ZoomOutCommand}"
+                                        Style="{StaticResource SecondaryToolbarButtonStyle}"
+                                        MinWidth="36"
+                                        Padding="8,6"
+                                        Margin="6,0,8,0" />
+                                <TextBlock Text="{Binding PreviewZoomText}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,8,0"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextSecondaryBrush}" />
+                                <Button Content="+"
+                                        Command="{Binding ZoomInCommand}"
+                                        Style="{StaticResource SecondaryToolbarButtonStyle}"
+                                        MinWidth="36"
+                                        Padding="8,6"
+                                        Margin="0,0,8,0" />
+                                <Button Content="Fit"
+                                        Command="{Binding FitPreviewCommand}"
+                                        Style="{StaticResource SecondaryToolbarButtonStyle}"
+                                        MinWidth="50"
+                                        Padding="10,6"
+                                        Margin="0" />
+                            </WrapPanel>
+                        </Grid>
                     </Grid>
 
                     <Border Grid.Row="1"
@@ -440,8 +489,11 @@
                                        Fill="#FCFDFE" />
 
                             <Border Visibility="{Binding HasPreviewImage, Converter={StaticResource InverseBoolToVisibilityConverter}}"
-                                    Width="520"
-                                    Height="680"
+                                    Width="Auto"
+                                    Height="Auto"
+                                    MaxWidth="520"
+                                    MaxHeight="680"
+                                    Margin="40"
                                     Background="{StaticResource SurfaceBrush}"
                                     BorderBrush="{StaticResource PanelBorderBrush}"
                                     BorderThickness="1"

@@ -6,67 +6,72 @@ namespace OcrShowcase.Demo.Wpf.Services;
 
 public sealed class OverlayProjectionService : IOverlayProjectionService
 {
-    public PreviewProjectionResult BuildPreviewProjection(OcrContractRoot contract)
+    public IReadOnlyList<PreviewProjectionResult> BuildPreviewProjections(OcrContractRoot contract)
     {
-        var page = contract.Pages.OrderBy(p => p.PageIndex).FirstOrDefault();
-        if (page is null)
+        if (contract.Pages.Count == 0)
         {
-            return new PreviewProjectionResult(null, 1200, 1600, []);
+            return [new PreviewProjectionResult(1, null, 1200, 1600, [])];
         }
 
-        var width = page.Size.WidthPx > 0 ? page.Size.WidthPx : 1200;
-        var height = page.Size.HeightPx > 0 ? page.Size.HeightPx : 1600;
-        var imagePath = ResolveImagePath(contract, page);
-        var overlayItems = new List<PreviewOverlayItem>();
-
-        overlayItems.AddRange(page.Tokens
-            .Where(token => IsValid(token.Bbox))
-            .Select(token => new PreviewOverlayItem
+        return contract.Pages
+            .OrderBy(p => p.PageIndex)
+            .Select(page =>
             {
-                Kind = "Word",
-                X = token.Bbox.X,
-                Y = token.Bbox.Y,
-                Width = token.Bbox.W,
-                Height = token.Bbox.H,
-                RecognizedText = token.Text,
-                ConfidenceText = token.Confidence > 0 ? $"{token.Confidence * 100:F1}%" : null,
-                PageText = page.PageIndex > 0 ? $"Page {page.PageIndex}" : null,
-                SupportsTooltip = true
-            }));
+                var width = page.Size.WidthPx > 0 ? page.Size.WidthPx : 1200;
+                var height = page.Size.HeightPx > 0 ? page.Size.HeightPx : 1600;
+                var imagePath = ResolveImagePath(contract, page);
+                var overlayItems = new List<PreviewOverlayItem>();
 
-        // "Show Fields" intentionally represents promoted structured field regions only.
-        // Documents with zero promoted fields will therefore show no field overlays even if
-        // token boxes and table regions are available.
-        overlayItems.AddRange(contract.Recognition.Fields
-            .Where(field => field.Source.PageIndex == page.PageIndex && IsValid(field.Source.Bbox))
-            .Select(field => new PreviewOverlayItem
-            {
-                Kind = "Field",
-                X = field.Source.Bbox.X,
-                Y = field.Source.Bbox.Y,
-                Width = field.Source.Bbox.W,
-                Height = field.Source.Bbox.H,
-                Label = string.IsNullOrWhiteSpace(field.Label) ? field.FieldId : field.Label,
-                RecognizedText = field.Value?.ToString() ?? field.Normalized.Value?.ToString(),
-                ConfidenceText = field.Confidence > 0 ? $"{field.Confidence * 100:F1}%" : null,
-                PageText = field.Source.PageIndex > 0 ? $"Page {field.Source.PageIndex}" : null
-            }));
+                overlayItems.AddRange(page.Tokens
+                    .Where(token => IsValid(token.Bbox))
+                    .Select(token => new PreviewOverlayItem
+                    {
+                        Kind = "Word",
+                        X = token.Bbox.X,
+                        Y = token.Bbox.Y,
+                        Width = token.Bbox.W,
+                        Height = token.Bbox.H,
+                        RecognizedText = token.Text,
+                        ConfidenceText = token.Confidence > 0 ? $"{token.Confidence * 100:F1}%" : null,
+                        PageText = page.PageIndex > 0 ? $"Page {page.PageIndex}" : null,
+                        SupportsTooltip = true
+                    }));
 
-        overlayItems.AddRange(page.Tables
-            .Where(table => IsValid(table.Bbox))
-            .Select(table => new PreviewOverlayItem
-            {
-                Kind = "Table",
-                X = table.Bbox.X,
-                Y = table.Bbox.Y,
-                Width = table.Bbox.W,
-                Height = table.Bbox.H,
-                Label = string.IsNullOrWhiteSpace(table.TableId) ? table.Detection.Method : table.TableId,
-                ConfidenceText = table.Confidence > 0 ? $"{table.Confidence * 100:F1}%" : null,
-                PageText = page.PageIndex > 0 ? $"Page {page.PageIndex}" : null
-            }));
+                // "Show Fields" intentionally represents promoted structured field regions only.
+                // Documents with zero promoted fields will therefore show no field overlays even if
+                // token boxes and table regions are available.
+                overlayItems.AddRange(contract.Recognition.Fields
+                    .Where(field => field.Source.PageIndex == page.PageIndex && IsValid(field.Source.Bbox))
+                    .Select(field => new PreviewOverlayItem
+                    {
+                        Kind = "Field",
+                        X = field.Source.Bbox.X,
+                        Y = field.Source.Bbox.Y,
+                        Width = field.Source.Bbox.W,
+                        Height = field.Source.Bbox.H,
+                        Label = string.IsNullOrWhiteSpace(field.Label) ? field.FieldId : field.Label,
+                        RecognizedText = field.Value?.ToString() ?? field.Normalized.Value?.ToString(),
+                        ConfidenceText = field.Confidence > 0 ? $"{field.Confidence * 100:F1}%" : null,
+                        PageText = field.Source.PageIndex > 0 ? $"Page {field.Source.PageIndex}" : null
+                    }));
 
-        return new PreviewProjectionResult(imagePath, width, height, overlayItems);
+                overlayItems.AddRange(page.Tables
+                    .Where(table => IsValid(table.Bbox))
+                    .Select(table => new PreviewOverlayItem
+                    {
+                        Kind = "Table",
+                        X = table.Bbox.X,
+                        Y = table.Bbox.Y,
+                        Width = table.Bbox.W,
+                        Height = table.Bbox.H,
+                        Label = string.IsNullOrWhiteSpace(table.TableId) ? table.Detection.Method : table.TableId,
+                        ConfidenceText = table.Confidence > 0 ? $"{table.Confidence * 100:F1}%" : null,
+                        PageText = page.PageIndex > 0 ? $"Page {page.PageIndex}" : null
+                    }));
+
+                return new PreviewProjectionResult(page.PageIndex, imagePath, width, height, overlayItems);
+            })
+            .ToList();
     }
 
     private static string? ResolveImagePath(OcrContractRoot contract, PageInfo page)

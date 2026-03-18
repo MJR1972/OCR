@@ -5,5 +5,5 @@ namespace OcrShowcase.Demo.Wpf.Services;
 
 public interface IOverlayProjectionService
 {
-    PreviewProjectionResult BuildPreviewProjection(OcrContractRoot contract);
+    IReadOnlyList<PreviewProjectionResult> BuildPreviewProjections(OcrContractRoot contract);
 }

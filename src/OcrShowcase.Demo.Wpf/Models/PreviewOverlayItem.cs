@@ -30,6 +30,7 @@ public sealed record PreviewOverlayItem
 }
 
 public sealed record PreviewProjectionResult(
+    int PageIndex,
     string? ImagePath,
     double Width,
     double Height,

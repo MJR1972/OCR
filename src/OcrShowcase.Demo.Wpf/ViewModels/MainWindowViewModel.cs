@@ -21,9 +21,10 @@ public sealed class MainWindowViewModel : ViewModelBase
     private readonly IInputFileDialogService _inputFileDialogService;
     private readonly IJsonSaveDialogService _jsonSaveDialogService;
     private readonly IOcrDemoService _ocrDemoService;
+    private readonly IPreviewDocumentService _previewDocumentService;
     private readonly IOverlayProjectionService _overlayProjectionService;
-    private readonly IDemoStartupService _demoStartupService;
     private readonly List<PreviewOverlayItem> _allOverlayItems = [];
+    private readonly Dictionary<int, PreviewProjectionResult> _previewPagesByIndex = [];
 
     private string _statusMessage = "Demo workspace ready. Load a document to begin.";
     private bool _isProcessing;
@@ -62,14 +63,15 @@ public sealed class MainWindowViewModel : ViewModelBase
     private bool _hasLogData = true;
     private bool _hasJsonData;
     private string? _lastOverlayDebugSignature;
+    private int _selectedPreviewPageNumber = 1;
 
     public MainWindowViewModel()
         : this(
             new InputFileDialogService(),
             new JsonSaveDialogService(),
             new OcrDemoService(new OcrProcessor()),
-            new OverlayProjectionService(),
-            new DemoStartupService())
+            new PreviewDocumentService(),
+            new OverlayProjectionService())
     {
     }
 
@@ -77,21 +79,23 @@ public sealed class MainWindowViewModel : ViewModelBase
         IInputFileDialogService inputFileDialogService,
         IJsonSaveDialogService jsonSaveDialogService,
         IOcrDemoService ocrDemoService,
-        IOverlayProjectionService overlayProjectionService,
-        IDemoStartupService demoStartupService)
+        IPreviewDocumentService previewDocumentService,
+        IOverlayProjectionService overlayProjectionService)
     {
         _inputFileDialogService = inputFileDialogService;
         _jsonSaveDialogService = jsonSaveDialogService;
         _ocrDemoService = ocrDemoService;
+        _previewDocumentService = previewDocumentService;
         _overlayProjectionService = overlayProjectionService;
-        _demoStartupService = demoStartupService;
 
-        LoadDocumentCommand = new RelayCommand(LoadDocument);
+        LoadDocumentCommand = new RelayCommand(LoadDocumentAsync);
         RunOcrCommand = new RelayCommand(RunOcrAsync, CanRunOcr);
         ExportJsonCommand = new RelayCommand(ExportJson, CanExportJson);
         ZoomInCommand = new RelayCommand(ZoomIn);
         ZoomOutCommand = new RelayCommand(ZoomOut);
         FitPreviewCommand = new RelayCommand(FitPreview);
+        PreviousPreviewPageCommand = new RelayCommand(GoToPreviousPreviewPage, CanGoToPreviousPreviewPage);
+        NextPreviewPageCommand = new RelayCommand(GoToNextPreviewPage, CanGoToNextPreviewPage);
 
         SummaryCards = [];
         SummaryDetails = [];
@@ -101,9 +105,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         DetectedTables = [];
         LogEntries = [];
         VisibleOverlayItems = [];
+        PreviewPageNumbers = [];
 
         InitializeEmptyPresentationState();
-        LoadStartupDemoIfAvailable();
     }
 
     public string ApplicationTitle => "OCR Showcase Demo";
@@ -287,6 +291,30 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public string PreviewZoomText => $"{PreviewZoom * 100:F0}%";
 
+    public ObservableCollection<int> PreviewPageNumbers { get; }
+
+    public int SelectedPreviewPageNumber
+    {
+        get => _selectedPreviewPageNumber;
+        set
+        {
+            if (SetProperty(ref _selectedPreviewPageNumber, value))
+            {
+                ApplyCurrentPreviewPage();
+                OnPropertyChanged(nameof(PreviewPageIndicator));
+                PreviousPreviewPageCommand.RaiseCanExecuteChanged();
+                NextPreviewPageCommand.RaiseCanExecuteChanged();
+            }
+        }
+    }
+
+    public bool HasMultiplePreviewPages => PreviewPageNumbers.Count > 1;
+
+    public string PreviewPageIndicator =>
+        PreviewPageNumbers.Count == 0
+            ? "No pages"
+            : $"Page {SelectedPreviewPageNumber} of {PreviewPageNumbers.Count}";
+
     public bool ShowWordOverlays
     {
         get => _showWordOverlays;
@@ -381,6 +409,10 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public RelayCommand FitPreviewCommand { get; }
 
+    public RelayCommand PreviousPreviewPageCommand { get; }
+
+    public RelayCommand NextPreviewPageCommand { get; }
+
     public void UpdatePreviewViewportSize(double width, double height)
     {
         var safeWidth = Math.Max(1, width);
@@ -397,7 +429,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         RecalculatePreviewLayout();
     }
 
-    private void LoadDocument()
+    private async Task LoadDocumentAsync()
     {
         var selectedFile = _inputFileDialogService.PickInputFile();
         if (string.IsNullOrWhiteSpace(selectedFile))
@@ -408,7 +440,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         SelectedFilePath = selectedFile;
         DocumentName = Path.GetFileName(selectedFile);
-        PageCount = string.Equals(Path.GetExtension(selectedFile), ".pdf", StringComparison.OrdinalIgnoreCase) ? "Pending OCR" : "1";
+        PageCount = "Loading preview...";
         ElapsedTime = "--";
         MeanConfidence = "--";
         OutputJsonPath = string.Empty;
@@ -418,7 +450,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         PreviewHeaderTitle = DocumentName;
         PreviewSubheading = selectedFile;
-        PreviewPlaceholder = "Document loaded. Run OCR to generate summary metrics, machine-readable JSON, diagnostic logs, and live overlay boxes.";
+        PreviewPlaceholder = "Rendering document preview. Run OCR afterwards to generate summary metrics, machine-readable JSON, diagnostic logs, and live overlay boxes.";
         ClearPreviewSurface();
 
         SummaryHeadline = "Ready to run OCR";
@@ -427,7 +459,35 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         ResetCollectionsForNewSelection();
         AddLog("Input", $"Selected file: {selectedFile}");
-        StatusMessage = $"Loaded {DocumentName}.";
+        StatusMessage = $"Loaded {DocumentName}. Preparing preview...";
+
+        try
+        {
+            var previewPages = await _previewDocumentService.LoadAsync(selectedFile);
+            SetPreviewPages(previewPages, resetZoom: true);
+
+            if (previewPages.Count > 0)
+            {
+                PageCount = previewPages.Count.ToString();
+                PreviewPlaceholder = "Document loaded. Preview ready. Run OCR to generate summary metrics, machine-readable JSON, diagnostic logs, and live overlay boxes.";
+                StatusMessage = $"Loaded {DocumentName}. Preview ready.";
+                AddLog("Preview", $"Prepared {previewPages.Count} preview page(s) for {DocumentName}.");
+            }
+            else
+            {
+                PageCount = string.Equals(Path.GetExtension(selectedFile), ".pdf", StringComparison.OrdinalIgnoreCase) ? "Pending OCR" : "1";
+                PreviewPlaceholder = "Document loaded. Preview could not be generated yet. Run OCR to render the document and populate overlays.";
+                StatusMessage = $"Loaded {DocumentName}. Preview unavailable until OCR completes.";
+                AddLog("Preview", $"No immediate preview could be generated for {DocumentName}.");
+            }
+        }
+        catch (Exception ex)
+        {
+            PageCount = string.Equals(Path.GetExtension(selectedFile), ".pdf", StringComparison.OrdinalIgnoreCase) ? "Pending OCR" : "1";
+            PreviewPlaceholder = "Document loaded. Preview could not be generated yet. Run OCR to render the document and populate overlays.";
+            StatusMessage = $"Loaded {DocumentName}. Preview unavailable until OCR completes.";
+            AddLog("Preview", ex.Message);
+        }
     }
 
     private async Task RunOcrAsync()
@@ -568,17 +628,8 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     private void PopulatePreviewSurface(OcrContractRoot contract)
     {
-        var projection = _overlayProjectionService.BuildPreviewProjection(contract);
-
-        PreviewCanvasWidth = projection.Width;
-        PreviewCanvasHeight = projection.Height;
-        PreviewImage = LoadBitmap(projection.ImagePath);
-        HasPreviewImage = PreviewImage is not null;
-
-        _allOverlayItems.Clear();
-        _allOverlayItems.AddRange(projection.OverlayItems);
-        RecalculatePreviewLayout();
-        FitPreview();
+        var projections = _overlayProjectionService.BuildPreviewProjections(contract);
+        SetPreviewPages(projections, resetZoom: false);
     }
 
     private void RefreshVisibleOverlays()
@@ -781,10 +832,10 @@ public sealed class MainWindowViewModel : ViewModelBase
         ResetCollectionsForNewSelection();
         SummaryHeadline = "OCR Showcase Demo";
         SummaryNarrative = "A screenshot-ready review surface for OCR preview, extraction, JSON inspection, and diagnostics.";
-        PreviewPlaceholder = "Load a PDF or image to begin, or let the app preload a saved sample OCR run for immediate presentation.";
+        PreviewPlaceholder = "Load a PDF or image to begin. The first page preview will appear immediately when available, and OCR overlays will be added after processing.";
         JsonPreview = "{\n  \"status\": \"Awaiting OCR run\"\n}";
         HasJsonData = false;
-        StatusMessage = "Portfolio demo ready. Load a document or use the preloaded sample if available.";
+        StatusMessage = "Portfolio demo ready. Load a document to begin.";
         AddLog("System", "Ready.");
         HasLogData = true;
     }
@@ -815,7 +866,110 @@ public sealed class MainWindowViewModel : ViewModelBase
         PreviewImageOffsetY = 0;
         _allOverlayItems.Clear();
         VisibleOverlayItems.Clear();
+        _previewPagesByIndex.Clear();
+        PreviewPageNumbers.Clear();
+        SelectedPreviewPageNumber = 1;
+        OnPropertyChanged(nameof(HasMultiplePreviewPages));
+        OnPropertyChanged(nameof(PreviewPageIndicator));
+        PreviousPreviewPageCommand.RaiseCanExecuteChanged();
+        NextPreviewPageCommand.RaiseCanExecuteChanged();
         FitPreview();
+    }
+
+    private void SetPreviewPages(IReadOnlyList<PreviewProjectionResult> previewPages, bool resetZoom)
+    {
+        _previewPagesByIndex.Clear();
+        PreviewPageNumbers.Clear();
+
+        foreach (var page in previewPages.OrderBy(page => page.PageIndex))
+        {
+            _previewPagesByIndex[page.PageIndex] = page;
+            PreviewPageNumbers.Add(page.PageIndex);
+        }
+
+        OnPropertyChanged(nameof(HasMultiplePreviewPages));
+        OnPropertyChanged(nameof(PreviewPageIndicator));
+
+        if (PreviewPageNumbers.Count == 0)
+        {
+            PreviewImage = null;
+            HasPreviewImage = false;
+            _allOverlayItems.Clear();
+            VisibleOverlayItems.Clear();
+            PreviousPreviewPageCommand.RaiseCanExecuteChanged();
+            NextPreviewPageCommand.RaiseCanExecuteChanged();
+            return;
+        }
+
+        var desiredPage = PreviewPageNumbers.Contains(SelectedPreviewPageNumber)
+            ? SelectedPreviewPageNumber
+            : PreviewPageNumbers[0];
+
+        if (SelectedPreviewPageNumber != desiredPage)
+        {
+            SelectedPreviewPageNumber = desiredPage;
+        }
+        else
+        {
+            OnPropertyChanged(nameof(SelectedPreviewPageNumber));
+            ApplyCurrentPreviewPage();
+            PreviousPreviewPageCommand.RaiseCanExecuteChanged();
+            NextPreviewPageCommand.RaiseCanExecuteChanged();
+        }
+
+        if (resetZoom)
+        {
+            FitPreview();
+        }
+    }
+
+    private void ApplyCurrentPreviewPage()
+    {
+        if (!_previewPagesByIndex.TryGetValue(SelectedPreviewPageNumber, out var previewPage))
+        {
+            PreviewImage = null;
+            HasPreviewImage = false;
+            _allOverlayItems.Clear();
+            VisibleOverlayItems.Clear();
+            RecalculatePreviewLayout();
+            return;
+        }
+
+        var bitmap = LoadBitmap(previewPage.ImagePath);
+        PreviewImage = bitmap;
+        HasPreviewImage = bitmap is not null;
+        PreviewCanvasWidth = previewPage.Width > 0 ? previewPage.Width : bitmap?.PixelWidth ?? 1200;
+        PreviewCanvasHeight = previewPage.Height > 0 ? previewPage.Height : bitmap?.PixelHeight ?? 1600;
+
+        _allOverlayItems.Clear();
+        _allOverlayItems.AddRange(previewPage.OverlayItems);
+        RecalculatePreviewLayout();
+    }
+
+    private bool CanGoToPreviousPreviewPage() =>
+        PreviewPageNumbers.Count > 1 && SelectedPreviewPageNumber > PreviewPageNumbers.Min();
+
+    private void GoToPreviousPreviewPage()
+    {
+        if (!CanGoToPreviousPreviewPage())
+        {
+            return;
+        }
+
+        SelectedPreviewPageNumber--;
+    }
+
+    private bool CanGoToNextPreviewPage() =>
+        PreviewPageNumbers.Count > 1 && SelectedPreviewPageNumber < PreviewPageNumbers.Max();
+
+    private void GoToNextPreviewPage()
+    {
+        if (!CanGoToNextPreviewPage())
+        {
+            return;
+        }
+
+        SelectedPreviewPageNumber++;
     }
 
     private static BitmapImage? LoadBitmap(string? path)
@@ -1040,19 +1194,6 @@ public sealed class MainWindowViewModel : ViewModelBase
         AddLog("Overlay", $"Offsets: x={offsetX:F1}, y={offsetY:F1}");
     }
 
-    private void LoadStartupDemoIfAvailable()
-    {
-        var payload = _demoStartupService.TryLoadDemoStartup();
-        if (payload is null)
-        {
-            return;
-        }
-
-        SelectedFilePath = payload.DisplaySourcePath;
-        AddLog("Demo", $"Loaded startup sample from {payload.DisplaySourcePath}");
-        ApplyOcrResult(payload.RunResult);
-        StatusMessage = "Sample OCR presentation loaded for screenshots.";
-    }
 }
 
 public sealed class SummaryCardViewModel
